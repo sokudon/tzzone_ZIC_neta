@@ -506,7 +506,7 @@ def read_tzif(tzfile_path):
             gmtoff, isdst, abbrind = local_time_type
             transitions.append({
                 'transition_time': transition_time,
-                'gmt_offset': gmtoff/3600,   //raw だとgmtoffのまま
+                'gmt_offset': gmtoff/3600,   #//raw だとgmtoffのまま
                 "local" :cvt_local(transition_time),
                 'isdst': isdst,
                 "abbr": abbr[abbrind:abbr.find('\x00', abbrind)],
