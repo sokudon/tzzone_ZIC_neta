@@ -1,0 +1,96 @@
+#https://colab.research.google.com/?hl=ja GOOGLE colabで貼り付けて　tzdatabaseの内容を表示 ＋　JSON化
+#tzdata自体はzone imfomation complier(ZIC) で作成されて　unix系だとman zdump で表示できる
+#pythonでdateutilの一部を改変してzdumpもどきともいう（）
+#dateutil/pytzのパーサーが古いレガシーのTZifしかたいおうしてないので
+#適切なメンテナンスをしないと2038年問題が起きる可能性がある transition_timeが32bitのため
+
+from io import DEFAULT_BUFFER_SIZE
+import json
+from datetime import datetime
+from dateutil import tz
+from dateutil.tz.tz import tzfile
+import struct
+
+tzname="Asia/Tokyo"
+
+def read_tzif(tzfile_path):
+    with open(tzfile_path, 'rb') as f:
+        # Read the header
+        header = f.read(44)  # TZif headers are 44 bytes
+        (magic, version, tzh_ttisgmtcnt, tzh_ttisstdcnt, tzh_leapcnt,
+         tzh_timecnt, tzh_typecnt, tzh_charcnt) = struct.unpack('>4s c 15x 6I', header)
+
+        if magic != b'TZif':
+            raise ValueError('Invalid TZif file')
+
+        # Read the transition times
+        if tzh_timecnt:
+            transition_times = struct.unpack('>%dl' % tzh_timecnt, f.read(tzh_timecnt * 4))
+        else:
+            transition_times = []
+
+        # Read the transition types
+        if tzh_timecnt:
+             transition_types = struct.unpack(">%dB" % tzh_timecnt,
+                                          f.read(tzh_timecnt))
+        else:
+             transition_types =[]
+
+        # Read the local time types
+        local_time_types = []
+        for i in range(tzh_typecnt):
+            local_time_types.append(struct.unpack(">lbb", f.read(6)))
+
+        abbr = f.read(tzh_charcnt).decode()
+
+
+        # Create a list of transitions
+        transitions = []
+        for i in range(tzh_timecnt):
+            transition_time = transition_times[i]
+            local_time_type = local_time_types[transition_types[i]]
+            gmtoff, isdst, abbrind = local_time_type
+            transitions.append({
+                'transition_time': transition_time,
+                'gmt_offset': gmtoff/3600,   //raw だとgmtoffのまま
+                "local" :cvt_local(transition_time),
+                'isdst': isdst,
+                "abbr": abbr[abbrind:abbr.find('\x00', abbrind)],
+                #"abbra": abbr
+            })
+
+        return {
+            'version': version.decode(),
+            'transitions': transitions
+        }
+
+def cvt_local(sec):
+    global tzname
+    dt_utc = datetime.utcfromtimestamp(sec)
+    jst = tz.gettz(tzname)
+    dt_jst = dt_utc.replace(tzinfo=tz.UTC).astimezone(jst)
+    return dt_jst.strftime('%Y-%m-%dT%X%z')
+
+# パスを指定して、TZifファイルを読み込む
+tzif_path = '/usr/share/zoneinfo/'+tzname  # タイムゾーンファイルのパス
+tzif_data = read_tzif(tzif_path)
+
+for item in tzif_data["transitions"]:
+    print(item)
+
+json_str = json.dumps(tzif_data)
+print(json_str)
+
+
+##出力結果
+#{'transition_time': -2147483648, 'gmt_offset': 9.0, 'local': '1901-12-14T05:45:52+0900', 'isdst': 0, 'abbr': 'JST'}
+#{'transition_time': -683802000, 'gmt_offset': 10.0, 'local': '1948-05-02T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
+#{'transition_time': -672310800, 'gmt_offset': 9.0, 'local': '1948-09-12T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
+#{'transition_time': -654771600, 'gmt_offset': 10.0, 'local': '1949-04-03T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
+#{'transition_time': -640861200, 'gmt_offset': 9.0, 'local': '1949-09-11T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
+#{'transition_time': -620298000, 'gmt_offset': 10.0, 'local': '1950-05-07T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
+#{'transition_time': -609411600, 'gmt_offset': 9.0, 'local': '1950-09-10T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
+#{'transition_time': -588848400, 'gmt_offset': 10.0, 'local': '1951-05-06T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
+#{'transition_time': -577962000, 'gmt_offset': 9.0, 'local': '1951-09-09T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
+
+#{"version": "2", "transitions": [{"transition_time": -2147483648, "gmt_offset": 9.0, "local": "1901-12-14T05:45:52+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -683802000, "gmt_offset": 10.0, "local": "1948-05-02T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -672310800, "gmt_offset": 9.0, "local": "1948-09-12T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -654771600, "gmt_offset": 10.0, "local": "1949-04-03T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -640861200, "gmt_offset": 9.0, "local": "1949-09-11T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -620298000, "gmt_offset": 10.0, "local": "1950-05-07T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -609411600, "gmt_offset": 9.0, "local": "1950-09-10T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -588848400, "gmt_offset": 10.0, "local": "1951-05-06T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -577962000, "gmt_offset": 9.0, "local": "1951-09-09T00:00:00+0900", "isdst": 0, "abbr": "JST"}]}

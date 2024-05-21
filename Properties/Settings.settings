@@ -1,0 +1,72 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="neta.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="st" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="en" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ibe" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="goog" Type="System.String" Scope="User">
+      <Value Profile="(Default)">プロセカ</Value>
+    </Setting>
+    <Setting Name="lefttimeformat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">dd日hh時間mm分ss秒</Value>
+    </Setting>
+    <Setting Name="datetimeformat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">yyyy/MM/dd HH:mm:ss UTCzzz</Value>
+    </Setting>
+    <Setting Name="useutc" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="useutczone" Type="System.String" Scope="User">
+      <Value Profile="(Default)">(GMT+09:00)大阪、札幌、東京 東京 (標準時),M$EB</Value>
+    </Setting>
+    <Setting Name="useutcint" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">9</Value>
+    </Setting>
+    <Setting Name="useutch" Type="System.String" Scope="User">
+      <Value Profile="(Default)">09</Value>
+    </Setting>
+    <Setting Name="useutcm" Type="System.String" Scope="User">
+      <Value Profile="(Default)">00</Value>
+    </Setting>
+    <Setting Name="usems" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="mstime" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Tokyo Standard Time</Value>
+    </Setting>
+    <Setting Name="msstring" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="build" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2024/05/21 21:30</Value>
+    </Setting>
+    <Setting Name="json" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="barlen" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">390</Value>
+    </Setting>
+    <Setting Name="parcent" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">395</Value>
+    </Setting>
+    <Setting Name="api" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://script.google.com/macros/s/AKfycbxAcB-2FLv5fR9Yc5ZSN5F7giGDnvAjduMvwRTLWBai9faFSQaI4bol73klcLM-lsHbKg/exec?game=all</Value>
+    </Setting>
+    <Setting Name="parse" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/data/proseka/name,/data/proseka/start,/data/proseka/end</Value>
+    </Setting>
+    <Setting Name="parse2" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/data/proseka/name,/data/proseka/start,/data/proseka/end</Value>
+    </Setting>
+    <Setting Name="lasttzdatapath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>

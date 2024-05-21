@@ -1,0 +1,72 @@
+C#ようにdateutilの参考にして32bit/64bit tzdata-db zicバイナリを読み込めるように。データ構成がちがううるうDBは未対応
+
+Vs2022に変更、エラーがおおいので分離するかも（）
+
+
+おまけ　google colabのdateutilでみるやつ
+#https://colab.research.google.com/?hl=ja GOOGLE colabで貼り付けて　tzdatabaseの内容を表示 ＋　JSON化
+#tzdata自体はzone imfomation complier(ZIC) で作成されて　unix系だとman zdump で表示できる
+#pythonのdateutilの一部を改変してzdumpもどきともいう（）
+#dateutil/pytzのパーサーが古いレガシーのTZifしかたいおうしてないので
+#適切なメンテナンスをしないと2038年問題が起きる可能性がある =transition_timeが32bitのため
+
+#unix/linux系 google colabとかもcygwinとか
+#/usr/share/lib/zoneinfo/
+
+#python系　
+#Python312\Lib\site-packages\dateutil\zoneinfo   tar.gzなので解凍必要
+#Python312\Lib\site-packages\pytz\zoneinfo
+
+#下は非対応,データが古い模様？
+#Python312\Lib\site-packages\tzdata\zoneinfo
+
+#dateutilとpytzにはいってるものは同じ Asia/Tokyo
+1stTZif transitions,gmtoffset,isdst,abbr
+-2147483648,32400,0,JST
+-683802000,36000,1,JDT
+-672310800,32400,0,JST
+-654771600,36000,1,JDT
+-640861200,32400,0,JST
+-620298000,36000,1,JDT
+-609411600,32400,0,JST
+-588848400,36000,1,JDT
+-577962000,32400,0,JST
+
+2ndTZif transitions,gmtoffset,isdst,abbr
+-2587712400,32400,0,JST
+-683802000,36000,1,JDT
+-672310800,32400,0,JST
+-654771600,36000,1,JDT
+-640861200,32400,0,JST
+-620298000,36000,1,JDT
+-609411600,32400,0,JST
+-588848400,36000,1,JDT
+-577962000,32400,0,JST
+
+tzdata name:\git\tzzone_ZIC_neta\bin\Release\net8.0-windows7.0\Tokyo
+filesize:309byte 
+footer position:302
+foorter string:
+JST-9
+
+crc32:DE6480C
+md5:38620155fabd5572c5a4b1db051b3cc8
+sha1:41852e7fc829ff3ace521bc3ebc60b6e43b56da6
+
+
+tzif version:Tzif2
+tzh_ttisgmtcnt:4
+tzh_ttisstdcnt :4
+tzh_leapcnt:0
+tzh_timecnt:9
+tzh_typecnt:4
+tzh_charcnt:12
+
+2nd TZif position:133
+2nd tzif version:Tzif2
+2nd tzh_ttisgmtcnt:4
+2nd tzh_ttisstdcnt :4
+2nd tzh_leapcnt:0
+2nd tzh_timecnt:9
+2nd tzh_typecnt:4
+2nd tzh_charcnt:12
