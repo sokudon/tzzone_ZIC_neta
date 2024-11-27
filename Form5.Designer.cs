@@ -30,6 +30,7 @@
         {
             textBox1 = new System.Windows.Forms.TextBox();
             button1 = new System.Windows.Forms.Button();
+            tzutc = new System.Windows.Forms.CheckBox();
             SuspendLayout();
             // 
             // textBox1
@@ -51,11 +52,25 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
+            // tzutc
+            // 
+            tzutc.AutoSize = true;
+            tzutc.Checked = true;
+            tzutc.CheckState = System.Windows.Forms.CheckState.Checked;
+            tzutc.Location = new System.Drawing.Point(472, 347);
+            tzutc.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            tzutc.Name = "tzutc";
+            tzutc.Size = new System.Drawing.Size(323, 24);
+            tzutc.TabIndex = 26;
+            tzutc.Text = "unix秒を現地時間に変更,オフセットを3600で割る";
+            tzutc.UseVisualStyleBackColor = true;
+            // 
             // ZIC
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(800, 450);
+            Controls.Add(tzutc);
             Controls.Add(button1);
             Controls.Add(textBox1);
             Name = "ZIC";
@@ -69,5 +84,6 @@
 
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.CheckBox tzutc;
     }
 }

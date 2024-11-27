@@ -14,3 +14,5 @@
 /bin/Release/zonneinfo Tokyo
 /bin/Release/neta.exe.config
 /bin/Release/neta.exe
+/src
+/bin/Release/net8.0-windows7.0/runtimes

@@ -75,6 +75,7 @@ namespace neta
                         int nexttzpos = -1;
                         int finalpos = -1;
                         string versionn="";
+                        bool tzcv= tzutc.Checked;
 
                         StringBuilder sb = new StringBuilder();
                         if (header.Contains("TZif") == false)
@@ -192,6 +193,20 @@ namespace neta
                                     Array.ConstrainedCopy(abbr, local_time_types_abbr[type], tmp, 0, 10);
                                     char[] charArray = ByteArrayToCharArray(tmp, Encoding.UTF8);
                                     transitions[i][3] = TerminateAtNull(charArray);
+
+                                    if (tzcv) {
+
+                                        transitions[i][1] = Convert.ToString(local_time_types_gmt[type] / 3600);
+                                        // UTCオフセット (例: +09:00)
+                                        TimeSpan utcOffset = TimeSpan.FromHours(local_time_types_gmt[type] / 3600);
+                                        // DateTimeOffsetに変換
+                                        DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_times[i]).ToOffset(utcOffset);
+
+                                        // オフセット付きのフォーマットに変換
+                                        string formattedDate = dateTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
+                                        transitions[i][0] = formattedDate;
+
+                                    }
 
                                     sb.Append(transitions[i][0]);
                                     sb.Append(",");
@@ -323,7 +338,19 @@ namespace neta
                                             Array.ConstrainedCopy(abbr2, local_time_types_abbrn[type], tmp2, 0, 10);
                                             char[] charArray = ByteArrayToCharArray(tmp2, Encoding.UTF8);
                                             transitionsn[i][3] = TerminateAtNull(charArray);
+                                            if (tzcv)
+                                            {
+                                                transitionsn[i][1] = Convert.ToString(local_time_types_gmtn[type] / 3600);
+                                                // UTCオフセット (例: +09:00)
+                                                TimeSpan utcOffset = TimeSpan.FromHours(local_time_types_gmtn[type] / 3600);
+                                                // DateTimeOffsetに変換
+                                                DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_timesn[i]).ToOffset(utcOffset);
 
+                                                // オフセット付きのフォーマットに変換
+                                                string formattedDate = dateTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
+                                                transitionsn[i][0] = formattedDate;
+
+                                            }
                                             sb.Append(transitionsn[i][0]);
                                             sb.Append(",");
                                             sb.Append(transitionsn[i][1]);

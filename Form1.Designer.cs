@@ -52,6 +52,8 @@
             時刻設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             外部つーるへエクスポートToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             oBSタイマーToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            luascriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            pythonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ぱいそんたいまーToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             wEBたいまーToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             wEBせかいどけいToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -289,29 +291,44 @@
             // 
             // oBSタイマーToolStripMenuItem
             // 
+            oBSタイマーToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { luascriptToolStripMenuItem, pythonToolStripMenuItem });
             oBSタイマーToolStripMenuItem.Name = "oBSタイマーToolStripMenuItem";
-            oBSタイマーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            oBSタイマーToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             oBSタイマーToolStripMenuItem.Text = "OBSたいまーぷらぐいん";
             oBSタイマーToolStripMenuItem.Click += oBSタイマーToolStripMenuItem_Click;
+            // 
+            // luascriptToolStripMenuItem
+            // 
+            luascriptToolStripMenuItem.Name = "luascriptToolStripMenuItem";
+            luascriptToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            luascriptToolStripMenuItem.Text = "luascript";
+            luascriptToolStripMenuItem.Click += luascriptToolStripMenuItem_Click;
+            // 
+            // pythonToolStripMenuItem
+            // 
+            pythonToolStripMenuItem.Name = "pythonToolStripMenuItem";
+            pythonToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            pythonToolStripMenuItem.Text = "python";
+            pythonToolStripMenuItem.Click += pythonToolStripMenuItem_Click;
             // 
             // ぱいそんたいまーToolStripMenuItem
             // 
             ぱいそんたいまーToolStripMenuItem.Name = "ぱいそんたいまーToolStripMenuItem";
-            ぱいそんたいまーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            ぱいそんたいまーToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             ぱいそんたいまーToolStripMenuItem.Text = "ぱいそんたいまー";
             ぱいそんたいまーToolStripMenuItem.Click += ぱいそんたいまーToolStripMenuItem_Click;
             // 
             // wEBたいまーToolStripMenuItem
             // 
             wEBたいまーToolStripMenuItem.Name = "wEBたいまーToolStripMenuItem";
-            wEBたいまーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            wEBたいまーToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             wEBたいまーToolStripMenuItem.Text = "WEBたいまー";
             wEBたいまーToolStripMenuItem.Click += wEBたいまーToolStripMenuItem_Click;
             // 
             // wEBせかいどけいToolStripMenuItem
             // 
             wEBせかいどけいToolStripMenuItem.Name = "wEBせかいどけいToolStripMenuItem";
-            wEBせかいどけいToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            wEBせかいどけいToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             wEBせかいどけいToolStripMenuItem.Text = "WEBせかいどけい";
             wEBせかいどけいToolStripMenuItem.Click += wEBせかいどけいToolStripMenuItem_Click;
             // 
@@ -383,6 +400,8 @@
         private System.Windows.Forms.ToolStripMenuItem oBSタイマーToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem wEBせかいどけいToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem netaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem luascriptToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pythonToolStripMenuItem;
     }
 }
 

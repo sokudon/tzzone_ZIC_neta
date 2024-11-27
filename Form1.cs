@@ -549,66 +549,7 @@ namespace neta
 
         private void oBSタイマーToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string url = "https://raw.githubusercontent.com/sokudon/deresute/master/OBSdere_extend.lua";
-            WebClient wc = new WebClient();
-            wc.Encoding = Encoding.UTF8;
-            string text = wc.DownloadString(url);
-            DateTime st;
-            DateTime en;
-            string sst = ",";
-            string sen = ",";
-            string format = "yyyy-MM-dd'T'HH:mm:ssZ";
-            if (DateTime.TryParse(startbox.Text, out st))
-            {
-                sst = st.ToUniversalTime().ToString(format);
-            }
-            if (DateTime.TryParse(endbox.Text, out en))
-            {
-                sen = en.ToUniversalTime().ToString(format);
-            }
-            // "start_text", "2020-04-30T12:00:00+09:00")
-            //"stop_text", "2020-05-07T21:00:00+09:00")
-            //"title_text", "でれすて")
-            //"para_text", "%T%n経過時間%K%n残り時間%L%nイベント時間%I%n現地時間%N%n日本時間%JST%n達成率%P%nS %S%nE %E%n%nSJ %SJ%nEJ %EJ%n%nSU %SU%nEU %EU")
-            //"bar", 1)
-            //"%d %hh:%mm:%ss(%hsH,%dsD)"	
-            //"日本時間%JST%n経過時間%K%n残り時間%L%nイベント時間%I%n%T%P％%n%Q"
-            //"%Y-%m-%dT%H:%M:%S%z (%a)"
-
-
-            text = text.Replace("でれすて", ibemei.Text)
-                .Replace("2020-04-30T12:00:00+09:00", sst)
-                .Replace("2020-05-07T21:00:00+09:00", sen)
-                .Replace("%H:%m:%s", "%d %hh:%mm:%ss")
-                .Replace("%Y/%m/%d %H:%M:%S", "%Y-%m-%d(%a)%H:%M:%S(GMT%z)")
-                .Replace("%T%n経過時間%K%n残り時間%L%nイベント時間%I%n現地時間%N%n日本時間%JST%n達成率%P%nS %S%nE %E%n%nSJ %SJ%nEJ %EJ%n%nSU %SU%nEU %EU", "日本時間%JST%n経過時間%K%n残り時間%L%nイベント時間%I%n%T%P％%n%Q")
-                .Replace("bar\", 1", "bar\",2");
-
-            string path = @"obs_neta_timer.lua";
-
-            try
-            {
-                // Create the file, or overwrite if the file exists.
-                using (FileStream fs = File.Create(path))
-                {
-                    byte[] info = new UTF8Encoding(true).GetBytes(text);
-                    // Add some information to the file.
-                    fs.Write(info, 0, info.Length);
-                    fs.Close();
-                }
-
-
-                var proc = new System.Diagnostics.Process();
-
-                proc.StartInfo.FileName = path;
-                proc.StartInfo.UseShellExecute = true;
-                proc.Start();
-            }
-
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
+            
         }
 
         private void wEBせかいどけいToolStripMenuItem_Click(object sender, EventArgs e)
@@ -655,6 +596,103 @@ namespace neta
             form5.ShowDialog(this);
             form5.Dispose();
         }
+
+        private void luascriptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string url = "https://raw.githubusercontent.com/sokudon/deresute/master/OBSdere_extend.lua";
+            WebClient wc = new WebClient();
+            wc.Encoding = Encoding.UTF8;
+            string text = wc.DownloadString(url);
+            DateTime st;
+            DateTime en;
+            string sst = ",";
+            string sen = ",";
+            string format = "yyyy-MM-dd'T'HH:mm:ssZ";
+            if (DateTime.TryParse(startbox.Text, out st))
+            {
+                sst = st.ToUniversalTime().ToString(format);
+            }
+            if (DateTime.TryParse(endbox.Text, out en))
+            {
+                sen = en.ToUniversalTime().ToString(format);
+            }
+
+            text = text.Replace("でれすて", ibemei.Text)
+                .Replace("2020-04-30T12:00:00+09:00", sst)
+                .Replace("2020-05-07T21:00:00+09:00", sen)
+                .Replace("%H:%m:%s", "%d %hh:%mm:%ss")
+                .Replace("%Y/%m/%d %H:%M:%S", "%Y-%m-%d(%a)%H:%M:%S(GMT%z)")
+                .Replace("%T%n経過時間%K%n残り時間%L%nイベント時間%I%n現地時間%N%n日本時間%JST%n達成率%P%nS %S%nE %E%n%nSJ %SJ%nEJ %EJ%n%nSU %SU%nEU %EU", "日本時間%JST%n経過時間%K%n残り時間%L%nイベント時間%I%n%T%P％%n%Q")
+                .Replace("bar\", 1", "bar\",2");
+
+            string path = @"obs_neta_timer.lua";
+
+            try
+            {
+                // Create the file, or overwrite if the file exists.
+                using (FileStream fs = File.Create(path))
+                {
+                    byte[] info = new UTF8Encoding(true).GetBytes(text);
+                    // Add some information to the file.
+                    fs.Write(info, 0, info.Length);
+                    fs.Close();
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+        private void pythonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+          String  url = "https://raw.githubusercontent.com/sokudon/gakumasu/master/date-time_with_tzinfo_gaku.py";
+            WebClient wc = new WebClient();
+            wc.Encoding = Encoding.UTF8;
+            string text = wc.DownloadString(url);
+            DateTime st;
+            DateTime en;
+            string sst = ",";
+            string sen = ",";
+            string format = "yyyy-MM-dd'T'HH:mm:ssZ";
+            if (DateTime.TryParse(startbox.Text, out st))
+            {
+                sst = st.ToUniversalTime().ToString(format);
+            }
+            if (DateTime.TryParse(endbox.Text, out en))
+            {
+                sen = en.ToUniversalTime().ToString(format);
+            }
+            //ibe = '星雲の窓辺'
+            //st = '2024-04-30T17:00:00+09:00'
+            //en = '2024-05-08T22:00:00+09:00'
+            text = text.Replace("星雲の窓辺", ibemei.Text)
+                .Replace("2024-04-30T17:00:00+09:00", sst)
+                .Replace("2024-05-08T22:00:00+09:00", sen);
+
+            string path = @"obs_neta_timer.py";
+
+            try
+            {
+                // Create the file, or overwrite if the file exists.
+                using (FileStream fs = File.Create(path))
+                {
+                    byte[] info = new UTF8Encoding(true).GetBytes(text);
+                    // Add some information to the file.
+                    fs.Write(info, 0, info.Length);
+                    fs.Close();
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+
+     
     }
 }
     

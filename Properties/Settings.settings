@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2024/05/21 21:30</Value>
+      <Value Profile="(Default)">2024/11/27</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -67,6 +67,15 @@
     </Setting>
     <Setting Name="lasttzdatapath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="readtzifdir" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="usetzdatabin" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Asia/Tokyo</Value>
+    </Setting>
+    <Setting Name="usetz" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>
