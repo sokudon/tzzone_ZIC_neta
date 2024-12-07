@@ -393,15 +393,13 @@ namespace neta
 
         private void button3_Click(object sender, EventArgs e)
         {
-
             WebClient wc = new WebClient();
             wc.Encoding = Encoding.UTF8;
             DateTime dt = DateTime.Now;
-
             string url = Properties.Settings.Default.api.ToString().Replace("TODAY()", dt.ToString("yyyy-MM-dd"));
             string parseop = Properties.Settings.Default.parse;
             string text = "";
-            var erros = "";
+            var errorPath = "";
             try
             {
                 text = wc.DownloadString(url);
@@ -415,58 +413,112 @@ namespace neta
             try
             {
                 var obj = Codeplex.Data.DynamicJson.Parse(text);
-                var objorig = obj;
-                string[] op = parseop.Split(',');
-                string[] get = { "", "", "" };
-                if (text == "[]" || text == "{}")
+                var objOriginal = obj;
+                string[] parsePaths = parseop.Split(',');
+                string[] getValues = { "", "", "" };
+                bool end = false;
+
+                Regex regex = new Regex("\\[(\\d+)\\]$");
+                Regex regexb = new Regex("^\\[(\\d+)\\]");
+
+                if (string.IsNullOrWhiteSpace(text) || text == "[]" || text == "{}")
                 {
-                    MessageBox.Show("JSONがから[] {}です,apiurlを確認してください（）");
+                    MessageBox.Show("JSONが空または不正です。APIのURLを確認してください。");
                     return;
                 }
-                else
+
+                for (var k = 0; k < parsePaths.Length; k++)
+                //for (var k = 0; k < 1; k++)
                 {
-                    for (var k = 0; k < op.Length; k++)
+                    // 現在のオブジェクトを元のオブジェクトにリセット
+                    obj = objOriginal;
+                    string[] pathSegments = parsePaths[k].Trim('/').Split('/');
+                    errorPath = parsePaths[k];
+                    end = false;
+
+                    // パスをたどるループ
+                    for (var i = 0; i < pathSegments.Length; i++)
                     {
-                        obj = objorig;
-                        string[] path = op[k].Split('/');
-                        erros = op[k];
-                        for (var i = 1; i < path.Length;)
+                        try
                         {
-                            if (obj.IsArray)
+                            // 配列の処理
+                            while (obj.IsArray)
                             {
-                                if (obj.IsDefined(0) == false)
+                                // 配列の最初の要素がない場合は処理をスキップ
+                                if (!obj.IsDefined(0))
                                 {
+                                    obj = null;
                                     break;
                                 }
-                                obj = obj[0];
-                            }
-                            else if (obj.IsObject)
-                            {
-                                obj = obj[path[i]];
-                                i++;
-                            }
-                            if (i == path.Length - 1)
-                            {
-                                if (obj.IsObject)
+                                Match match = regexb.Match(pathSegments[i]);
+                                if (match.Success)
                                 {
-                                    get[k] = obj[path[i]];
+                                    string matchedNumber = match.Value;
+                                    string p = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
+                                    int n = Convert.ToInt32(p);
+                                    obj = obj[n];
+                                }
+                                else
+                                {
+                                    obj = obj[0];
+                                }
+                                if (i == pathSegments.Length - 1)
+                                {
+                                    Match matchm = regex.Match(pathSegments[i]);
+                                    if (matchm.Success)
+                                    {
+                                        string matchedNumber = matchm.Value;
+                                        string pp = matchedNumber.ToString().Replace("[","").Replace("]","");
+                                        int nn = Convert.ToInt32(pp);
+                                        getValues[k] = obj[nn].ToString();
+                                        end = true;
+                                    }
                                     break;
                                 }
+                            }
+                            if (end)
+                            {
+                                break;
+                            }
+
+                            // オブジェクトの処理
+                            if (obj != null && obj.IsObject)
+                            {
+                                // 最後の要素の場合
+                                if (i == pathSegments.Length - 1)
+                                {
+                                    getValues[k] = obj[pathSegments[i]];
+                                    break;
+                                }
+
+                                // 途中の要素の場合
+                                obj = obj[pathSegments[i]];
+                            }
+                            else
+                            {
+                                // オブジェクトが見つからない場合
+                                MessageBox.Show("objなし");
+                                break;
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            // パスのどこかで例外が発生した場合
+                            MessageBox.Show($"{ex.Message} エラー場所:'{errorPath}' {pathSegments[i]} {obj}");
+                            break;
+                        }
                     }
-
-                    ibemei.Text = get[0];
-                    startbox.Text = get[1];
-                    endbox.Text = get[2];
-                    comboBox1.Text = "かすたむJS";
-
-
                 }
+
+                // 取得した値を設定
+                ibemei.Text = getValues[0] ?? "";
+                startbox.Text = getValues[1] ?? "";
+                endbox.Text = getValues[2] ?? "";
+                comboBox1.Text = "かすたむJS";
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message + " エラー場所:'" + erros + "'");
+                MessageBox.Show($"{ex.Message} エラー場所:'{errorPath}'");
             }
         }
 

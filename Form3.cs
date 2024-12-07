@@ -52,11 +52,11 @@ namespace neta
             comboBox1.Text = Properties.Settings.Default.useutczone;
             comboBox2.Text = Properties.Settings.Default.msstring;
             comboBox3.Text = Properties.Settings.Default.barlen.ToString();
-            textBox3.Text = Properties.Settings.Default.api;
+            comboBox5.Text = Properties.Settings.Default.api;
             textBox4.Text = Properties.Settings.Default.parse;
             comboBox4.Text = Properties.Settings.Default.usetzdatabin;
             textBox5.Text = Properties.Settings.Default.lasttzdatapath;
-            checkBox3.Checked=Properties.Settings.Default.usetz  ;
+            checkBox3.Checked = Properties.Settings.Default.usetz;
         }
 
 
@@ -188,18 +188,6 @@ namespace neta
             }
         }
 
-        private void textBox3_TextChanged(object sender, EventArgs e)
-        {
-            var url = "^s?https?://[ -_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+$";
-
-            var m = Regex.Match(textBox3.Text, url);
-            if (m.Success)
-            {
-                Properties.Settings.Default.api = textBox3.Text;
-            }
-
-        }
-
 
         //mobaapi
         //　https://pink-check.school/api/v2/events/?time=TODAY()
@@ -234,13 +222,6 @@ namespace neta
                     Properties.Settings.Default.parse = textBox4.Text;
                 }
             }
-        }
-
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-
-            DateTime dt = DateTime.Now;
-            System.Diagnostics.Process.Start(textBox3.Text.ToString().Replace("TODAY()", dt.ToString("yyyy-MM-dd")));
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -345,7 +326,7 @@ namespace neta
                         fs.Read(bs, 0, bs.Length);
                         fs.Close();
 
-                        ZTimeZoneInfo(bs, Properties.Settings.Default.usetzdatabin,false);
+                        ZTimeZoneInfo(bs, Properties.Settings.Default.usetzdatabin, false);
                         return;
                     }
                 }
@@ -380,8 +361,8 @@ namespace neta
         {
             string _id = id;
 
-           bool HasIanaId = true;
-            TimeSpan _baseUtcOffset=TimeSpan.Zero;
+            bool HasIanaId = true;
+            TimeSpan _baseUtcOffset = TimeSpan.Zero;
             AdjustmentRule[] _adjustmentRules = Array.Empty<AdjustmentRule>();
 
             if (IsUtcAlias(id))
@@ -411,12 +392,12 @@ namespace neta
                 int type = typeOfLocalTime[i];
                 if (!transitionType[type].IsDst)
                 {
-                  _baseUtcOffset = transitionType[type].UtcOffset;
-                 _standardAbbrevName = TZif_GetZoneAbbreviation(zoneAbbreviations, transitionType[type].AbbreviationIndex);
+                    _baseUtcOffset = transitionType[type].UtcOffset;
+                    _standardAbbrevName = TZif_GetZoneAbbreviation(zoneAbbreviations, transitionType[type].AbbreviationIndex);
                 }
                 else
                 {
-                   _daylightAbbrevName = TZif_GetZoneAbbreviation(zoneAbbreviations, transitionType[type].AbbreviationIndex);
+                    _daylightAbbrevName = TZif_GetZoneAbbreviation(zoneAbbreviations, transitionType[type].AbbreviationIndex);
                 }
             }
 
@@ -483,11 +464,11 @@ namespace neta
         // Truncate the date and the time to Milliseconds precision
         private static DateTime GetTimeOnlyInMillisecondsPrecision(DateTime input) => new DateTime((input.TimeOfDay.Ticks / TimeSpan.TicksPerMillisecond) * TimeSpan.TicksPerMillisecond);
 
- 
+
         private static void TZif_GenerateAdjustmentRule(ref int index, TimeSpan timeZoneBaseUtcOffset, List<AdjustmentRule> rulesList, DateTime[] dts,
             byte[] typeOfLocalTime, TZifType[] transitionTypes, string? futureTransitionsPosixFormat)
         {
-    
+
             while (index < dts.Length && dts[index] == DateTime.MinValue)
             {
                 index++;
@@ -510,7 +491,7 @@ namespace neta
                         default,
                         default,
                         baseUtcDelta);
-                        //noDaylightTransitions: true);
+                //noDaylightTransitions: true);
 
                 //if (!IsValidAdjustmentRuleOffset(timeZoneBaseUtcOffset, r))
                 //{
@@ -553,7 +534,7 @@ namespace neta
                         dstStart,
                         default,
                         baseUtcDelta);
-                        //noDaylightTransitions: true);
+                //noDaylightTransitions: true);
 
                 //if (!IsValidAdjustmentRuleOffset(timeZoneBaseUtcOffset, r))
                 //{
@@ -589,7 +570,7 @@ namespace neta
                         default,
                         default,
                         baseUtcDelta);
-                       // noDaylightTransitions: true);
+                    // noDaylightTransitions: true);
                 }
 
                 //if (!IsValidAdjustmentRuleOffset(timeZoneBaseUtcOffset, r))
@@ -694,7 +675,7 @@ namespace neta
                             dstStart.GetValueOrDefault(),
                             dstEnd.GetValueOrDefault(),
                             baseOffset);
-                            //noDaylightTransitions: false);
+                        //noDaylightTransitions: false);
                     }
                     else
                     {
@@ -706,7 +687,7 @@ namespace neta
                                default,
                                default,
                                baseOffset);
-                              // noDaylightTransitions: true);
+                        // noDaylightTransitions: true);
                     }
                 }
             }
@@ -969,7 +950,7 @@ namespace neta
             return result;
         }
 
-   
+
 
         private static TZifType TZif_GetEarlyDateTransitionType(TZifType[] transitionTypes)
         {
@@ -1014,12 +995,12 @@ namespace neta
             } while ((uint)index < (uint)date.Length && char.IsAsciiDigit(date[index]));
 
 
-        int[] DaysToMonth365 =
-        {
+            int[] DaysToMonth365 =
+            {
             0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
         };
 
-        ReadOnlySpan<int> days = DaysToMonth365;
+            ReadOnlySpan<int> days = DaysToMonth365;
 
             if (julianDay == 0 || julianDay > days[days.Length - 1])
             {
@@ -1199,6 +1180,27 @@ namespace neta
             }
         }
 
+        private void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var url = "https?://[ -_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+$";
+
+            var m = Regex.Match(comboBox5.Text, url);
+            if (m.Success)
+            {
+                Properties.Settings.Default.api = m.Value;
+            }
+        }
+
+        private void comboBox5_TextChanged(object sender, EventArgs e)
+        {
+            var url = "https?://[ -_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+$";
+
+            var m = Regex.Match(comboBox5.Text, url);
+            if (m.Success)
+            {
+                Properties.Settings.Default.api = m.Value;
+            }
+        }
 
         private readonly struct TZifHead
         {

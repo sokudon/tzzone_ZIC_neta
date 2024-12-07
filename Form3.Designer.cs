@@ -36,10 +36,10 @@
             textBox5 = new System.Windows.Forms.TextBox();
             comboBox4 = new System.Windows.Forms.ComboBox();
             panel2 = new System.Windows.Forms.Panel();
-            linkLabel1 = new System.Windows.Forms.LinkLabel();
-            textBox3 = new System.Windows.Forms.TextBox();
             button1 = new System.Windows.Forms.Button();
             textBox4 = new System.Windows.Forms.TextBox();
+            comboBox5 = new System.Windows.Forms.ComboBox();
+            label7 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
             label4 = new System.Windows.Forms.Label();
             comboBox3 = new System.Windows.Forms.ComboBox();
@@ -154,38 +154,16 @@
             // 
             // panel2
             // 
-            panel2.Controls.Add(linkLabel1);
-            panel2.Controls.Add(textBox3);
             panel2.Controls.Add(button1);
             panel2.Controls.Add(textBox4);
+            panel2.Controls.Add(comboBox5);
+            panel2.Controls.Add(label7);
             panel2.Controls.Add(label6);
             panel2.Location = new System.Drawing.Point(21, 378);
             panel2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             panel2.Name = "panel2";
             panel2.Size = new System.Drawing.Size(379, 113);
             panel2.TabIndex = 20;
-            // 
-            // linkLabel1
-            // 
-            linkLabel1.AutoSize = true;
-            linkLabel1.Location = new System.Drawing.Point(3, 33);
-            linkLabel1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            linkLabel1.Name = "linkLabel1";
-            linkLabel1.Size = new System.Drawing.Size(70, 20);
-            linkLabel1.TabIndex = 15;
-            linkLabel1.TabStop = true;
-            linkLabel1.Text = "かすたむJS";
-            linkLabel1.LinkClicked += linkLabel1_LinkClicked;
-            // 
-            // textBox3
-            // 
-            textBox3.Location = new System.Drawing.Point(78, 33);
-            textBox3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            textBox3.Name = "textBox3";
-            textBox3.Size = new System.Drawing.Size(277, 27);
-            textBox3.TabIndex = 11;
-            textBox3.Text = "https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec?game=all";
-            textBox3.TextChanged += textBox3_TextChanged;
             // 
             // button1
             // 
@@ -207,6 +185,30 @@
             textBox4.TabIndex = 12;
             textBox4.Text = "/data/name,/data/start,/data/end";
             textBox4.TextChanged += textBox4_TextChanged;
+            // 
+            // comboBox5
+            // 
+            comboBox5.FormattingEnabled = true;
+            comboBox5.ImeMode = System.Windows.Forms.ImeMode.On;
+            comboBox5.Items.AddRange(new object[] { "JSONサンプル{} https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec?game=all", "JSONサンプル[] https://script.google.com/macros/s/AKfycbx1-Bds_m3ouWAVt-igCN26kbAq1-AEe3IVwq3D0_m0ToWFnYumCXtMe8x5Pyhv1zRV/exec" });
+            comboBox5.Location = new System.Drawing.Point(87, 20);
+            comboBox5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            comboBox5.Name = "comboBox5";
+            comboBox5.Size = new System.Drawing.Size(268, 28);
+            comboBox5.TabIndex = 21;
+            comboBox5.SelectedIndexChanged += comboBox5_SelectedIndexChanged;
+            comboBox5.TextChanged += comboBox5_TextChanged;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new System.Drawing.Point(4, 28);
+            label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label7.Name = "label7";
+            label7.Size = new System.Drawing.Size(70, 20);
+            label7.TabIndex = 14;
+            label7.Text = "かすたむJS";
+            label7.Click += label6_Click;
             // 
             // label6
             // 
@@ -361,9 +363,7 @@
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox comboBox3;
-        private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Button button1;
         public System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.Panel panel2;
@@ -372,5 +372,7 @@
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.CheckBox checkBox3;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ComboBox comboBox5;
     }
 }

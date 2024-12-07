@@ -190,8 +190,8 @@
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.treeView1);
-            this.Name = "Form4";
-            this.Text = "Form4";
+            this.Name = "JSONぱす";
+            this.Text = "JSONぱす";
             this.Load += new System.EventHandler(this.Form4_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);

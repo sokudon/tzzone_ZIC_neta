@@ -26,7 +26,7 @@ namespace neta
             wc.Encoding = Encoding.UTF8;
             DateTime dt = DateTime.Now;
 
-            string url = Properties.Settings.Default.api.ToString().Replace("TODAY()", dt.ToString("yyyy-MM-dd"));
+            string url = Properties.Settings.Default.api.ToString();
             string parseop = Properties.Settings.Default.parse;
             string text = "";
             try
@@ -124,12 +124,12 @@ namespace neta
             var n = treeView1.SelectedNode;
             var info = n.Tag;
             var type = info.GetType().Name;
-            if (type == "JValue") {
+            if (type == "JValue")
+            {
                 var tmp = ((Newtonsoft.Json.Linq.JToken)info).Path;
-                tmp = Regex.Replace(tmp, "\\[\\d+\\]", "");
-                tmp = Regex.Replace(tmp, "^\\.", "");
-                tmp = Regex.Replace(tmp, "\\.", "/");
-                textBox2.Text = "/"+tmp;
+                tmp = Regex.Replace(tmp, "^\\.", "");  // ドットの先頭削除
+                tmp = tmp.Replace(".", "/");           // ドットをスラッシュに置換
+                textBox2.Text = "/" + tmp;
             }
         }
 
@@ -141,9 +141,8 @@ namespace neta
             if (type == "JValue")
             {
                 var tmp = ((Newtonsoft.Json.Linq.JToken)info).Path;
-                tmp = Regex.Replace(tmp, "\\[\\d+\\]", "");
                 tmp = Regex.Replace(tmp, "^\\.", "");
-                tmp = Regex.Replace(tmp, "\\.", "/");
+                tmp = tmp.Replace(".", "/");
                 textBox3.Text = "/" + tmp;
             }
         }
@@ -156,9 +155,8 @@ namespace neta
             if (type == "JValue")
             {
                 var tmp = ((Newtonsoft.Json.Linq.JToken)info).Path;
-                tmp = Regex.Replace(tmp, "\\[\\d+\\]", "");
                 tmp = Regex.Replace(tmp, "^\\.", "");
-                tmp = Regex.Replace(tmp, "\\.", "/");
+                tmp = tmp.Replace(".", "/");
                 textBox4.Text = "/" + tmp;
             }
         }

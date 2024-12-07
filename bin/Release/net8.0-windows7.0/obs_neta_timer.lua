@@ -14,7 +14,13 @@
 
 --[[
 //全部出しさんぷる
-OS時間:%N%n経過時間%K           %t日本時間:%JST  %n残り時間:%L          %t%t開始時間:%SJ%nイベント時間:%I     %t%t終了時間%EJ       %T%P％%n%Q
+OS時間:%N
+経過時間%K
+残り時間:%L
+開始時間:%SJ
+終了時間%EJ
+イベント時間:%I
+%T%P％%Q
 
 %T	イベント名・タイトル
 %N	現在の時間OS依存、時刻書式可能
@@ -143,8 +149,9 @@ function delta_time()
 end
 
 function get_timestring(t,text)
-	if(t=="Invalid date")then
-	return "Invalid date"
+
+	if( type(t) == "string") then
+		return "Invalid date"
 	end
 
 	total = t*10
@@ -219,7 +226,7 @@ function get_timestring(t,text)
 end
 
 function checkdate(a,b)
-if(a=="Invalid date" or b=="Invalid date")then
+if(type(a) == "string" or type(b) == "string") then
 return "Either date is Invalid date"
 end
 return true
@@ -254,24 +261,26 @@ function get_tzoffset(timezone)
 end
 
 function set_time_text()
-	local text = para_text	
-	local elaspted=get_timestring(lefttime(starttime)*-1,format)
+	local text = para_text
+	local start = parse_json_date_utc(starttime)
+	local ends = parse_json_date_utc(finaltime)
+	local elaspted=get_timestring(elasped(starttime),format)
 	local left=get_timestring(lefttime(finaltime),format)
 	local ibetime=checkdate(lefttime(starttime),lefttime(finaltime))
 	local prog=""
 	local bar=""
 	if(ibetime==true)then
-	ibetime=get_timestring(parse_json_date_utc(finaltime)-parse_json_date_utc(starttime),format)
-	prog=string.format("%2.2f",math.abs(lefttime(starttime)/(parse_json_date_utc(finaltime)-parse_json_date_utc(starttime))*100))
+	ibetime=get_timestring(ends-start,format)
+	prog=string.format("%2.2f",math.abs(lefttime(starttime)/(ends-start)*100))
 	
 	if(parse_json_date_utc(starttime)>=os.time())then
 	prog=0
-	left=get_timestring(parse_json_date_utc(finaltime)-parse_json_date_utc(starttime),format) 
+	left=get_timestring(ends-start,format) 
 	elaspted=get_timestring(0,format)
 	end
 	if(tonumber(prog)>100)then
 	prog=100
-	elaspted=get_timestring(parse_json_date_utc(finaltime)-parse_json_date_utc(starttime),format)
+	elaspted=get_timestring(ends-start,format)
 	if(end_text~="")then
 	left=end_text
 	else
@@ -292,20 +301,20 @@ function set_time_text()
 	text = string.gsub(text, "%%K", elaspted)
 	text = string.gsub(text, "%%L", left)
 	text = string.gsub(text, "%%P", prog)
-	text = string.gsub(text, "%%Q", bar)
-	if(parse_json_date_utc(starttime)=="Invalid date")then
-	text=  string.gsub(text, "%%SJ?","Invalid date")
+	text = string.gsub(text, "%%Q", bar)	
+	if(type(start) == "string")then
+	text=  string.gsub(text, "%%S%a","Invalid date")
 	else
-	text = string.gsub(text, "%%SU",os.date(time_textu,parse_json_date_utc(starttime)+utc*3600 ))
-	text = string.gsub(text, "%%SJ",os.date(time_textj,parse_json_date_utc(starttime)+9*3600 ))
-	text = string.gsub(text, "%%S",os.date(time_textq,parse_json_date_utc(starttime)))
+	text = string.gsub(text, "%%SU",os.date(time_textu,start+utc*3600))
+	text = string.gsub(text, "%%SJ",os.date(time_textj,start+9*3600 ))
+	text = string.gsub(text, "%%S",os.date(time_textq,start))
 	end
-	if(parse_json_date_utc(finaltime)=="Invalid date")then
-	text=  string.gsub(text, "%%EJ?","Invalid date")
+	if(type(ends) == "string")then
+	text=  string.gsub(text, "%%E%a","Invalid date")
 	else
-	text = string.gsub(text, "%%EU",os.date(time_textu,parse_json_date_utc(finaltime)+utc*3600 ))
-	text = string.gsub(text, "%%EJ",os.date(time_textj,parse_json_date_utc(finaltime)+9*3600 ))
-	text = string.gsub(text, "%%E",os.date(time_textq,parse_json_date_utc(finaltime)))
+	text = string.gsub(text, "%%EU",os.date(time_textu,ends+utc*3600 ))
+	text = string.gsub(text, "%%EJ",os.date(time_textj,ends+9*3600 ))
+	text = string.gsub(text, "%%E",os.date(time_textq,ends))
 	end
 	text=  string.gsub(text, "%%[EJKLNOPQfikloqsv]","")	 --フリーズ文字 %%[EJKLNOPQfikloqsv]
 	
@@ -445,17 +454,99 @@ function reset_button_clicked(props, p)
 	return false
 end
 
-function lefttime(dt)  
-	local t=parse_json_date_utc(dt)
-	if(t=="Invalid date")then
-	return t
+function lefttime(dt) 
+	local timedata= parse_json_date_utc(dt)
+	if( type(timedata) == "string") then
+	return dt
 	end
-	t=t-os.time()
+	local t=timedata -os.time()
 	return  t
 end
 
+function elasped(dt)
+	local timedata= parse_json_date_utc(dt)
+	if( type(timedata) == "string") then
+	return dt
+	end
+	local t=timedata -os.time()
+	return  -t
+end
+
+--custum timetable
 function timezoneparse(tz)
-local timezone={{"ACDT","+1030"},{"ACST","+0930"},{"AEDT","+1100"},{"AEST","+1000"},{"AFT","+0430"},{"AKDT","-0800"},{"AKST","-0900"},{"ART","-0300"},{"AWDT","+0900"},{"AWST","+0800"},{"BDT","+0600"},{"BNT","+0800"},{"BOT","-0400"},{"BRT","-0300"},{"BST","+0100"},{"BTT","+0600"},{"CAT","+0200"},{"CCT","+0630"},{"cDT","-0400"},{"CDT","-0500"},{"CEST","+0200"},{"CET","+0100"},{"CLST","-0300"},{"CLT","-0400"},{"COT","-0500"},{"cst","+0800"},{"cST","-0500"},{"CST","-0600"},{"ChST","+1000"},{"EAT","+0300"},{"ECT","-0500"},{"EDT","-0400"},{"EEST","+0300"},{"EET","+0200"},{"EST","-0500"},{"FJST","+1300"},{"FJT","+1200"},{"GMT","+0000"},{"GST","+0400"},{"HKT","+0800"},{"HST","-1000"},{"ICT","+0700"},{"IDT","+0300"},{"iST","+0200"},{"IST","+0530"},{"IRDT","+0430"},{"IRST","+0330"},{"JST","+0900"},{"KST","+0900"},{"MDT","-0600"},{"MMT","+0630"},{"MST","-0700"},{"MYT","+0800"},{"NPT","+0545"},{"NZDT","+1300"},{"NZST","+1200"},{"PDT","-0700"},{"PET","-0500"},{"PHT","+0800"},{"PKT","+0500"},{"PST","-0800"},{"PWT","+0900"},{"SST","-1100"},{"UTC","+0000"},{"UYT","-0300"},{"WAT","+0100"},{"WEST","+0100"},{"WET","+0000"},{"WIB","+0700"},{"WIT","+0900"},{"WITA","+0800"}}
+local timezone={
+{"ACDT","+1030"},
+{"ACST","+0930"},
+{"AEDT","+1100"},
+{"AEST","+1000"},
+{"AFT","+0430"},
+{"AKDT","-0800"},
+{"AKST","-0900"},
+{"ART","-0300"},
+{"AWDT","+0900"},
+{"AWST","+0800"},
+{"BDT","+0600"},
+{"BNT","+0800"},
+{"BOT","-0400"},
+{"BRT","-0300"},
+{"BST","+0100"},
+{"BTT","+0600"},
+{"CAT","+0200"},
+{"CCT","+0630"},
+{"cDT","-0400"},
+{"CDT","-0500"},
+{"CEST","+0200"},
+{"CET","+0100"},
+{"CLST","-0300"},
+{"CLT","-0400"},
+{"COT","-0500"},
+{"cst","+0800"},
+{"cST","-0500"},
+{"CST","-0600"},
+{"ChST","+1000"},
+{"EAT","+0300"},
+{"ECT","-0500"},
+{"EDT","-0400"},
+{"EEST","+0300"},
+{"EET","+0200"},
+{"EST","-0500"},
+{"FJST","+1300"},
+{"FJT","+1200"},
+{"GMT","+0000"},
+{"GST","+0400"},
+{"HKT","+0800"},
+{"HST","-1000"},
+{"ICT","+0700"},
+{"IDT","+0300"},
+{"iST","+0200"},
+{"IST","+0530"},
+{"IRDT","+0430"},
+{"IRST","+0330"},
+{"JST","+0900"},
+{"KST","+0900"},
+{"MDT","-0600"},
+{"MMT","+0630"},
+{"MST","-0700"},
+{"MYT","+0800"},
+{"NPT","+0545"},
+{"NZDT","+1300"},
+{"NZST","+1200"},
+{"PDT","-0700"},
+{"PET","-0500"},
+{"PHT","+0800"},
+{"PKT","+0500"},
+{"PST","-0800"},
+{"PWT","+0900"},
+{"SST","-1100"},
+{"UT","+0000"},
+{"UTC","+0000"},
+{"UYT","-0300"},
+{"WAT","+0100"},
+{"WEST","+0100"},
+{"WET","+0000"},
+{"WIB","+0700"},
+{"WIT","+0900"},
+{"WITA","+0800"}}
 --%a%a+$ paturn fix
 
 if(tz=="UU")then
@@ -469,23 +560,172 @@ return timezone[i][2]
 end
 end
 
-return 0 --utc
+return nil
+end
+
+
+--https://claude.ai/chat/805aaf7b-938a-486f-afe0-3109f98fb181
+-- RFC 2822 date parser
+-- Example input: "Tue, 15 Nov 1994 08:12:31 +0200"
+
+local months = {
+    Jan = 1, Feb = 2, Mar = 3, Apr = 4, May = 5, Jun = 6,
+    Jul = 7, Aug = 8, Sep = 9, Oct = 10, Nov = 11, Dec = 12
+}
+
+local weekdays = {
+    Sun = 0, Mon = 1, Tue = 2, Wed = 3, Thu = 4, Fri = 5, Sat = 6
+}
+
+local function parse_timezone(tz)
+    
+    -- Parse numeric timezone (+0200 format)
+    local sign, hour, min = tz:match("([+-])(%d%d)(%d%d)")
+	if(sign)then
+	else
+	local tzval= timezoneparse(tz)
+	if(tzval)then  
+	sign, hour, min =  tzval:match("([+-])(%d%d)(%d%d)")  
+	end
+    end
+    
+    if sign and hour and min then
+        local offset = tonumber(hour) * 3600 + tonumber(min) * 60
+        return sign == "+" and offset or -offset
+    end
+    
+    return nil
+end
+
+local function parse_rfc2822_date(date_string)
+    -- Remove optional weekday and comma
+    date_string = date_string:gsub("^%w+,%s*", "")
+    
+    
+    local ymd = "(%d+)%s+(%a+)%s+(%d+)%s+([%a%d+-]+)"--ローカル時間MD
+    local ymdh = "(%d+)%s+(%a+)%s+(%d+)%s+(%d+)%s+([%a%d+-]+)"--ローカル時間MD+h
+    local ymdhm =  "(%d+)%s+(%a+)%s+(%d+)%s+(%d+):(%d+)%s+([%a%d+-]+)"--ローカル時間MD+HM
+    local ymdhms = "(%d+)%s+(%a+)%s+(%d+)%s+(%d+):(%d+):(%d+)%s+([%a%d+-]+)"--ローカル時間MDhms
+	
+	local day, month, year, hour, min, sec, tz
+	if(date_string:match(ymdhms))then
+	day, month, year, hour, min, sec, tz = date_string:match(ymdhms)
+	elseif(date_string:match(ymdhm))then
+	day, month, year, hour, min, tz = date_string:match(ymdhm)
+	 sec =0
+	elseif(date_string:match(ymdh))then
+	day, month, year, hour, tz = date_string:match(ymdh)
+	 min, sec =0,0
+	elseif(date_string:match(ymd))then
+	day, month, year, tz = date_string:match(ymd)
+	 hour, min, sec =0,0,0
+	end
+    
+    if not (day and month and year and hour and min and sec and tz) then
+        return nil, "Invalid date format"
+    end
+    
+    -- Convert components to numbers
+    day = tonumber(day)
+    year = tonumber(year)
+    hour = tonumber(hour)
+    min = tonumber(min)
+    sec = tonumber(sec)
+    
+    -- Convert month name to number
+    month = months[month]
+    if not month then
+        return nil, "Invalid month name"
+    end
+    
+    -- Validate ranges
+    if day < 1 or day > 31 or
+       hour < 0 or hour > 23 or
+       min < 0 or min > 59 or
+       sec < 0 or sec > 59 then
+        return nil, "Component out of range"
+    end
+    
+    -- Handle two-digit years
+    if year < 100 then
+        year = year + (year >= 50 and 1900 or 2000)
+    end
+    
+    -- Parse timezone
+    local tz_offset = parse_timezone(tz)
+    if not tz_offset then
+        return nil, "Invalid timezone"
+    end
+    
+    -- Return a table with parsed components
+    return {
+        year = year,
+        month = month,
+        day = day,
+        hour = hour,
+        min = min,
+        sec = sec,
+        tz_offset = tz_offset
+    }
+end
+
+
+-- Example usage
+local function test_parser()
+    local test_dates = {
+        --"Tue, 15 Nov 1994 08:12:31 +0200",  -- With seconds
+        --"16 Nov 1994 08:12 GMT",            -- Without seconds
+        --"17 Nov 94 08:12:31 EST",           -- With seconds, 2-digit year
+        --"18 Nov 94 08:12 EDT",              -- Without seconds, 2-digit year
+        --"19 Nov 94 08 EDT",              -- Without seconds, 2-digit year
+        --"11 Nov 94 EDT",              -- Without seconds, 2-digit year
+        "28 Nov 2024 22:00:00 JST",
+        "28 Nov 2024 22:00 JST",
+        "28 Nov 2024 22 +0900"
+    }
+    --2024/11/28 22:00:00   28 Nov 2024 22:00:00 JST
+    for _, date in ipairs(test_dates) do
+        local result, err = parse_rfc2822_date(date)
+        if result then
+            print("Year:".. result.year)
+            print("Month:".. result.month)
+            print("Day:".. result.day)
+            print("Hour:".. result.hour)
+            print("Minute:".. result.min)
+            print("Second:".. result.sec)
+            print("Timezone offset (seconds):".. result.tz_offset)
+        else
+            print("Error:".. err)
+        end
+    end
 end
 
 function parse_json_date_utc(json_date)
     local pattern = "(%d+)%-(%d+)%-(%d+)%a(%d+)%:(%d+)%:([%d%.]+)([Z%+%-])(%d?%d?)%:?(%d?%d?)"
     
-    if(json_date:match("%a%a+$")) then --try parse UTC FIX
-    local normal = "(%d+)[%-%/](%d+)[%-%/](%d+) +(%d+)%:(%d+)%s?%a%a+$"--ローカル時間MD+HM
-        if(json_date:match(normal))then
-        local year, month, day, hour, minute,
-        seconds = json_date:match(normal)
-        json_date = year.."-"..month.."-"..day.."T"..hour..":"..minute..":00".. timezoneparse(json_date:match("%a%a+$"))
-     end
-    end
- 
     if(json_date:match(pattern)==nil)then
+     if(json_date:match("(%d+)%s+(%a+)%s+(%d+)(%s*%d*)(:?%d*)(:?%d*)%s+([%a%d+-]+)")) then --RFC2822
+		local date,err=parse_rfc2822_date(json_date)
+		if(date)then
+         return preset_fairfield_dateutc(date.year,date.month,date.day) -date.tz_offset + date.hour*3600 + date.min*60 + date.sec
+        else
+         return "Invalid date"
+        end
+	 end
    
+   if(json_date:match("%s?%a%a+$")) then --try parse UTC FIX
+    local normal = "(%d+)[%-%/](%d+)[%-%/](%d+) +(%d+)%:(%d+)%s?(%a%a+)$"--ローカル時間MD+HM
+        if(json_date:match(normal))then
+        local year, month, day, hour, min,tz = json_date:match(normal)
+        local tz_offset= parse_timezone(tz)
+        if(tz_offset)then
+         return preset_fairfield_dateutc(year,month,day) -tz_offset + hour*3600 + min*60
+        else
+         return "Invalid date"
+        end
+        end
+    end
+    
     local unix = "^(%d+)$"
     local normalp = "(%d+)[%-%/](%d+)[%-%/](%d+)$"--ローカル時間MD
     local normalq = "(%d+)[%-%/](%d+)[%-%/](%d+) +(%d+)$"--ローカル時間MD+h
@@ -519,30 +759,59 @@ function parse_json_date_utc(json_date)
      return "Invalid date"
     end
     
-    local year, month, day, hour, minute, 
-        seconds, offsetsign, offsethour, offsetmin = json_date:match(pattern)
-    local timestamp = os.time{year = year, month = month, 
-        day = day, hour = 4, min = minute, sec = seconds}
+    local year, month, day, hour, minute, seconds, offsetsign, offsethour, offsetmin =json_date:match(pattern)
     local offset = 0
     if offsetsign ~= 'Z' then
       offset = tonumber(offsethour) * 3600 + tonumber(offsetmin)*60
       if offsetsign == "-" then offset = offset * -1 end
     end
     
-   
+    --ymd 1-12月のみパーす
+	if (tonumber(year) and tonumber(month) and tonumber(day)) then
+	 if(tonumber(month) >0 and tonumber(month) <=12)then
+	     return preset_fairfield_dateutc(year,month,day) -offset + hour*3600 + minute*60 + seconds
+	end
+	end
+	
+    return "Invalid date"
     
     --local temp = os.date("*t",timestamp)
     --if(temp.isdst) then  --パースした時刻がサマーがしらべる
-    --offset = offset -3600
+    --offset = offset -3600  --0.5サマータイムもあるので（）、オーストラリアだと使えないかも
     --end
     --return timestamp + get_timezone() -offset
     
     --return timestamp + get_timezone_the_day() -offset
     
-    return timestamp + get_timezone_offset(timestamp) -offset  + (hour-4)*3600
-    --hourは越境時タイムマシンが発生するので最後に足す、幻の2時(2020-03-08T02:00:00) -05:00
-    --https://ja.wikipedia.org/wiki/%E5%A4%8F%E6%99%82%E9%96%93　ブラジルが0時なので4時までずらす
+    --old method ,avoid crrupt dateme in DST timezone, simply time slide method use OSTIME
+    --hourはサマータイム越境時タイムマシンが発生するので最後に足す、幻の2時(2020-03-08T02:00:00) -05:00
+    --https://ja.wikipedia.org/wiki/%E5%A4%8F%E6%99%82%E9%96%93　ブラジルが0時豪州3時なので4時までずらす
+    --local timestamp = os.time{year = year, month = month, day = day, hour = 4, min = minute, sec = seconds}
+    --return timestamp + get_timezone_offset(timestamp) -offset  + (hour-4)*3600
 end
+
+--https://teratail.com/questions/292340でみつけたアルゴの移植 fairfieldのプリセットでの計算
+--https://ja.wikipedia.org/wiki/%E3%83%84%E3%82%A7%E3%83%A9%E3%83%BC%E3%81%AE%E5%85%AC%E5%BC%8F
+function days(y, m, d)
+    -- 月ごとの累積日数テーブル
+    local t = { 306, 337, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275 }
+    
+    m= tonumber(m)
+    -- 1,2月の場合は前年として計算
+    if(m < 3)then
+    y = y - 1
+    end
+    
+    local tm=365*y + math.floor(y/4) - math.floor(y/100) + math.floor(y/400) + t[m] + d
+    --debugtxt3= tm .." "..y..m..d
+    
+    return tm
+end
+
+function preset_fairfield_dateutc(y, m, d)
+    return (days(y, m, d) - days(1970, 1, 1)) * 86400
+end
+
 
 function get_timezone_the_day()
   local hh = tonumber(string.format("%d",(tonumber(os.date("%z"))/100)))
@@ -640,7 +909,7 @@ function script_properties()
 	local sources = obs.obs_enum_sources()
 	if sources ~= nil then
 		for _, source in ipairs(sources) do
-			source_id = obs.obs_source_get_id(source)
+			source_id = obs.obs_source_get_unversioned_id(source)
 			if source_id == "text_gdiplus" or source_id == "text_ft2_source" then
 				local name = obs.obs_source_get_name(source)
 				obs.obs_property_list_add_string(p, name, name)
@@ -664,7 +933,7 @@ function script_properties()
 	 p_start_text = obs.obs_properties_add_text(props, "start_text", "START:ex　2020-02-26T15:00:00+09:00", obs.OBS_TEXT_DEFAULT)
 	 p_stop_text = obs.obs_properties_add_text(props, "stop_text", "END:ex　2020-02-26T21:00:00+09:00", obs.OBS_TEXT_DEFAULT)
 	 f_prop = obs.obs_properties_add_text(props, "format", "ELASPED/LEFT format", obs.OBS_TEXT_DEFAULT)
-	 p_para_text = obs.obs_properties_add_text(props, "para_text", "TIME parameter:", obs.OBS_TEXT_DEFAULT)
+	 p_para_text = obs.obs_properties_add_text(props, "para_text", "TIME parameter:",  obs.OBS_TEXT_MULTILINE)
 	 p_time_text = obs.obs_properties_add_text(props, "time_text", "TIME format:", obs.OBS_TEXT_DEFAULT)
 	 p_end_text = obs.obs_properties_add_text(props, "end_text", "STOP text:(empty not use)", obs.OBS_TEXT_DEFAULT)
 	else
@@ -672,7 +941,7 @@ function script_properties()
 	 p_start_text = obs.obs_properties_add_text(props, "start_text", "開始時間:例　2020-02-26T15:00:00+09:00", obs.OBS_TEXT_DEFAULT)
 	 p_stop_text = obs.obs_properties_add_text(props, "stop_text",   "終了時間:例　2020/02/26 21:00 JST", obs.OBS_TEXT_DEFAULT)
 	 f_prop = obs.obs_properties_add_text(props, "format", "経過/残表示形式", obs.OBS_TEXT_DEFAULT)
-	 p_para_text = obs.obs_properties_add_text(props, "para_text", "表示する時間:", obs.OBS_TEXT_DEFAULT)
+	 p_para_text = obs.obs_properties_add_text(props, "para_text", "表示する時間:", obs.OBS_TEXT_MULTILINE)
 	 p_time_text = obs.obs_properties_add_text(props, "time_text", "時刻表記:", obs.OBS_TEXT_DEFAULT)
 	 p_end_text = obs.obs_properties_add_text(props, "end_text", "タイマー停止の文字:(空欄だと未使用)", obs.OBS_TEXT_DEFAULT)
 	end
@@ -704,12 +973,17 @@ function script_description()
 	return "Sets a text source to act as a timer with advanced options. Hotkeys can be set for starting/stopping and to the reset timer."
 end
 
+
+function trim(s)
+    return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
 function cut_string(s,max)
 if(#s>=max)then
 s = s:sub(1,max)
 end
 
-return s
+return trim(s)
 end
 
 function script_update(settings)
@@ -765,17 +1039,16 @@ end
 
 function script_defaults(settings)
 	obs.obs_data_set_default_double(settings, "UTC", 0)
-	obs.obs_data_set_default_string(settings, "start_text", "2024-07-31T06:00:00Z")
-	obs.obs_data_set_default_string(settings, "stop_text", "2024-08-07T11:59:59Z")
+	obs.obs_data_set_default_string(settings, "start_text", "2024-11-30T08:00:00Z")
+	obs.obs_data_set_default_string(settings, "stop_text", "2024-12-08T13:00:00Z")
 	obs.obs_data_set_default_string(settings, "mode", "Countdown")
 	obs.obs_data_set_default_string(settings, "a_mode", "Global (timer always active)")
 	obs.obs_data_set_default_string(settings, "format", "%d %hh:%mm:%ss")
-	obs.obs_data_set_default_string(settings, "title_text", "[プロセカ]Chase my IDEAL IDOL！")
+	obs.obs_data_set_default_string(settings, "title_text", "[ユメステ]Jump！L0ve→L1ve!!(後編)")
 	obs.obs_data_set_default_string(settings, "time_text", "%Y-%m-%d(%a)%H:%M:%S(GMT%z)")
 	obs.obs_data_set_default_string(settings, "para_text", "日本時間%JST%n経過時間%K%n残り時間%L%nイベント時間%I%n%T%P％%n%Q")
 	obs.obs_data_set_default_string(settings, "end_text", "タイマー停止中(開始前/終了)")
 	obs.obs_data_set_default_double(settings, "bar",2)
-
 
 end
 
