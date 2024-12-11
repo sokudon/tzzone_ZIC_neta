@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2024/12/08</Value>
+      <Value Profile="(Default)">2024/12/11</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -76,6 +76,24 @@
     </Setting>
     <Setting Name="usetz" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="lastfile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\</Value>
+    </Setting>
+    <Setting Name="usefiler" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="stfilter" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2023</Value>
+    </Setting>
+    <Setting Name="enfilter" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2038</Value>
+    </Setting>
+    <Setting Name="datetester" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2024/12/11</Value>
+    </Setting>
+    <Setting Name="TZJSON" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

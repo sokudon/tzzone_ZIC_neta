@@ -221,7 +221,7 @@ namespace neta
 
                                 byte[] TZifnext = new byte[4];
                                 Array.ConstrainedCopy(bs, pos, TZifnext, 0, 4);
-                                var header2 = encoding.GetString(bs).Substring(0, 4);
+                                var header2 = encoding.GetString(TZifnext).Substring(0, 4);
                                 nexttzpos = pos;
                                 finalpos = -1;
 
@@ -233,7 +233,7 @@ namespace neta
                                 int tzh_typecntn = 0;
                                 int tzh_charcntn = 0;
 
-                                if (header.Contains("TZif") == false)
+                                if (header2.Contains("TZif") == false)
                                 {
                                     sb.AppendLine("2番目のZICバイナリ,TZifはありません");
                                     sb.AppendLine();

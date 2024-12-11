@@ -17,6 +17,13 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using static System.TimeZoneInfo;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Xml.Linq;
+using static System.Windows.Forms.DataFormats;
+using Codeplex.Data;
+using System.Text.Json;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Collections;
 
 
 namespace neta
@@ -45,6 +52,7 @@ namespace neta
                 }
             }
 
+
             textBox1.Text = Properties.Settings.Default.lefttimeformat;
             textBox2.Text = Properties.Settings.Default.datetimeformat;
             checkBox1.Checked = Properties.Settings.Default.useutc;
@@ -57,6 +65,7 @@ namespace neta
             comboBox4.Text = Properties.Settings.Default.usetzdatabin;
             textBox5.Text = Properties.Settings.Default.lasttzdatapath;
             checkBox3.Checked = Properties.Settings.Default.usetz;
+            checkBox4.Checked = Properties.Settings.Default.usefiler;
         }
 
 
@@ -297,16 +306,13 @@ namespace neta
                     Properties.Settings.Default.lasttzdatapath = filePath;
                     textBox5.Text = filePath;
                 }
-                else
-                {
-
-                }
             }
         }
 
         private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.usetzdatabin = comboBox4.Text;
+            checkBox3_CheckedChanged(sender, e);
         }
 
         private void checkBox3_CheckedChanged(object sender, EventArgs e)
@@ -315,6 +321,10 @@ namespace neta
             Properties.Settings.Default.usetz = checkBox3.Checked;
             if (checkBox3.Checked == true)
             {
+                if (this.Width < 500)
+                {
+                    this.Width = this.Width + 450;
+                }
                 using (OpenFileDialog openFileDialog = new OpenFileDialog())
                 {
 
@@ -325,699 +335,25 @@ namespace neta
                         byte[] bs = new byte[fs.Length];
                         fs.Read(bs, 0, bs.Length);
                         fs.Close();
+                        string tztxt = TZif_ParseRaw(bs);
 
-                        ZTimeZoneInfo(bs, Properties.Settings.Default.usetzdatabin, false);
+                        textBox3.Text = tztxt;
                         return;
                     }
                 }
             }
-        }
-
-
-        private static bool IsUtcAlias(string id)
-        {
-            switch ((ushort)id[0])
-            {
-                case 69: // e
-                case 101: // E
-                    return string.Equals(id, "Etc/UTC", StringComparison.OrdinalIgnoreCase) ||
-                           string.Equals(id, "Etc/UCT", StringComparison.OrdinalIgnoreCase) ||
-                           string.Equals(id, "Etc/Universal", StringComparison.OrdinalIgnoreCase) ||
-                           string.Equals(id, "Etc/Zulu", StringComparison.OrdinalIgnoreCase);
-                case 85: // u
-                case 117: // U
-                    return string.Equals(id, "UCT", StringComparison.OrdinalIgnoreCase) ||
-                           string.Equals(id, "UTC", StringComparison.OrdinalIgnoreCase) ||
-                           string.Equals(id, "Universal", StringComparison.OrdinalIgnoreCase);
-                case 90: // z
-                case 122: // Z
-                    return string.Equals(id, "Zulu", StringComparison.OrdinalIgnoreCase);
-            }
-
-            return false;
-        }
-
-        private void ZTimeZoneInfo(byte[] data, string id, bool dstDisabled)
-        {
-            string _id = id;
-
-            bool HasIanaId = true;
-            TimeSpan _baseUtcOffset = TimeSpan.Zero;
-            AdjustmentRule[] _adjustmentRules = Array.Empty<AdjustmentRule>();
-
-            if (IsUtcAlias(id))
-            {
-                //_baseUtcOffset = TimeSpan.Zero;
-                //AdjustmentRule[] _adjustmentRules = Array.Empty<AdjustmentRule>();
-                return;
-            }
-
-            DateTime[] dts;
-            byte[] typeOfLocalTime;
-            TZifType[] transitionType;
-            string zoneAbbreviations;
-            string futureTransitionsPosixFormat;
-            string _standardAbbrevName;
-            string _daylightAbbrevName;
-
-            // parse the raw TZif bytes; this method can throw ArgumentException when the data is malformed.
-            TZif_ParseRaw(data, out dts, out typeOfLocalTime, out transitionType, out zoneAbbreviations, out futureTransitionsPosixFormat);
-
-            // find the best matching baseUtcOffset and display strings based on the current utcNow value.
-            // NOTE: read the Standard and Daylight display strings from the tzfile now in case they can't be loaded later
-            // from the globalization data.
-            DateTime utcNow = DateTime.UtcNow;
-            for (int i = 0; i < dts.Length && dts[i] <= utcNow; i++)
-            {
-                int type = typeOfLocalTime[i];
-                if (!transitionType[type].IsDst)
-                {
-                    _baseUtcOffset = transitionType[type].UtcOffset;
-                    _standardAbbrevName = TZif_GetZoneAbbreviation(zoneAbbreviations, transitionType[type].AbbreviationIndex);
-                }
-                else
-                {
-                    _daylightAbbrevName = TZif_GetZoneAbbreviation(zoneAbbreviations, transitionType[type].AbbreviationIndex);
-                }
-            }
-
-            if (dts.Length == 0)
-            {
-                // time zones like Africa/Bujumbura and Etc/GMT* have no transition times but still contain
-                // TZifType entries that may contain a baseUtcOffset and display strings
-                for (int i = 0; i < transitionType.Length; i++)
-                {
-                    if (!transitionType[i].IsDst)
-                    {
-                        _baseUtcOffset = transitionType[i].UtcOffset;
-                        _standardAbbrevName = TZif_GetZoneAbbreviation(zoneAbbreviations, transitionType[i].AbbreviationIndex);
-                    }
-                    else
-                    {
-                        _daylightAbbrevName = TZif_GetZoneAbbreviation(zoneAbbreviations, transitionType[i].AbbreviationIndex);
-                    }
-                }
-            }
-
-            // TZif supports seconds-level granularity with offsets but TimeZoneInfo only supports minutes since it aligns
-            // with DateTimeOffset, SQL Server, and the W3C XML Specification
-            if (_baseUtcOffset.Ticks % TimeSpan.TicksPerMinute != 0)
-            {
-                _baseUtcOffset = new TimeSpan(_baseUtcOffset.Hours, _baseUtcOffset.Minutes, 0);
-            }
-
-            if (!dstDisabled)
-            {
-                // only create the adjustment rule if DST is enabled
-                //TZif_GenerateAdjustmentRules(out _adjustmentRules, _baseUtcOffset, dts, typeOfLocalTime, transitionType, futureTransitionsPosixFormat);
-            }
-
-            //ValidateTimeZoneInfo(_id, _baseUtcOffset, _adjustmentRules, out _supportsDaylightSavingTime);
-        }
-
-
-        private static void TZif_GenerateAdjustmentRules(out AdjustmentRule[]? rules, TimeSpan baseUtcOffset, DateTime[] dts, byte[] typeOfLocalTime,
-    TZifType[] transitionType, string? futureTransitionsPosixFormat)
-        {
-            rules = null;
-
-            if (dts.Length > 0)
-            {
-                int index = 0;
-                List<AdjustmentRule> rulesList = new List<AdjustmentRule>();
-
-                while (index <= dts.Length)
-                {
-                    TZif_GenerateAdjustmentRule(ref index, baseUtcOffset, rulesList, dts, typeOfLocalTime, transitionType, futureTransitionsPosixFormat);
-                }
-
-                rules = rulesList.ToArray();
-                if (rules != null && rules.Length == 0)
-                {
-                    rules = null;
-                }
-            }
-        }
-
-        private static readonly TransitionTime s_daylightRuleMarker = TransitionTime.CreateFixedDateRule(DateTime.MinValue.AddMilliseconds(2), 1, 1);
-
-        // Truncate the date and the time to Milliseconds precision
-        private static DateTime GetTimeOnlyInMillisecondsPrecision(DateTime input) => new DateTime((input.TimeOfDay.Ticks / TimeSpan.TicksPerMillisecond) * TimeSpan.TicksPerMillisecond);
-
-
-        private static void TZif_GenerateAdjustmentRule(ref int index, TimeSpan timeZoneBaseUtcOffset, List<AdjustmentRule> rulesList, DateTime[] dts,
-            byte[] typeOfLocalTime, TZifType[] transitionTypes, string? futureTransitionsPosixFormat)
-        {
-
-            while (index < dts.Length && dts[index] == DateTime.MinValue)
-            {
-                index++;
-            }
-
-            if (rulesList.Count == 0 && index < dts.Length)
-            {
-                TZifType transitionType = TZif_GetEarlyDateTransitionType(transitionTypes);
-                DateTime endTransitionDate = dts[index];
-
-                TimeSpan transitionOffset = TZif_CalculateTransitionOffsetFromBase(transitionType.UtcOffset, timeZoneBaseUtcOffset);
-                TimeSpan daylightDelta = transitionType.IsDst ? transitionOffset : TimeSpan.Zero;
-                TimeSpan baseUtcDelta = transitionType.IsDst ? TimeSpan.Zero : transitionOffset;
-
-                //TimeZoneInfo palmer = TimeZoneInfo.CreateCustomTimeZone(standardName, offset, displayName, standardName,daylightName, adjustments, true);
-                AdjustmentRule r = AdjustmentRule.CreateAdjustmentRule(
-                        DateTime.MinValue,
-                        endTransitionDate.AddTicks(-1),
-                        daylightDelta,
-                        default,
-                        default,
-                        baseUtcDelta);
-                //noDaylightTransitions: true);
-
-                //if (!IsValidAdjustmentRuleOffset(timeZoneBaseUtcOffset, r))
-                //{
-                //    NormalizeAdjustmentRuleOffset(timeZoneBaseUtcOffset, ref r);
-                //}
-
-                rulesList.Add(r);
-            }
-            else if (index < dts.Length)
-            {
-                DateTime startTransitionDate = dts[index - 1];
-                TZifType startTransitionType = transitionTypes[typeOfLocalTime[index - 1]];
-
-                DateTime endTransitionDate = dts[index];
-
-                TimeSpan transitionOffset = TZif_CalculateTransitionOffsetFromBase(startTransitionType.UtcOffset, timeZoneBaseUtcOffset);
-                TimeSpan daylightDelta = startTransitionType.IsDst ? transitionOffset : TimeSpan.Zero;
-                TimeSpan baseUtcDelta = startTransitionType.IsDst ? TimeSpan.Zero : transitionOffset;
-
-                TransitionTime dstStart;
-                if (startTransitionType.IsDst)
-                {
-                    // the TransitionTime fields are not used when AdjustmentRule.NoDaylightTransitions == true.
-                    // However, there are some cases in the past where DST = true, and the daylight savings offset
-                    // now equals what the current BaseUtcOffset is.  In that case, the AdjustmentRule.DaylightOffset
-                    // is going to be TimeSpan.Zero.  But we still need to return 'true' from AdjustmentRule.HasDaylightSaving.
-                    // To ensure we always return true from HasDaylightSaving, make a "special" dstStart that will make the logic
-                    // in HasDaylightSaving return true.
-                    dstStart = s_daylightRuleMarker;
-                }
-                else
-                {
-                    dstStart = default;
-                }
-
-                AdjustmentRule r = AdjustmentRule.CreateAdjustmentRule(
-                        startTransitionDate,
-                        endTransitionDate.AddTicks(-1),
-                        daylightDelta,
-                        dstStart,
-                        default,
-                        baseUtcDelta);
-                //noDaylightTransitions: true);
-
-                //if (!IsValidAdjustmentRuleOffset(timeZoneBaseUtcOffset, r))
-                //{
-                //    NormalizeAdjustmentRuleOffset(timeZoneBaseUtcOffset, ref r);
-                //}
-
-                rulesList.Add(r);
-            }
             else
             {
-                // create the AdjustmentRule that will be used for all DateTimes after the last transition
-
-                // NOTE: index == dts.Length
-                DateTime startTransitionDate = dts[index - 1];
-
-                AdjustmentRule? r = !string.IsNullOrEmpty(futureTransitionsPosixFormat) ?
-                    TZif_CreateAdjustmentRuleForPosixFormat(futureTransitionsPosixFormat, startTransitionDate, timeZoneBaseUtcOffset) :
-                    null;
-
-                if (r == null)
+                if (this.Width >= 960)
                 {
-                    // just use the last transition as the rule which will be used until the end of time
-
-                    TZifType transitionType = transitionTypes[typeOfLocalTime[index - 1]];
-                    TimeSpan transitionOffset = TZif_CalculateTransitionOffsetFromBase(transitionType.UtcOffset, timeZoneBaseUtcOffset);
-                    TimeSpan daylightDelta = transitionType.IsDst ? transitionOffset : TimeSpan.Zero;
-                    TimeSpan baseUtcDelta = transitionType.IsDst ? TimeSpan.Zero : transitionOffset;
-
-                    r = AdjustmentRule.CreateAdjustmentRule(
-                        startTransitionDate,
-                        DateTime.MaxValue,
-                        daylightDelta,
-                        default,
-                        default,
-                        baseUtcDelta);
-                    // noDaylightTransitions: true);
-                }
-
-                //if (!IsValidAdjustmentRuleOffset(timeZoneBaseUtcOffset, r))
-                //{
-                //    NormalizeAdjustmentRuleOffset(timeZoneBaseUtcOffset, ref r);
-                //}
-
-                rulesList.Add(r);
-            }
-
-            index++;
-        }
-
-        private static TimeSpan? TZif_ParseOffsetString(ReadOnlySpan<char> offset)
-        {
-            TimeSpan? result = null;
-
-            if (offset.Length > 0)
-            {
-                bool negative = offset[0] == '-';
-                if (negative || offset[0] == '+')
-                {
-                    offset = offset.Slice(1);
-                }
-
-                // Try parsing just hours first.
-                // Note, TimeSpan.TryParseExact "%h" can't be used here because some time zones using values
-                // like "26" or "144" and TimeSpan parsing would turn that into 26 or 144 *days* instead of hours.
-                int hours;
-                if (int.TryParse(offset, out hours))
-                {
-                    result = new TimeSpan(hours, 0, 0);
-                }
-                else
-                {
-                    TimeSpan parsedTimeSpan;
-                    if (TimeSpan.TryParseExact(offset, "g", CultureInfo.InvariantCulture, out parsedTimeSpan))
-                    {
-                        result = parsedTimeSpan;
-                    }
-                }
-
-                if (result.HasValue && negative)
-                {
-                    result = result.GetValueOrDefault().Negate();
+                    this.Width = this.Width - 450;
                 }
             }
-
-            return result;
+            this.FormBorderStyle = FormBorderStyle.FixedDialog; // サイズ変更を禁止
+            this.MaximizeBox = false; // 最大化ボタンを無効化
         }
 
 
-        private static AdjustmentRule? TZif_CreateAdjustmentRuleForPosixFormat(string posixFormat, DateTime startTransitionDate, TimeSpan timeZoneBaseUtcOffset)
-        {
-            if (TZif_ParsePosixFormat(posixFormat,
-                out _,
-                out ReadOnlySpan<char> standardOffset,
-                out ReadOnlySpan<char> daylightSavingsName,
-                out ReadOnlySpan<char> daylightSavingsOffset,
-                out ReadOnlySpan<char> start,
-                out ReadOnlySpan<char> startTime,
-                out ReadOnlySpan<char> end,
-                out ReadOnlySpan<char> endTime))
-            {
-                // a valid posixFormat has at least standardName and standardOffset
-
-                TimeSpan? parsedBaseOffset = TZif_ParseOffsetString(standardOffset);
-                if (parsedBaseOffset.HasValue)
-                {
-                    TimeSpan baseOffset = parsedBaseOffset.GetValueOrDefault().Negate(); // offsets are backwards in POSIX notation
-                    baseOffset = TZif_CalculateTransitionOffsetFromBase(baseOffset, timeZoneBaseUtcOffset);
-
-                    // having a daylightSavingsName means there is a DST rule
-                    if (!daylightSavingsName.IsEmpty)
-                    {
-                        TimeSpan? parsedDaylightSavings = TZif_ParseOffsetString(daylightSavingsOffset);
-                        TimeSpan daylightSavingsTimeSpan;
-                        if (!parsedDaylightSavings.HasValue)
-                        {
-                            // default DST to 1 hour if it isn't specified
-                            daylightSavingsTimeSpan = new TimeSpan(1, 0, 0);
-                        }
-                        else
-                        {
-                            daylightSavingsTimeSpan = parsedDaylightSavings.GetValueOrDefault().Negate(); // offsets are backwards in POSIX notation
-                            daylightSavingsTimeSpan = TZif_CalculateTransitionOffsetFromBase(daylightSavingsTimeSpan, timeZoneBaseUtcOffset);
-                            daylightSavingsTimeSpan = TZif_CalculateTransitionOffsetFromBase(daylightSavingsTimeSpan, baseOffset);
-                        }
-
-                        TransitionTime? dstStart = TZif_CreateTransitionTimeFromPosixRule(start, startTime);
-                        TransitionTime? dstEnd = TZif_CreateTransitionTimeFromPosixRule(end, endTime);
-
-                        if (dstStart == null || dstEnd == null)
-                        {
-                            return null;
-                        }
-
-                        return AdjustmentRule.CreateAdjustmentRule(
-                            startTransitionDate,
-                            DateTime.MaxValue,
-                            daylightSavingsTimeSpan,
-                            dstStart.GetValueOrDefault(),
-                            dstEnd.GetValueOrDefault(),
-                            baseOffset);
-                        //noDaylightTransitions: false);
-                    }
-                    else
-                    {
-                        // if there is no daylightSavingsName, the whole AdjustmentRule should be with no transitions - just the baseOffset
-                        return AdjustmentRule.CreateAdjustmentRule(
-                               startTransitionDate,
-                               DateTime.MaxValue,
-                               TimeSpan.Zero,
-                               default,
-                               default,
-                               baseOffset);
-                        // noDaylightTransitions: true);
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private static DateTime ParseTimeOfDay(ReadOnlySpan<char> time)
-        {
-            DateTime timeOfDay;
-            TimeSpan? timeOffset = TZif_ParseOffsetString(time);
-            if (timeOffset.HasValue)
-            {
-                // This logic isn't correct and can't be corrected until https://github.com/dotnet/runtime/issues/14966 is fixed.
-                // Some time zones use time values like, "26", "144", or "-2".
-                // This allows the week to sometimes be week 4 and sometimes week 5 in the month.
-                // For now, strip off any 'days' in the offset, and just get the time of day correct
-                timeOffset = new TimeSpan(timeOffset.GetValueOrDefault().Hours, timeOffset.GetValueOrDefault().Minutes, timeOffset.GetValueOrDefault().Seconds);
-                if (timeOffset.GetValueOrDefault() < TimeSpan.Zero)
-                {
-                    timeOfDay = new DateTime(1, 1, 2, 0, 0, 0);
-                }
-                else
-                {
-                    timeOfDay = new DateTime(1, 1, 1, 0, 0, 0);
-                }
-
-                timeOfDay += timeOffset.GetValueOrDefault();
-            }
-            else
-            {
-                // default to 2AM.
-                timeOfDay = new DateTime(1, 1, 1, 2, 0, 0);
-            }
-
-            return timeOfDay;
-        }
-        private static bool TZif_ParseMDateRule(ReadOnlySpan<char> dateRule, out int month, out int week, out DayOfWeek dayOfWeek)
-        {
-            if (dateRule[0] == 'M')
-            {
-                int monthWeekDotIndex = dateRule.IndexOf('.');
-                if (monthWeekDotIndex > 0)
-                {
-                    ReadOnlySpan<char> weekDaySpan = dateRule.Slice(monthWeekDotIndex + 1);
-                    int weekDayDotIndex = weekDaySpan.IndexOf('.');
-                    if (weekDayDotIndex > 0)
-                    {
-                        if (int.TryParse(dateRule.Slice(1, monthWeekDotIndex - 1), out month) &&
-                            int.TryParse(weekDaySpan.Slice(0, weekDayDotIndex), out week) &&
-                            int.TryParse(weekDaySpan.Slice(weekDayDotIndex + 1), out int day))
-                        {
-                            dayOfWeek = (DayOfWeek)day;
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            month = 0;
-            week = 0;
-            dayOfWeek = default;
-            return false;
-        }
-
-        private static TransitionTime? TZif_CreateTransitionTimeFromPosixRule(ReadOnlySpan<char> date, ReadOnlySpan<char> time)
-        {
-            if (date.IsEmpty)
-            {
-                return null;
-            }
-
-            if (date[0] == 'M')
-            {
-                // Mm.w.d
-                // This specifies day d of week w of month m. The day d must be between 0(Sunday) and 6.The week w must be between 1 and 5;
-                // week 1 is the first week in which day d occurs, and week 5 specifies the last d day in the month. The month m should be between 1 and 12.
-
-                int month;
-                int week;
-                DayOfWeek day;
-                if (!TZif_ParseMDateRule(date, out month, out week, out day))
-                {
-                    //throw new InvalidTimeZoneException(SR.Format(SR.InvalidTimeZone_UnparsablePosixMDateString, date.ToString()));
-                }
-
-                return TransitionTime.CreateFloatingDateRule(ParseTimeOfDay(time), month, week, day);
-            }
-            else
-            {
-                if (date[0] != 'J')
-                {
-                    // should be n Julian day format.
-                    // This specifies the Julian day, with n between 0 and 365. February 29 is counted in leap years.
-                    //
-                    // n would be a relative number from the beginning of the year. which should handle if the
-                    // the year is a leap year or not.
-                    //
-                    // In leap year, n would be counted as:
-                    //
-                    // 0                30 31              59 60              90      335            365
-                    // |-------Jan--------|-------Feb--------|-------Mar--------|....|-------Dec--------|
-                    //
-                    // while in non leap year we'll have
-                    //
-                    // 0                30 31              58 59              89      334            364
-                    // |-------Jan--------|-------Feb--------|-------Mar--------|....|-------Dec--------|
-                    //
-                    // For example if n is specified as 60, this means in leap year the rule will start at Mar 1,
-                    // while in non leap year the rule will start at Mar 2.
-                    //
-                    // This n Julian day format is very uncommon and mostly  used for convenience to specify dates like January 1st
-                    // which we can support without any major modification to the Adjustment rules. We'll support this rule  for day
-                    // numbers less than 59 (up to Feb 28). Otherwise we'll skip this POSIX rule.
-                    // We've never encountered any time zone file using this format for days beyond Feb 28.
-
-                    if (int.TryParse(date, out int julianDay) && julianDay < 59)
-                    {
-                        int d, m;
-                        if (julianDay <= 30) // January
-                        {
-                            m = 1;
-                            d = julianDay + 1;
-                        }
-                        else // February
-                        {
-                            m = 2;
-                            d = julianDay - 30;
-                        }
-
-                        return TransitionTime.CreateFixedDateRule(ParseTimeOfDay(time), m, d);
-                    }
-
-                    // Since we can't support this rule, return null to indicate to skip the POSIX rule.
-                    return null;
-                }
-
-                // Julian day
-                TZif_ParseJulianDay(date, out int month, out int day);
-                return TransitionTime.CreateFixedDateRule(ParseTimeOfDay(time), month, day);
-            }
-        }
-
-        private static bool TZif_ParsePosixFormat(
-            ReadOnlySpan<char> posixFormat,
-            out ReadOnlySpan<char> standardName,
-            out ReadOnlySpan<char> standardOffset,
-            out ReadOnlySpan<char> daylightSavingsName,
-            out ReadOnlySpan<char> daylightSavingsOffset,
-            out ReadOnlySpan<char> start,
-            out ReadOnlySpan<char> startTime,
-            out ReadOnlySpan<char> end,
-            out ReadOnlySpan<char> endTime)
-        {
-            daylightSavingsOffset = null;
-            start = null;
-            startTime = null;
-            end = null;
-            endTime = null;
-
-            int index = 0;
-            standardName = TZif_ParsePosixName(posixFormat, ref index);
-            standardOffset = TZif_ParsePosixOffset(posixFormat, ref index);
-
-            daylightSavingsName = TZif_ParsePosixName(posixFormat, ref index);
-            if (!daylightSavingsName.IsEmpty)
-            {
-                daylightSavingsOffset = TZif_ParsePosixOffset(posixFormat, ref index);
-
-                if (index < posixFormat.Length && posixFormat[index] == ',')
-                {
-                    index++;
-                    TZif_ParsePosixDateTime(posixFormat, ref index, out start, out startTime);
-
-                    if (index < posixFormat.Length && posixFormat[index] == ',')
-                    {
-                        index++;
-                        TZif_ParsePosixDateTime(posixFormat, ref index, out end, out endTime);
-                    }
-                }
-            }
-
-            return !standardName.IsEmpty && !standardOffset.IsEmpty;
-        }
-
-        private static ReadOnlySpan<char> TZif_ParsePosixName(ReadOnlySpan<char> posixFormat, scoped ref int index)
-        {
-            bool isBracketEnclosed = index < posixFormat.Length && posixFormat[index] == '<';
-            if (isBracketEnclosed)
-            {
-                // move past the opening bracket
-                index++;
-
-                ReadOnlySpan<char> result = TZif_ParsePosixString(posixFormat, ref index, c => c == '>');
-
-                // move past the closing bracket
-                if (index < posixFormat.Length && posixFormat[index] == '>')
-                {
-                    index++;
-                }
-
-                return result;
-            }
-            else
-            {
-                return TZif_ParsePosixString(
-                    posixFormat,
-                    ref index,
-                    c => char.IsDigit(c) || c == '+' || c == '-' || c == ',');
-            }
-        }
-
-        private static ReadOnlySpan<char> TZif_ParsePosixOffset(ReadOnlySpan<char> posixFormat, scoped ref int index) =>
-            TZif_ParsePosixString(posixFormat, ref index, c => !char.IsDigit(c) && c != '+' && c != '-' && c != ':');
-
-        private static void TZif_ParsePosixDateTime(ReadOnlySpan<char> posixFormat, scoped ref int index, out ReadOnlySpan<char> date, out ReadOnlySpan<char> time)
-        {
-            time = null;
-
-            date = TZif_ParsePosixDate(posixFormat, ref index);
-            if (index < posixFormat.Length && posixFormat[index] == '/')
-            {
-                index++;
-                time = TZif_ParsePosixTime(posixFormat, ref index);
-            }
-        }
-
-        private static ReadOnlySpan<char> TZif_ParsePosixDate(ReadOnlySpan<char> posixFormat, scoped ref int index) =>
-            TZif_ParsePosixString(posixFormat, ref index, c => c == '/' || c == ',');
-
-        private static ReadOnlySpan<char> TZif_ParsePosixTime(ReadOnlySpan<char> posixFormat, scoped ref int index) =>
-            TZif_ParsePosixString(posixFormat, ref index, c => c == ',');
-
-        private static ReadOnlySpan<char> TZif_ParsePosixString(ReadOnlySpan<char> posixFormat, scoped ref int index, Func<char, bool> breakCondition)
-        {
-            int startIndex = index;
-            for (; index < posixFormat.Length; index++)
-            {
-                char current = posixFormat[index];
-                if (breakCondition(current))
-                {
-                    break;
-                }
-            }
-
-            return posixFormat.Slice(startIndex, index - startIndex);
-        }
-
-        private static TimeSpan TZif_CalculateTransitionOffsetFromBase(TimeSpan transitionOffset, TimeSpan timeZoneBaseUtcOffset)
-        {
-            TimeSpan result = transitionOffset - timeZoneBaseUtcOffset;
-
-            // TZif supports seconds-level granularity with offsets but TimeZoneInfo only supports minutes since it aligns
-            // with DateTimeOffset, SQL Server, and the W3C XML Specification
-            if (result.Ticks % TimeSpan.TicksPerMinute != 0)
-            {
-                result = new TimeSpan(result.Hours, result.Minutes, 0);
-            }
-
-            return result;
-        }
-
-
-
-        private static TZifType TZif_GetEarlyDateTransitionType(TZifType[] transitionTypes)
-        {
-            foreach (TZifType transitionType in transitionTypes)
-            {
-                if (!transitionType.IsDst)
-                {
-                    return transitionType;
-                }
-            }
-
-            if (transitionTypes.Length > 0)
-            {
-                return transitionTypes[0];
-            }
-
-            //throw new InvalidTimeZoneException(SR.InvalidTimeZone_NoTTInfoStructures);
-            return transitionTypes[0];
-        }
-
-        private static void TZif_ParseJulianDay(ReadOnlySpan<char> date, out int month, out int day)
-        {
-            // Jn
-            // This specifies the Julian day, with n between 1 and 365.February 29 is never counted, even in leap years.
-            Debug.Assert(!date.IsEmpty);
-            Debug.Assert(date[0] == 'J');
-            month = day = 0;
-
-            int index = 1;
-
-            if ((uint)index >= (uint)date.Length || !char.IsAsciiDigit(date[index]))
-            {
-                //throw new InvalidTimeZoneException(SR.InvalidTimeZone_InvalidJulianDay);
-            }
-
-            int julianDay = 0;
-
-            do
-            {
-                julianDay = julianDay * 10 + (int)(date[index] - '0');
-                index++;
-            } while ((uint)index < (uint)date.Length && char.IsAsciiDigit(date[index]));
-
-
-            int[] DaysToMonth365 =
-            {
-            0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
-        };
-
-            ReadOnlySpan<int> days = DaysToMonth365;
-
-            if (julianDay == 0 || julianDay > days[days.Length - 1])
-            {
-                //throw new InvalidTimeZoneException(SR.InvalidTimeZone_InvalidJulianDay);
-            }
-
-            int i = 1;
-            while (i < days.Length && julianDay > days[i])
-            {
-                i++;
-            }
-
-            Debug.Assert(i > 0 && i < days.Length);
-
-            month = i;
-            day = julianDay - days[i - 1];
-        }
 
 
         private readonly struct TZifType
@@ -1040,20 +376,6 @@ namespace neta
             }
         }
 
-        // Returns the Substring from zoneAbbreviations starting at index and ending at '\0'
-        // zoneAbbreviations is expected to be in the form: "PST\0PDT\0PWT\0\PPT"
-        private static string TZif_GetZoneAbbreviation(string zoneAbbreviations, int index)
-        {
-            int lastIndex = zoneAbbreviations.IndexOf('\0', index);
-            return lastIndex > 0 ?
-                zoneAbbreviations.Substring(index, lastIndex - index) :
-                zoneAbbreviations.Substring(index);
-        }
-
-        // Converts a span of bytes into a long - always using standard byte order (Big Endian)
-        // per TZif file standard
-        private static short TZif_ToInt16(ReadOnlySpan<byte> value)
-            => BinaryPrimitives.ReadInt16BigEndian(value);
 
         // Converts an array of bytes into an int - always using standard byte order (Big Endian)
         // per TZif file standard
@@ -1071,22 +393,8 @@ namespace neta
             => BinaryPrimitives.ReadInt64BigEndian(value.AsSpan(startIndex));
 
 
-        private static long TZif_ToUnixTime(byte[] value, int startIndex, TZVersion version) =>
-            version != TZVersion.V1 ?
-                TZif_ToInt64(value, startIndex) :
-                TZif_ToInt32(value, startIndex);
-
-
-        private static DateTime TZif_UnixTimeToDateTime(long unixTime) =>
-             unixTime < -9223372036854775808 ? DateTimeOffset.FromUnixTimeSeconds(-9223372036854775808).UtcDateTime :
-             unixTime > 9223372036854775807 ? DateTimeOffset.FromUnixTimeSeconds(+9223372036854775807).UtcDateTime :
-             DateTimeOffset.FromUnixTimeSeconds(unixTime).UtcDateTime;
-
-
-        private static void TZif_ParseRaw(byte[] data, out DateTime[] dts, out byte[] typeOfLocalTime, out TZifType[] transitionType,
-                                          out string zoneAbbreviations, out string? futureTransitionsPosixFormat)
+        private static string TZif_ParseRaw(byte[] data)
         {
-            futureTransitionsPosixFormat = null;
 
             // read in the 44-byte TZ header containing the count/length fields
             //
@@ -1106,78 +414,420 @@ namespace neta
                 timeValuesLength = 8; // the second version uses 8-bytes
             }
 
-            // initialize the containers for the rest of the TZ data
-            dts = new DateTime[t.TimeCount];
-            typeOfLocalTime = new byte[t.TimeCount];
-            transitionType = new TZifType[t.TypeCount];
+            index -= TZifHead.Length;
 
-            // read in the UTC transition points and convert them to Windows
-            //
-            for (int i = 0; i < t.TimeCount; i++)
+            string tzdata = Path.Combine(Properties.Settings.Default.lasttzdatapath, Properties.Settings.Default.usetzdatabin);
+            string tzst = (Properties.Settings.Default.usetzdatabin);
+            byte[] bs = new byte[data.Length];
+            Array.ConstrainedCopy(data, 0, bs, 0, data.Length);
+
+            byte[] TZifnext = new byte[4];
+            int pos = index;
+            Array.ConstrainedCopy(bs, pos, TZifnext, 0, 4);
+            var encoding = Encoding.GetEncoding(0);
+            var header2 = encoding.GetString(TZifnext).Substring(0, 4);
+            int nexttzpos = pos;
+            int finalpos = -1;
+            string finaltz = "";
+            string footer = "";
+            StringBuilder sb = new StringBuilder();
+            StringBuilder js = new StringBuilder();
+            js.Append("{");
+
+            string tr = "";
+            string ab = "";
+            string of = "";
+
+            long Y_filter_st = Convert.ToInt64(Properties.Settings.Default.stfilter);
+            long Y_filter_en = Convert.ToInt64(Properties.Settings.Default.enfilter);
+
+            int tzh_ttisgmtcntn = 0;
+            int tzh_ttisstdcntn = 0;
+            int tzh_leapcntn = 0;
+            int tzh_timecntn = 0;
+            int tzh_typecntn = 0;
+            int tzh_charcntn = 0;
+
+            if (header2.Contains("TZif") == false)
             {
-                long unixTime = TZif_ToUnixTime(data, index, t.Version);
-                dts[i] = TZif_UnixTimeToDateTime(unixTime);
-                index += timeValuesLength;
+                sb.AppendLine("2番目のZICバイナリ,TZifはありません");
+                sb.AppendLine();
             }
-
-            // read in the Type Indices; there is a 1:1 mapping of UTC transition points to Type Indices
-            // these indices directly map to the array index in the transitionType array below
-            //
-            for (int i = 0; i < t.TimeCount; i++)
+            else
             {
-                typeOfLocalTime[i] = data[index];
-                index++;
-            }
+                byte[] v = new byte[] { bs[pos + 4] };
+                string versionn = encoding.GetString(v);
 
-            // read in the Type table.  Each 6-byte entry represents
-            // {UtcOffset, IsDst, AbbreviationIndex}
-            //
-            // each AbbreviationIndex is a character index into the zoneAbbreviations string below
-            //
-            for (int i = 0; i < t.TypeCount; i++)
-            {
-                transitionType[i] = new TZifType(data, index);
-                index += 6;
-            }
-
-            // read in the Abbreviation ASCII string.  This string will be in the form:
-            // "PST\0PDT\0PWT\0\PPT"
-            //
-            Encoding enc = Encoding.UTF8;
-            zoneAbbreviations = enc.GetString(data, index, (int)t.CharCount);
-            index += (int)t.CharCount;
-
-            // skip ahead of the Leap-Seconds Adjustment data.  In a future release, consider adding
-            // support for Leap-Seconds
-            //
-            index += (int)(t.LeapCount * (timeValuesLength + 4)); // skip the leap second transition times
-
-            // read in the Standard Time table.  There should be a 1:1 mapping between Type-Index and Standard
-            // Time table entries.
-            //
-            // TRUE     =     transition time is standard time
-            // FALSE    =     transition time is wall clock time
-            // ABSENT   =     transition time is wall clock time
-            //
-            index += (int)Math.Min(t.IsStdCount, t.TypeCount);
-
-            // read in the GMT Time table.  There should be a 1:1 mapping between Type-Index and GMT Time table
-            // entries.
-            //
-            // TRUE     =     transition time is UTC
-            // FALSE    =     transition time is local time
-            // ABSENT   =     transition time is local time
-            //
-            index += (int)Math.Min(t.IsGmtCount, t.TypeCount);
-
-            if (t.Version != TZVersion.V1)
-            {
-                // read the POSIX-style format, which should be wrapped in newlines with the last newline at the end of the file
-                if (data[index++] == '\n' && data[data.Length - 1] == '\n')
+                if (bs[pos + 4] == 0)
                 {
-                    futureTransitionsPosixFormat = enc.GetString(data, index, data.Length - index - 1);
+                    sb.AppendLine("2番目のZICバイナリ,TZif version NULL(1) はMUST BE IGNOREです");
+                    sb.AppendLine();
+                }
+                else
+                {
+
+                    pos += 20;
+                    tzh_ttisgmtcntn = BitConverter.ToInt32(Bigval(bs, pos), 0);
+
+                    tzh_ttisstdcntn = BitConverter.ToInt32(Bigval(bs, pos + 4), 0);
+
+                    tzh_leapcntn = BitConverter.ToInt32(Bigval(bs, pos + 8), 0);
+
+                    tzh_timecntn = BitConverter.ToInt32(Bigval(bs, pos + 12), 0);
+
+                    tzh_typecntn = BitConverter.ToInt32(Bigval(bs, pos + 16), 0);
+
+                    tzh_charcntn = BitConverter.ToInt32(Bigval(bs, pos + 20), 0);
+
+
+                    //C#  transition_timeが64bitのため
+                    long[] transition_timesn = new long[tzh_timecntn];
+                    int[] transition_typesn = new int[tzh_timecntn];
+
+                    pos += 24;
+                    if (tzh_timecntn != 0)
+                    {
+                        for (int i = 0; i < tzh_timecntn; i++)
+                        {
+                            transition_timesn[i] = BitConverter.ToInt64(Bigval64(bs, pos + 8 * i), 0);
+                            transition_typesn[i] = bs[pos + tzh_timecntn * 8 + i];
+                        }
+                    }
+                    else
+                    {
+                        transition_timesn = [];
+                        transition_typesn = [];
+                    }
+
+                    pos += tzh_timecntn * 9;
+                    int[] local_time_types_gmtn = new int[tzh_typecntn];
+                    int[] local_time_types_isdstn = new int[tzh_typecntn];
+                    int[] local_time_types_abbrn = new int[tzh_typecntn];
+
+                    for (int i = 0; i < tzh_typecntn; i++)
+                    {
+                        local_time_types_gmtn[i] = BitConverter.ToInt32(Bigval(bs, pos + i * 6), 0);
+                        local_time_types_isdstn[i] = bs[pos + 4 + i * 6];
+                        local_time_types_abbrn[i] = bs[pos + 5 + i * 6];
+                    }
+
+                    pos = pos + 6 * tzh_typecntn;
+                    byte[] abbr2 = new byte[tzh_charcntn + 10];
+                    Array.ConstrainedCopy(bs, pos, abbr2, 0, tzh_charcntn);
+
+
+                    sb.AppendLine("2ndTZif transitions,gmtoffset,isdst,abbr");
+                    pos = pos + tzh_charcntn;
+                    if (tzh_leapcntn > 0)
+                    {
+                        pos = pos + tzh_leapcntn * 8;
+                    }
+
+
+                    if (tzh_ttisstdcntn > 0)
+                    {
+                        //isstd = struct.unpack(">%db" % ttisstdcnt fileobj.read(ttisstdcnt))
+                        byte[] isstd = new byte[tzh_ttisstdcntn];
+                        Array.ConstrainedCopy(bs, pos, isstd, 0, tzh_ttisstdcntn);
+                        pos += tzh_ttisstdcntn;
+                    }
+
+                    if (tzh_ttisgmtcntn > 0)
+                    {
+                        //isgmt = struct.unpack(">%db" % ttisgmtcnt, fileobj.read(ttisgmtcnt))
+                        byte[] isgmt = new byte[tzh_ttisgmtcntn];
+                        Array.ConstrainedCopy(bs, pos, isgmt, 0, tzh_ttisgmtcntn);
+                        pos += tzh_ttisgmtcntn;
+
+                    }
+
+
+                    js.Append(@"""Zone"":" + @"""TZST"",");
+                    js.Append(@"""TransList"":" + @"[0],");
+                    js.Append(@"""Offsets"":" + @"[1],");
+                    js.Append(@"""Abbrs"":" + @"[3]");
+                    bool filter = Properties.Settings.Default.usefiler;
+                    int max = tzh_timecntn - 1;
+
+                    string[][] transitionsn = new string[tzh_timecntn][];
+                    for (int i = 0; i < tzh_timecntn; i++)
+                    {
+                        int type = transition_typesn[i];
+                        transitionsn[i] = new string[4];
+                        transitionsn[i][0] = transition_timesn[i].ToString();
+                        transitionsn[i][1] = Convert.ToString(local_time_types_gmtn[type]);
+                        transitionsn[i][2] = Convert.ToString(local_time_types_isdstn[type]);
+
+                        byte[] tmp2 = new byte[20];
+                        Array.ConstrainedCopy(abbr2, local_time_types_abbrn[type], tmp2, 0, 10);
+                        char[] charArray = ByteArrayToCharArray(tmp2, Encoding.UTF8);
+                        transitionsn[i][3] = TerminateAtNull(charArray);
+
+                        if (filter == false)
+                        {
+                            tr = tr + transitionsn[i][0] + @",";
+                            of = of + Convert.ToString(local_time_types_gmtn[type] / 3600) + @",";
+                            ab = ab + @"""" + transitionsn[i][3] + @""",";
+                        }
+                        else
+                        {
+                            TimeSpan utcOffset = TimeSpan.FromHours(local_time_types_gmtn[type] / 3600);
+                            // DateTimeOffsetに変換
+                            DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_timesn[i]).ToOffset(utcOffset);
+
+                            // オフセット付きのフォーマットに変換
+                            string y = dateTimeWithOffset.ToString("yyyy");
+                            int YY = Convert.ToInt32(y);
+                            if (YY >= Y_filter_st && YY <= Y_filter_en)
+                            {
+                                tr = tr + transitionsn[i][0] + @",";
+                                of = of + Convert.ToString(local_time_types_gmtn[type] / 3600) + @",";
+                                ab = ab + @"""" + transitionsn[i][3] + @""",";
+                            }
+                        }
+
+                        if (true)
+                        {
+                            transitionsn[i][1] = Convert.ToString(local_time_types_gmtn[type] / 3600);
+                            // UTCオフセット (例: +09:00)
+                            TimeSpan utcOffset = TimeSpan.FromHours(local_time_types_gmtn[type] / 3600);
+                            // DateTimeOffsetに変換
+                            DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_timesn[i]).ToOffset(utcOffset);
+
+                            // オフセット付きのフォーマットに変換
+                            string formattedDate = dateTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
+                            transitionsn[i][0] = formattedDate;
+
+                        }
+                        sb.Append(transitionsn[i][0]);
+                        sb.Append(",");
+                        sb.Append(transitionsn[i][1]);
+                        sb.Append(",");
+                        sb.Append(transitionsn[i][2]);
+                        sb.Append(",");
+                        sb.AppendLine(transitionsn[i][3]);
+
+
+                    }
+                    if (tr == "")
+                    {
+                        if (tzh_timecntn > 0)
+                        {
+                            tr = tr + transition_timesn[max].ToString() + @",";
+                            of = of + transitionsn[max][1] + @",";
+                            ab = ab + @"""" + transitionsn[max][3] + @""",";
+                            finaltz = Y_filter_st +"～"+ Y_filter_en +"年期間内にはゾーン情報存在しませんが、から配列回避のため最後のゾーン情報を追加しています(から配列＝UTCになるため)";
+                        }
+                    }
+                    else
+                    {
+                        finaltz = "カッティングしたゾーン情報になっています" +Y_filter_st + "～" + Y_filter_en + "年期間内のみ";
+
+                    }
+
+                    finalpos = pos;
+                    int finalstring = bs.Length - pos;
+                    byte[] foolerbyte = new byte[finalstring];
+                    if (finalstring > 0)
+                    {
+                        Array.ConstrainedCopy(bs, pos, foolerbyte, 0, finalstring);
+                        footer = encoding.GetString(foolerbyte);
+                    }
+
+                    sb.AppendLine();
                 }
             }
+
+
+            js.Append("}");
+            string mkjson = js.ToString();
+            mkjson = mkjson.Replace("TZST", tzst);
+            mkjson = mkjson.Replace("[0]", "[" + tr + "]");
+            mkjson = mkjson.Replace("[1]", "[" + of + "]");
+            mkjson = mkjson.Replace("[3]", "[" + ab + "]");
+            mkjson = mkjson.Replace(",]", "]");
+            mkjson = mkjson.Replace(",]", "]");
+            mkjson = mkjson.Replace(",]", "]");
+
+            sb.Append("tzdata name:");
+            sb.Append(tzdata);
+            sb.AppendLine();
+            sb.Append("filesize:");
+            sb.Append(bs.Length.ToString());
+            sb.AppendLine("byte ");
+            sb.Append("footer position:");
+            sb.Append(finalpos.ToString());
+            sb.AppendLine();
+            sb.Append("foorter string:");
+            sb.Append(footer);
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine(mkjson);
+
+
+            // JSONパース
+            TimeZoneData tzData = JsonSerializer.Deserialize<TimeZoneData>(mkjson);
+            Properties.Settings.Default.TZJSON = mkjson;
+
+            // TimeZoneTransitionsインスタンスを作成
+            TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
+                tzData.TransList,
+                tzData.Offsets,
+                tzData.Abbrs
+            );
+            string tester = Properties.Settings.Default.datetester;
+            DateTime testDateTime;
+
+            // TryParseを使って文字列をDateTimeに変換
+            if (DateTime.TryParse(tester, out testDateTime))
+            {
+            
+
+            int lastTransitionIdx = tzTransitions.FindLastTransition(testDateTime);
+
+            string localt = testDateTime.ToString();
+            string utct = testDateTime.ToUniversalTime().ToString();
+
+
+            if (lastTransitionIdx >= 0)
+            {
+                int uo = tzData.Offsets[lastTransitionIdx];
+                string abb = tzData.Abbrs[lastTransitionIdx];
+                string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss" + abb);
+
+                sb.AppendLine(finaltz);
+                sb.AppendLine("local utc tzdate:" + localt + "\r\n" + utct + "\r\n" + iso8601tz);
+                sb.AppendLine($"Last transition index: {lastTransitionIdx}");
+                sb.AppendLine($"Timestamp: {tzData.TransList[lastTransitionIdx]}");
+                sb.AppendLine($"Offset: {tzData.Offsets[lastTransitionIdx]}");
+                sb.AppendLine($"Abbreviation: {tzData.Abbrs[lastTransitionIdx]}");
+            }
+            else
+            {
+                string iso8601tz = testDateTime.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ssUTC");
+                sb.AppendLine("期間内に偏移ファイルがみつかりませんでした、暫定でUTCになります");
+                sb.AppendLine("local utc tzdate:" + localt + "\r\n" + utct + "\r\n" + iso8601tz);
+            }
+            }
+            else
+            {
+                sb.AppendLine("日付てすとのパースに失敗しました、正しい日付を入力してください");
+            }
+
+
+            return sb.ToString();
+
+
+        }
+
+        public class TimeZoneData
+        {
+            public string Zone { get; set; }
+            public List<long> TransList { get; set; }
+            public List<int> Offsets { get; set; }
+            public List<string> Abbrs { get; set; }
+        }
+
+        public class TimeZoneTransitions
+        {
+            private List<long> transList;
+            private List<int> offsets;
+            private List<string> abbrs;
+
+            public TimeZoneTransitions(List<long> transList, List<int> offsets, List<string> abbrs)
+            {
+                this.transList = transList ?? new List<long>();
+                this.offsets = offsets ?? new List<int>();
+                this.abbrs = abbrs ?? new List<string>();
+            }
+
+            public int FindLastTransition(DateTime dt, bool inUtc = false)
+            {
+                if (transList == null || transList.Count == 0)
+                {
+                    return -1; // No transitions available
+                }
+
+                // Convert DateTime to a Unix timestamp
+                long timestamp = DateTimeToUnixTimestamp(dt);
+
+                // Find the index where the timestamp would fit
+                //int idx = transList.BinarySearch(timestamp);
+                // if (idx < 0)     { idx = ~idx; // Adjust index if not found  }
+                int idx= BisectRight(transList, timestamp);
+
+
+                return idx - 1; // Return the index of the previous transition
+            }
+
+            //C#とpythonの2分検索はあるごがちがう
+            //https://chatgpt.com/c/6759448c-e904-800f-ad63-213ed43db5e0
+            public static int BisectRight(List<long> list, long value)
+            {
+                int low = 0, high = list.Count;
+
+                while (low < high)
+                {
+                    int mid = (low + high) / 2;
+
+                    if (list[mid] > value)
+                    {
+                        high = mid;
+                    }
+                    else
+                    {
+                        low = mid + 1;
+                    }
+                }
+
+                return low;
+            }
+
+            private long DateTimeToUnixTimestamp(DateTime dt)
+            {
+                DateTime utcDateTime = dt.ToUniversalTime();
+                DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                return (long)(utcDateTime - unixEpoch).TotalSeconds;
+            }
+        }
+
+
+        static string TerminateAtNull(char[] charArray)
+        {
+            int length = 0;
+            while (length < charArray.Length && charArray[length] != '\0')
+            {
+                length++;
+            }
+
+            return new string(charArray, 0, length);
+        }
+
+        static char[] ByteArrayToCharArray(byte[] byteArray, Encoding encoding)
+        {
+            // byte配列を文字列に変換
+            string str = encoding.GetString(byteArray);
+
+            // 文字列をchar配列に変換
+            return str.ToCharArray();
+        }
+
+
+        public static byte[] Bigval64(byte[] bs, int pos)
+        {
+            byte[] swapbin = new byte[8];
+            Array.ConstrainedCopy(bs, pos, swapbin, 0, 8);
+            Array.Reverse(swapbin);
+            return swapbin;
+        }
+
+        public static byte[] Bigval(byte[] bs, int pos)
+        {
+            byte[] swapbin = new byte[4];
+            Array.ConstrainedCopy(bs, pos, swapbin, 0, 4);
+            Array.Reverse(swapbin);
+            return swapbin;
         }
 
         private void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
@@ -1189,6 +839,7 @@ namespace neta
             {
                 Properties.Settings.Default.api = m.Value;
             }
+
         }
 
         private void comboBox5_TextChanged(object sender, EventArgs e)
@@ -1199,6 +850,82 @@ namespace neta
             if (m.Success)
             {
                 Properties.Settings.Default.api = m.Value;
+            }
+            var path = Properties.Settings.Default.api.ToString();
+            if (File.Exists(path))
+            {
+                Properties.Settings.Default.api = path;
+            }
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+
+            OpenFileDialog ofd = new OpenFileDialog();
+
+            //はじめのファイル名を指定する
+            //はじめに「ファイル名」で表示される文字列を指定する
+            ofd.FileName = "default.html";
+            //はじめに表示されるフォルダを指定する
+            //指定しない（空の文字列）の時は、現在のディレクトリが表示される
+            ofd.InitialDirectory = Properties.Settings.Default.lastfile;
+            //[ファイルの種類]に表示される選択肢を指定する
+            //指定しないとすべてのファイルが表示される
+            ofd.Filter = "jsonファイル(*.json)|*.json|すべてのファイル(*.*)|*.*";
+            //[ファイルの種類]ではじめに選択されるものを指定する
+            //2番目の「すべてのファイル」が選択されているようにする
+            ofd.FilterIndex = 2;
+            //タイトルを設定する
+            ofd.Title = "開くファイルを選択してください";
+            //ダイアログボックスを閉じる前に現在のディレクトリを復元するようにする
+            ofd.RestoreDirectory = true;
+            //存在しないファイルの名前が指定されたとき警告を表示する
+            //デフォルトでTrueなので指定する必要はない
+            ofd.CheckFileExists = true;
+            //存在しないパスが指定されたとき警告を表示する
+            //デフォルトでTrueなので指定する必要はない
+            ofd.CheckPathExists = true;
+
+            //ダイアログを表示する
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                Properties.Settings.Default.api = ofd.FileName;
+                Properties.Settings.Default.lastfile = Path.GetFileName(Path.GetDirectoryName(ofd.FileName));
+                comboBox5.Text = ofd.FileName;
+            }
+        }
+
+        private void textBox5_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox4_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.usefiler = checkBox4.Checked;
+            checkBox3_CheckedChanged(sender, e);
+        }
+
+        private void comboBox8_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.enfilter = comboBox8.Text;
+        }
+
+        private void comboBox7_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.stfilter = comboBox7.Text;
+            int st = Convert.ToInt32(comboBox7.Text);
+            int en = Convert.ToInt32(comboBox8.Text);
+            
+        }
+
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+            DateTime d;
+            if (DateTime.TryParse(textBox6.Text, out d)) { 
+                Properties.Settings.Default.datetester = textBox6.Text;
             }
         }
 

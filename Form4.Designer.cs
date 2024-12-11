@@ -1,4 +1,6 @@
-﻿namespace neta
+﻿using System.Drawing;
+
+namespace neta
 {
     partial class Form4
     {

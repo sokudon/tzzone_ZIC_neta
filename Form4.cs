@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using System.Net;
 using System.Text.RegularExpressions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace neta
 {
@@ -29,27 +30,56 @@ namespace neta
             string url = Properties.Settings.Default.api.ToString();
             string parseop = Properties.Settings.Default.parse;
             string text = "";
-            try
-            {
-                text = wc.DownloadString(url);
-                File.WriteAllText(@"tmp.js", text);
-            }
-            catch (WebException exc)
-            {
-                MessageBox.Show(exc.Message);
-                return;
-            }
 
+            var urlrg = "https?://[ -_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+$";
 
+            var m = Regex.Match(url, urlrg);
+            if (m.Success)
             {
-                using (var reader = new StreamReader("tmp.js"))
-                using (var jsonReader = new JsonTextReader(reader))
+
+                try
                 {
-                    jsonReader.DateParseHandling = DateParseHandling.None;
-                    var root = JToken.Load(jsonReader);
-                    DisplayTreeView(root, url);
+                    text = wc.DownloadString(url);
+                    File.WriteAllText(@"tmp.js", text);
+                    {
+                        using (var reader = new StreamReader("tmp.js"))
+                        using (var jsonReader = new JsonTextReader(reader))
+                        {
+                            jsonReader.DateParseHandling = DateParseHandling.None;
+                            var root = JToken.Load(jsonReader);
+                            DisplayTreeView(root, url);
+                        }
+                    }
+                }
+                catch (WebException exc)
+                {
+                    MessageBox.Show(exc.Message);
+                    return;
                 }
             }
+            else
+            {
+                var path = Properties.Settings.Default.api.ToString();
+                if (File.Exists(path))
+                {
+                    {
+                        using (var reader = new StreamReader(path))
+                        using (var jsonReader = new JsonTextReader(reader))
+                        {
+                            jsonReader.DateParseHandling = DateParseHandling.None;
+                            var root = JToken.Load(jsonReader);
+                            DisplayTreeView(root, path);
+                        }
+                    }
+                }
+                else {
+                    MessageBox.Show(path+"のファイルは存在しません");
+                    return;
+                }
+
+            }
+
+            
         }
 
 
@@ -124,7 +154,7 @@ namespace neta
             var n = treeView1.SelectedNode;
             var info = n.Tag;
             var type = info.GetType().Name;
-            if (type == "JValue")
+            if (type == "JValue" || type == "JArray" || type == "JProperty")
             {
                 var tmp = ((Newtonsoft.Json.Linq.JToken)info).Path;
                 tmp = Regex.Replace(tmp, "^\\.", "");  // ドットの先頭削除
@@ -138,7 +168,7 @@ namespace neta
             var n = treeView1.SelectedNode;
             var info = n.Tag;
             var type = info.GetType().Name;
-            if (type == "JValue")
+            if (type == "JValue" || type == "JArray" || type == "JProperty")
             {
                 var tmp = ((Newtonsoft.Json.Linq.JToken)info).Path;
                 tmp = Regex.Replace(tmp, "^\\.", "");
@@ -152,8 +182,9 @@ namespace neta
             var n = treeView1.SelectedNode;
             var info = n.Tag;
             var type = info.GetType().Name;
-            if (type == "JValue")
-            {
+            if (type == "JValue" || type == "JArray" || type == "JProperty")
+             {
+
                 var tmp = ((Newtonsoft.Json.Linq.JToken)info).Path;
                 tmp = Regex.Replace(tmp, "^\\.", "");
                 tmp = tmp.Replace(".", "/");

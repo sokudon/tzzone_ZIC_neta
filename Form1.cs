@@ -4,6 +4,14 @@ using System.Windows.Forms;
 using System.Net;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Diagnostics.Eventing.Reader;
+using Codeplex.Data;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using static neta.dtformat;
+using System.Web;
+using System.Text.Json;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace neta
 {
@@ -85,6 +93,7 @@ namespace neta
 
             bool utc = Properties.Settings.Default.useutc;
             bool ms = Properties.Settings.Default.usems;
+            bool tz = Properties.Settings.Default.usetz;
             string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
             eventname.Text = ibemei.Text;
             DateTime dt = DateTime.Now;
@@ -151,6 +160,49 @@ namespace neta
 
 
             }
+            else if(tz){
+
+                string mkjson = Properties.Settings.Default.TZJSON;
+                // JSONパース
+                if(mkjson != null){
+                TimeZoneData tzData = System.Text.Json.JsonSerializer.Deserialize<TimeZoneData>(mkjson);
+
+                // TimeZoneTransitionsインスタンスを作成
+                TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
+                    tzData.TransList,
+                    tzData.Offsets,
+                    tzData.Abbrs
+                );
+                        int lastTransitionIdx = tzTransitions.FindLastTransition(dt);
+                        int lastTransitionIdx_s = tzTransitions.FindLastTransition(st);
+                        int lastTransitionIdx_d = tzTransitions.FindLastTransition(en);
+
+                        if (lastTransitionIdx >= 0 && lastTransitionIdx_s >= 0  && lastTransitionIdx_d >= 0)
+                        {
+                            int uo = tzData.Offsets[lastTransitionIdx];
+                            string abb = tzData.Abbrs[lastTransitionIdx];
+                            string uoff = uo.ToString();
+
+                        int uoc = tzData.Offsets[lastTransitionIdx_s];
+                        string abbc = tzData.Abbrs[lastTransitionIdx_s];
+                        string uoffc = uoc.ToString();
+
+                        int uoe = tzData.Offsets[lastTransitionIdx_d];
+                        string abbe = tzData.Abbrs[lastTransitionIdx_d];
+                        string uoffe = uoe.ToString();
+
+                        format = format.Replace("K", abb).Replace("zzz", uoff).Replace("zz", uoff).Replace("z", uoff);
+                        string formats = format.Replace("K", abbc).Replace("zzz", uoffc).Replace("zz", uoffc).Replace("z", uoffc);
+                        string formate = format.Replace("K", abbe).Replace("zzz", uoffe).Replace("zz", uoffe).Replace("z", uoffe);
+
+                        current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(uo).ToString(format);
+                        start.Text = "開始時間:" + st.ToUniversalTime().AddHours(uoc).ToString(formats);
+                        end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uoe).ToString(formate);
+                    }
+
+                    
+            }
+        }
             else
             {
                 current.Text = "現在時間:" + dt.ToString(format);
@@ -396,18 +448,40 @@ namespace neta
             WebClient wc = new WebClient();
             wc.Encoding = Encoding.UTF8;
             DateTime dt = DateTime.Now;
-            string url = Properties.Settings.Default.api.ToString().Replace("TODAY()", dt.ToString("yyyy-MM-dd"));
+            string url = Properties.Settings.Default.api.ToString();
             string parseop = Properties.Settings.Default.parse;
             string text = "";
             var errorPath = "";
-            try
+            var urlrg = "https?://[ -_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+$";
+
+            var m = Regex.Match(url, urlrg);
+            if (m.Success)
             {
-                text = wc.DownloadString(url);
+                try
+                {
+                    text = wc.DownloadString(url);
+                }
+                catch (WebException exc)
+                {
+                    MessageBox.Show(exc.Message);
+                    return;
+                }
             }
-            catch (WebException exc)
+            else
             {
-                MessageBox.Show(exc.Message);
-                return;
+                var path = Properties.Settings.Default.api.ToString();
+                if (File.Exists(path))
+                {
+                    StreamReader sr = new StreamReader(path, Encoding.GetEncoding("UTF-8"));
+                    text = sr.ReadToEnd();
+                    sr.Close();
+                }
+                else
+                {
+                    MessageBox.Show(path + "のファイルは存在しません");
+                    return;
+                }
+
             }
 
             try
@@ -418,8 +492,7 @@ namespace neta
                 string[] getValues = { "", "", "" };
                 bool end = false;
 
-                Regex regex = new Regex("\\[(\\d+)\\]$");
-                Regex regexb = new Regex("^\\[(\\d+)\\]");
+                Regex regex = new Regex("\\[(\\d+)\\]");
 
                 if (string.IsNullOrWhiteSpace(text) || text == "[]" || text == "{}")
                 {
@@ -450,31 +523,24 @@ namespace neta
                                     obj = null;
                                     break;
                                 }
-                                Match match = regexb.Match(pathSegments[i]);
-                                if (match.Success)
+                                Match match = regex.Match(pathSegments[i]);
+                                while (match.Success)
                                 {
                                     string matchedNumber = match.Value;
                                     string p = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
                                     int n = Convert.ToInt32(p);
                                     obj = obj[n];
-                                }
-                                else
-                                {
-                                    obj = obj[0];
-                                }
+                                    match = match.NextMatch();
+                                   
+                                }                               
                                 if (i == pathSegments.Length - 1)
                                 {
-                                    Match matchm = regex.Match(pathSegments[i]);
-                                    if (matchm.Success)
-                                    {
-                                        string matchedNumber = matchm.Value;
-                                        string pp = matchedNumber.ToString().Replace("[","").Replace("]","");
-                                        int nn = Convert.ToInt32(pp);
-                                        getValues[k] = obj[nn].ToString();
-                                        end = true;
-                                    }
-                                    break;
+                                   
+                                   getValues[k] = obj.ToString();
+                                   end = true;
+                                   break;
                                 }
+                                obj = obj[0];
                             }
                             if (end)
                             {
@@ -484,20 +550,64 @@ namespace neta
                             // オブジェクトの処理
                             if (obj != null && obj.IsObject)
                             {
-                                // 最後の要素の場合
-                                if (i == pathSegments.Length - 1)
+                                Match matcho = regex.Match(pathSegments[i]);
+                                if (matcho.Success == false)
                                 {
-                                    getValues[k] = obj[pathSegments[i]];
-                                    break;
+                                    // 途中の要素の場合
+                                    obj = obj[pathSegments[i].ToString()];
+                                    // 最後の要素の場合
+                                    if (i == pathSegments.Length - 1)
+                                    {
+                                        getValues[k] = obj.ToString();
+                                        break;
+                                    }
+
                                 }
 
-                                // 途中の要素の場合
-                                obj = obj[pathSegments[i]];
+                                if(matcho.Success)
+                                {
+                                        string sepa_seg = regex.Replace(pathSegments[i], "");
+                                        obj = obj[sepa_seg];
+                                        string matchedNumber = matcho.Value;
+                                        string po = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
+                                        int no = Convert.ToInt32(po);
+                                        obj = obj[no];
+                                        i++;
+                                        matcho = matcho.NextMatch();
+                                        while (matcho.Success)
+                                        {
+                                            matchedNumber = matcho.Value;
+                                            string p = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
+                                            int n = Convert.ToInt32(p);
+                                            obj = obj[n];
+                                            matcho = matcho.NextMatch();
+
+                                        }
+                                    i--;
+                                    if (obj is DynamicJson) // または productDetails.GetType() == typeof(DynamicJson)
+                                    {
+                                        //Console.WriteLine("details はオブジェクトです");
+                                    }
+                                    else
+                                    {
+                                        //Console.WriteLine("details はオブジェクトではありません"); 
+                                        if (i == pathSegments.Length - 1)
+                                        {
+                                            getValues[k] = obj.ToString();
+                                            end = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (end)
+                                {
+                                    break;
+                                }    
                             }
                             else
                             {
                                 // オブジェクトが見つからない場合
-                                MessageBox.Show("objなし");
+                                MessageBox.Show("objがみつかりません");
                                 break;
                             }
                         }

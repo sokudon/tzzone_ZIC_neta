@@ -30,12 +30,14 @@
         {
             label1 = new System.Windows.Forms.Label();
             panel1 = new System.Windows.Forms.Panel();
-            checkBox3 = new System.Windows.Forms.CheckBox();
-            button2 = new System.Windows.Forms.Button();
+            panel3 = new System.Windows.Forms.Panel();
             label5 = new System.Windows.Forms.Label();
-            textBox5 = new System.Windows.Forms.TextBox();
+            button2 = new System.Windows.Forms.Button();
+            checkBox3 = new System.Windows.Forms.CheckBox();
             comboBox4 = new System.Windows.Forms.ComboBox();
+            textBox5 = new System.Windows.Forms.TextBox();
             panel2 = new System.Windows.Forms.Panel();
+            button3 = new System.Windows.Forms.Button();
             button1 = new System.Windows.Forms.Button();
             textBox4 = new System.Windows.Forms.TextBox();
             comboBox5 = new System.Windows.Forms.ComboBox();
@@ -51,7 +53,15 @@
             textBox2 = new System.Windows.Forms.TextBox();
             label2 = new System.Windows.Forms.Label();
             textBox1 = new System.Windows.Forms.TextBox();
+            textBox3 = new System.Windows.Forms.TextBox();
+            comboBox7 = new System.Windows.Forms.ComboBox();
+            comboBox8 = new System.Windows.Forms.ComboBox();
+            checkBox4 = new System.Windows.Forms.CheckBox();
+            label8 = new System.Windows.Forms.Label();
+            textBox6 = new System.Windows.Forms.TextBox();
+            label9 = new System.Windows.Forms.Label();
             panel1.SuspendLayout();
+            panel3.SuspendLayout();
             panel2.SuspendLayout();
             SuspendLayout();
             // 
@@ -68,11 +78,7 @@
             // 
             // panel1
             // 
-            panel1.Controls.Add(checkBox3);
-            panel1.Controls.Add(button2);
-            panel1.Controls.Add(label5);
-            panel1.Controls.Add(textBox5);
-            panel1.Controls.Add(comboBox4);
+            panel1.Controls.Add(panel3);
             panel1.Controls.Add(panel2);
             panel1.Controls.Add(label4);
             panel1.Controls.Add(comboBox3);
@@ -91,52 +97,51 @@
             panel1.Size = new System.Drawing.Size(403, 500);
             panel1.TabIndex = 1;
             // 
-            // checkBox3
+            // panel3
             // 
-            checkBox3.AutoSize = true;
-            checkBox3.Location = new System.Drawing.Point(33, 315);
-            checkBox3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            checkBox3.Name = "checkBox3";
-            checkBox3.Size = new System.Drawing.Size(211, 24);
-            checkBox3.TabIndex = 25;
-            checkBox3.Text = "TZDBを使う(夏時間修正あり)";
-            checkBox3.UseVisualStyleBackColor = true;
-            checkBox3.Visible = false;
-            checkBox3.CheckedChanged += checkBox3_CheckedChanged;
+            panel3.Controls.Add(label5);
+            panel3.Controls.Add(button2);
+            panel3.Controls.Add(checkBox3);
+            panel3.Controls.Add(comboBox4);
+            panel3.Controls.Add(textBox5);
+            panel3.Location = new System.Drawing.Point(25, 265);
+            panel3.Name = "panel3";
+            panel3.Size = new System.Drawing.Size(372, 73);
+            panel3.TabIndex = 26;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new System.Drawing.Point(4, 13);
+            label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label5.Name = "label5";
+            label5.Size = new System.Drawing.Size(89, 20);
+            label5.TabIndex = 23;
+            label5.Text = "tzdateのパス:";
+            label5.Click += label5_Click;
             // 
             // button2
             // 
-            button2.Location = new System.Drawing.Point(359, 274);
+            button2.Location = new System.Drawing.Point(324, 10);
             button2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             button2.Name = "button2";
             button2.Size = new System.Drawing.Size(24, 29);
             button2.TabIndex = 24;
             button2.Text = "..";
             button2.UseVisualStyleBackColor = true;
-            button2.Visible = false;
             button2.Click += button2_Click_1;
             // 
-            // label5
+            // checkBox3
             // 
-            label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point(28, 279);
-            label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            label5.Name = "label5";
-            label5.Size = new System.Drawing.Size(89, 20);
-            label5.TabIndex = 23;
-            label5.Text = "tzdateのパス:";
-            label5.Visible = false;
-            label5.Click += label5_Click;
-            // 
-            // textBox5
-            // 
-            textBox5.Location = new System.Drawing.Point(121, 276);
-            textBox5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            textBox5.Name = "textBox5";
-            textBox5.ReadOnly = true;
-            textBox5.Size = new System.Drawing.Size(237, 27);
-            textBox5.TabIndex = 22;
-            textBox5.Visible = false;
+            checkBox3.AutoSize = true;
+            checkBox3.Location = new System.Drawing.Point(4, 44);
+            checkBox3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            checkBox3.Name = "checkBox3";
+            checkBox3.Size = new System.Drawing.Size(211, 24);
+            checkBox3.TabIndex = 25;
+            checkBox3.Text = "TZDBを使う(夏時間修正あり)";
+            checkBox3.UseVisualStyleBackColor = true;
+            checkBox3.CheckedChanged += checkBox3_CheckedChanged;
             // 
             // comboBox4
             // 
@@ -144,16 +149,26 @@
             comboBox4.FormattingEnabled = true;
             comboBox4.ImeMode = System.Windows.Forms.ImeMode.Disable;
             comboBox4.Items.AddRange(new object[] { "Africa/Abidjan", "Africa/Accra", "Africa/Addis_Ababa", "Africa/Algiers", "Africa/Asmara", "Africa/Bamako", "Africa/Bangui", "Africa/Banjul", "Africa/Bissau", "Africa/Blantyre", "Africa/Brazzaville", "Africa/Bujumbura", "Africa/Cairo", "Africa/Casablanca", "Africa/Ceuta", "Africa/Conakry", "Africa/Dakar", "Africa/Dar_es_Salaam", "Africa/Djibouti", "Africa/Douala", "Africa/El_Aaiun", "Africa/Freetown", "Africa/Gaborone", "Africa/Harare", "Africa/Johannesburg", "Africa/Juba", "Africa/Kampala", "Africa/Khartoum", "Africa/Kigali", "Africa/Kinshasa", "Africa/Lagos", "Africa/Libreville", "Africa/Lome", "Africa/Luanda", "Africa/Lubumbashi", "Africa/Lusaka", "Africa/Malabo", "Africa/Maputo", "Africa/Maseru", "Africa/Mbabane", "Africa/Mogadishu", "Africa/Monrovia", "Africa/Nairobi", "Africa/Ndjamena", "Africa/Niamey", "Africa/Nouakchott", "Africa/Ouagadougou", "Africa/Porto-Novo", "Africa/Sao_Tome", "Africa/Tripoli", "Africa/Tunis", "Africa/Windhoek", "America/Adak", "America/Anchorage", "America/Anguilla", "America/Antigua", "America/Araguaina", "America/Argentina/Buenos_Aires", "America/Argentina/Catamarca", "America/Argentina/Cordoba", "America/Argentina/Jujuy", "America/Argentina/La_Rioja", "America/Argentina/Mendoza", "America/Argentina/Rio_Gallegos", "America/Argentina/Salta", "America/Argentina/San_Juan", "America/Argentina/San_Luis", "America/Argentina/Tucuman", "America/Argentina/Ushuaia", "America/Aruba", "America/Asuncion", "America/Atikokan", "America/Bahia", "America/Bahia_Banderas", "America/Barbados", "America/Belem", "America/Belize", "America/Blanc-Sablon", "America/Boa_Vista", "America/Bogota", "America/Boise", "America/Cambridge_Bay", "America/Campo_Grande", "America/Cancun", "America/Caracas", "America/Cayenne", "America/Cayman", "America/Chicago", "America/Chihuahua", "America/Ciudad_Juarez", "America/Costa_Rica", "America/Creston", "America/Cuiaba", "America/Curacao", "America/Danmarkshavn", "America/Dawson", "America/Dawson_Creek", "America/Denver", "America/Detroit", "America/Dominica", "America/Edmonton", "America/Eirunepe", "America/El_Salvador", "America/Fort_Nelson", "America/Fortaleza", "America/Glace_Bay", "America/Goose_Bay", "America/Grand_Turk", "America/Grenada", "America/Guadeloupe", "America/Guatemala", "America/Guayaquil", "America/Guyana", "America/Halifax", "America/Havana", "America/Hermosillo", "America/Indiana/Indianapolis", "America/Indiana/Knox", "America/Indiana/Marengo", "America/Indiana/Petersburg", "America/Indiana/Tell_City", "America/Indiana/Vevay", "America/Indiana/Vincennes", "America/Indiana/Winamac", "America/Inuvik", "America/Iqaluit", "America/Jamaica", "America/Juneau", "America/Kentucky/Louisville", "America/Kentucky/Monticello", "America/Kralendijk", "America/La_Paz", "America/Lima", "America/Los_Angeles", "America/Lower_Princes", "America/Maceio", "America/Managua", "America/Manaus", "America/Marigot", "America/Martinique", "America/Matamoros", "America/Mazatlan", "America/Menominee", "America/Merida", "America/Metlakatla", "America/Mexico_City", "America/Miquelon", "America/Moncton", "America/Monterrey", "America/Montevideo", "America/Montserrat", "America/Nassau", "America/New_York", "America/Nome", "America/Noronha", "America/North_Dakota/Beulah", "America/North_Dakota/Center", "America/North_Dakota/New_Salem", "America/Nuuk", "America/Ojinaga", "America/Panama", "America/Paramaribo", "America/Phoenix", "America/Port_of_Spain", "America/Port-au-Prince", "America/Porto_Velho", "America/Puerto_Rico", "America/Punta_Arenas", "America/Rankin_Inlet", "America/Recife", "America/Regina", "America/Resolute", "America/Rio_Branco", "America/Santarem", "America/Santiago", "America/Santo_Domingo", "America/Sao_Paulo", "America/Scoresbysund", "America/Sitka", "America/St_Barthelemy", "America/St_Johns", "America/St_Kitts", "America/St_Lucia", "America/St_Thomas", "America/St_Vincent", "America/Swift_Current", "America/Tegucigalpa", "America/Thule", "America/Tijuana", "America/Toronto", "America/Tortola", "America/Vancouver", "America/Whitehorse", "America/Winnipeg", "America/Yakutat", "Antarctica/Casey", "Antarctica/Davis", "Antarctica/DumontDUrville", "Antarctica/Macquarie", "Antarctica/Mawson", "Antarctica/McMurdo", "Antarctica/Palmer", "Antarctica/Rothera", "Antarctica/Syowa", "Antarctica/Troll", "Antarctica/Vostok", "Arctic/Longyearbyen", "Asia/Aden", "Asia/Almaty", "Asia/Amman", "Asia/Anadyr", "Asia/Aqtau", "Asia/Aqtobe", "Asia/Ashgabat", "Asia/Atyrau", "Asia/Baghdad", "Asia/Bahrain", "Asia/Baku", "Asia/Bangkok", "Asia/Barnaul", "Asia/Beirut", "Asia/Bishkek", "Asia/Brunei", "Asia/Chita", "Asia/Choibalsan", "Asia/Colombo", "Asia/Damascus", "Asia/Dhaka", "Asia/Dili", "Asia/Dubai", "Asia/Dushanbe", "Asia/Famagusta", "Asia/Gaza", "Asia/Hebron", "Asia/Ho_Chi_Minh", "Asia/Hong_Kong", "Asia/Hovd", "Asia/Irkutsk", "Asia/Jakarta", "Asia/Jayapura", "Asia/Jerusalem", "Asia/Kabul", "Asia/Kamchatka", "Asia/Karachi", "Asia/Kathmandu", "Asia/Khandyga", "Asia/Kolkata", "Asia/Krasnoyarsk", "Asia/Kuala_Lumpur", "Asia/Kuching", "Asia/Kuwait", "Asia/Macau", "Asia/Magadan", "Asia/Makassar", "Asia/Manila", "Asia/Muscat", "Asia/Nicosia", "Asia/Novokuznetsk", "Asia/Novosibirsk", "Asia/Omsk", "Asia/Oral", "Asia/Phnom_Penh", "Asia/Pontianak", "Asia/Pyongyang", "Asia/Qatar", "Asia/Qostanay", "Asia/Qyzylorda", "Asia/Riyadh", "Asia/Sakhalin", "Asia/Samarkand", "Asia/Seoul", "Asia/Shanghai", "Asia/Singapore", "Asia/Srednekolymsk", "Asia/Taipei", "Asia/Tashkent", "Asia/Tbilisi", "Asia/Tehran", "Asia/Thimphu", "Asia/Tokyo", "Asia/Tomsk", "Asia/Ulaanbaatar", "Asia/Urumqi", "Asia/Ust-Nera", "Asia/Vientiane", "Asia/Vladivostok", "Asia/Yakutsk", "Asia/Yangon", "Asia/Yekaterinburg", "Asia/Yerevan", "Atlantic/Azores", "Atlantic/Bermuda", "Atlantic/Canary", "Atlantic/Cape_Verde", "Atlantic/Faroe", "Atlantic/Madeira", "Atlantic/Reykjavik", "Atlantic/South_Georgia", "Atlantic/St_Helena", "Atlantic/Stanley", "Australia/Adelaide", "Australia/Brisbane", "Australia/Broken_Hill", "Australia/Darwin", "Australia/Eucla", "Australia/Hobart", "Australia/Lindeman", "Australia/Lord_Howe", "Australia/Melbourne", "Australia/Perth", "Australia/Sydney", "Europe/Amsterdam", "Europe/Andorra", "Europe/Astrakhan", "Europe/Athens", "Europe/Belgrade", "Europe/Berlin", "Europe/Bratislava", "Europe/Brussels", "Europe/Bucharest", "Europe/Budapest", "Europe/Busingen", "Europe/Chisinau", "Europe/Copenhagen", "Europe/Dublin", "Europe/Gibraltar", "Europe/Guernsey", "Europe/Helsinki", "Europe/Isle_of_Man", "Europe/Istanbul", "Europe/Jersey", "Europe/Kaliningrad", "Europe/Kirov", "Europe/Kyiv", "Europe/Lisbon", "Europe/Ljubljana", "Europe/London", "Europe/Luxembourg", "Europe/Madrid", "Europe/Malta", "Europe/Mariehamn", "Europe/Minsk", "Europe/Monaco", "Europe/Moscow", "Europe/Oslo", "Europe/Paris", "Europe/Podgorica", "Europe/Prague", "Europe/Riga", "Europe/Rome", "Europe/Samara", "Europe/San_Marino", "Europe/Sarajevo", "Europe/Saratov", "Europe/Simferopol", "Europe/Skopje", "Europe/Sofia", "Europe/Stockholm", "Europe/Tallinn", "Europe/Tirane", "Europe/Ulyanovsk", "Europe/Vaduz", "Europe/Vatican", "Europe/Vienna", "Europe/Vilnius", "Europe/Volgograd", "Europe/Warsaw", "Europe/Zagreb", "Europe/Zurich", "Indian/Antananarivo", "Indian/Chagos", "Indian/Christmas", "Indian/Cocos", "Indian/Comoro", "Indian/Kerguelen", "Indian/Mahe", "Indian/Maldives", "Indian/Mauritius", "Indian/Mayotte", "Indian/Reunion", "Pacific/Apia", "Pacific/Auckland", "Pacific/Bougainville", "Pacific/Chatham", "Pacific/Chuuk", "Pacific/Easter", "Pacific/Efate", "Pacific/Fakaofo", "Pacific/Fiji", "Pacific/Funafuti", "Pacific/Galapagos", "Pacific/Gambier", "Pacific/Guadalcanal", "Pacific/Guam", "Pacific/Honolulu", "Pacific/Kanton", "Pacific/Kiritimati", "Pacific/Kosrae", "Pacific/Kwajalein", "Pacific/Majuro", "Pacific/Marquesas", "Pacific/Midway", "Pacific/Nauru", "Pacific/Niue", "Pacific/Norfolk", "Pacific/Noumea", "Pacific/Pago_Pago", "Pacific/Palau", "Pacific/Pitcairn", "Pacific/Pohnpei", "Pacific/Port_Moresby", "Pacific/Rarotonga", "Pacific/Saipan", "Pacific/Tahiti", "Pacific/Tarawa", "Pacific/Tongatapu", "Pacific/Wake", "Pacific/Wallis", "UTC" });
-            comboBox4.Location = new System.Drawing.Point(244, 313);
+            comboBox4.Location = new System.Drawing.Point(219, 40);
             comboBox4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             comboBox4.Name = "comboBox4";
             comboBox4.Size = new System.Drawing.Size(139, 28);
             comboBox4.TabIndex = 21;
-            comboBox4.Visible = false;
             comboBox4.SelectedIndexChanged += comboBox4_SelectedIndexChanged;
+            // 
+            // textBox5
+            // 
+            textBox5.Location = new System.Drawing.Point(101, 10);
+            textBox5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            textBox5.Name = "textBox5";
+            textBox5.ReadOnly = true;
+            textBox5.Size = new System.Drawing.Size(215, 27);
+            textBox5.TabIndex = 22;
+            textBox5.TextChanged += textBox5_TextChanged;
             // 
             // panel2
             // 
+            panel2.Controls.Add(button3);
             panel2.Controls.Add(button1);
             panel2.Controls.Add(textBox4);
             panel2.Controls.Add(comboBox5);
@@ -165,9 +180,19 @@
             panel2.Size = new System.Drawing.Size(379, 113);
             panel2.TabIndex = 20;
             // 
+            // button3
+            // 
+            button3.Location = new System.Drawing.Point(327, 22);
+            button3.Name = "button3";
+            button3.Size = new System.Drawing.Size(28, 29);
+            button3.TabIndex = 22;
+            button3.Text = "...";
+            button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click_1;
+            // 
             // button1
             // 
-            button1.Location = new System.Drawing.Point(316, 69);
+            button1.Location = new System.Drawing.Point(323, 66);
             button1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             button1.Name = "button1";
             button1.Size = new System.Drawing.Size(39, 39);
@@ -190,11 +215,11 @@
             // 
             comboBox5.FormattingEnabled = true;
             comboBox5.ImeMode = System.Windows.Forms.ImeMode.On;
-            comboBox5.Items.AddRange(new object[] { "JSONサンプル{} https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec?game=all", "JSONサンプル[] https://script.google.com/macros/s/AKfycbx1-Bds_m3ouWAVt-igCN26kbAq1-AEe3IVwq3D0_m0ToWFnYumCXtMe8x5Pyhv1zRV/exec" });
-            comboBox5.Location = new System.Drawing.Point(87, 20);
+            comboBox5.Items.AddRange(new object[] { "JSONサンプル{} https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec?game=all", "JSONサンプル[] https://script.google.com/macros/s/AKfycbx1-Bds_m3ouWAVt-igCN26kbAq1-AEe3IVwq3D0_m0ToWFnYumCXtMe8x5Pyhv1zRV/exec", "テストケース　https://script.google.com/macros/s/AKfycbwhsv6LlhTmFM0CIc7vlXrNhMMQ9II23HxuTIfWYUSTyNRewsOJAm-des6xI2uhWYKN/exec" });
+            comboBox5.Location = new System.Drawing.Point(82, 20);
             comboBox5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             comboBox5.Name = "comboBox5";
-            comboBox5.Size = new System.Drawing.Size(268, 28);
+            comboBox5.Size = new System.Drawing.Size(233, 28);
             comboBox5.TabIndex = 21;
             comboBox5.SelectedIndexChanged += comboBox5_SelectedIndexChanged;
             comboBox5.TextChanged += comboBox5_TextChanged;
@@ -331,11 +356,87 @@
             textBox1.TabIndex = 1;
             textBox1.TextChanged += textBox1_TextChanged;
             // 
+            // textBox3
+            // 
+            textBox3.Location = new System.Drawing.Point(439, 45);
+            textBox3.Multiline = true;
+            textBox3.Name = "textBox3";
+            textBox3.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            textBox3.Size = new System.Drawing.Size(476, 446);
+            textBox3.TabIndex = 2;
+            // 
+            // comboBox7
+            // 
+            comboBox7.FormattingEnabled = true;
+            comboBox7.Items.AddRange(new object[] { "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038" });
+            comboBox7.Location = new System.Drawing.Point(541, 502);
+            comboBox7.Name = "comboBox7";
+            comboBox7.Size = new System.Drawing.Size(73, 28);
+            comboBox7.TabIndex = 4;
+            comboBox7.Text = "2023";
+            comboBox7.SelectedIndexChanged += comboBox7_SelectedIndexChanged;
+            // 
+            // comboBox8
+            // 
+            comboBox8.FormattingEnabled = true;
+            comboBox8.Items.AddRange(new object[] { "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038" });
+            comboBox8.Location = new System.Drawing.Point(649, 502);
+            comboBox8.Name = "comboBox8";
+            comboBox8.Size = new System.Drawing.Size(88, 28);
+            comboBox8.TabIndex = 5;
+            comboBox8.Text = "2038";
+            comboBox8.SelectedIndexChanged += comboBox8_SelectedIndexChanged;
+            // 
+            // checkBox4
+            // 
+            checkBox4.AutoSize = true;
+            checkBox4.Location = new System.Drawing.Point(437, 506);
+            checkBox4.Name = "checkBox4";
+            checkBox4.Size = new System.Drawing.Size(98, 24);
+            checkBox4.TabIndex = 6;
+            checkBox4.Text = "年フィルター";
+            checkBox4.UseVisualStyleBackColor = true;
+            checkBox4.CheckedChanged += checkBox4_CheckedChanged;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new System.Drawing.Point(620, 506);
+            label8.Name = "label8";
+            label8.Size = new System.Drawing.Size(24, 20);
+            label8.TabIndex = 7;
+            label8.Text = "～";
+            // 
+            // textBox6
+            // 
+            textBox6.Location = new System.Drawing.Point(822, 501);
+            textBox6.Name = "textBox6";
+            textBox6.Size = new System.Drawing.Size(113, 27);
+            textBox6.TabIndex = 8;
+            textBox6.Text = "2024/12/11";
+            textBox6.TextChanged += textBox6_TextChanged;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new System.Drawing.Point(743, 505);
+            label9.Name = "label9";
+            label9.Size = new System.Drawing.Size(73, 20);
+            label9.TabIndex = 9;
+            label9.Text = "日付てすと";
+            // 
             // dtformat
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(435, 549);
+            ClientSize = new System.Drawing.Size(957, 549);
+            Controls.Add(label9);
+            Controls.Add(textBox6);
+            Controls.Add(label8);
+            Controls.Add(checkBox4);
+            Controls.Add(comboBox8);
+            Controls.Add(comboBox7);
+            Controls.Add(textBox3);
             Controls.Add(panel1);
             Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             Name = "dtformat";
@@ -344,9 +445,12 @@
             Load += Form3_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
+            panel3.ResumeLayout(false);
+            panel3.PerformLayout();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -374,5 +478,14 @@
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox comboBox5;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.ComboBox comboBox7;
+        private System.Windows.Forms.ComboBox comboBox8;
+        private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox textBox6;
+        private System.Windows.Forms.Label label9;
     }
 }
