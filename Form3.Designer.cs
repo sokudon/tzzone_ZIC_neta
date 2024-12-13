@@ -373,7 +373,7 @@
             comboBox7.Name = "comboBox7";
             comboBox7.Size = new System.Drawing.Size(73, 28);
             comboBox7.TabIndex = 4;
-            comboBox7.Text = "2023";
+            comboBox7.Text = "2000";
             comboBox7.SelectedIndexChanged += comboBox7_SelectedIndexChanged;
             // 
             // comboBox8
@@ -384,7 +384,7 @@
             comboBox8.Name = "comboBox8";
             comboBox8.Size = new System.Drawing.Size(88, 28);
             comboBox8.TabIndex = 5;
-            comboBox8.Text = "2038";
+            comboBox8.Text = "2037";
             comboBox8.SelectedIndexChanged += comboBox8_SelectedIndexChanged;
             // 
             // checkBox4

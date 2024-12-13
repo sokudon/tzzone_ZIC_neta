@@ -12,6 +12,7 @@ using static neta.dtformat;
 using System.Web;
 using System.Text.Json;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Drawing;
 
 namespace neta
 {
@@ -160,28 +161,30 @@ namespace neta
 
 
             }
-            else if(tz){
+            else if (tz)
+            {
 
                 string mkjson = Properties.Settings.Default.TZJSON;
                 // JSONパース
-                if(mkjson != null){
-                TimeZoneData tzData = System.Text.Json.JsonSerializer.Deserialize<TimeZoneData>(mkjson);
+                if (mkjson != null)
+                {
+                    TimeZoneData tzData = System.Text.Json.JsonSerializer.Deserialize<TimeZoneData>(mkjson);
 
-                // TimeZoneTransitionsインスタンスを作成
-                TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
-                    tzData.TransList,
-                    tzData.Offsets,
-                    tzData.Abbrs
-                );
-                        int lastTransitionIdx = tzTransitions.FindLastTransition(dt);
-                        int lastTransitionIdx_s = tzTransitions.FindLastTransition(st);
-                        int lastTransitionIdx_d = tzTransitions.FindLastTransition(en);
+                    // TimeZoneTransitionsインスタンスを作成
+                    TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
+                        tzData.TransList,
+                        tzData.Offsets,
+                        tzData.Abbrs
+                    );
+                    int lastTransitionIdx = tzTransitions.FindLastTransition(dt);
+                    int lastTransitionIdx_s = tzTransitions.FindLastTransition(st);
+                    int lastTransitionIdx_d = tzTransitions.FindLastTransition(en);
 
-                        if (lastTransitionIdx >= 0 && lastTransitionIdx_s >= 0  && lastTransitionIdx_d >= 0)
-                        {
-                            int uo = tzData.Offsets[lastTransitionIdx];
-                            string abb = tzData.Abbrs[lastTransitionIdx];
-                            string uoff = uo.ToString();
+                    if (lastTransitionIdx >= 0 && lastTransitionIdx_s >= 0 && lastTransitionIdx_d >= 0)
+                    {
+                        int uo = tzData.Offsets[lastTransitionIdx];
+                        string abb = tzData.Abbrs[lastTransitionIdx];
+                        string uoff = uo.ToString();
 
                         int uoc = tzData.Offsets[lastTransitionIdx_s];
                         string abbc = tzData.Abbrs[lastTransitionIdx_s];
@@ -200,9 +203,9 @@ namespace neta
                         end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uoe).ToString(formate);
                     }
 
-                    
+
+                }
             }
-        }
             else
             {
                 current.Text = "現在時間:" + dt.ToString(format);
@@ -310,15 +313,6 @@ namespace neta
             return left;
         }
 
-        private void current_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void end_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void button1_Click_1(object sender, EventArgs e)
         {
@@ -531,14 +525,14 @@ namespace neta
                                     int n = Convert.ToInt32(p);
                                     obj = obj[n];
                                     match = match.NextMatch();
-                                   
-                                }                               
+
+                                }
                                 if (i == pathSegments.Length - 1)
                                 {
-                                   
-                                   getValues[k] = obj.ToString();
-                                   end = true;
-                                   break;
+
+                                    getValues[k] = obj.ToString();
+                                    end = true;
+                                    break;
                                 }
                                 obj = obj[0];
                             }
@@ -564,25 +558,25 @@ namespace neta
 
                                 }
 
-                                if(matcho.Success)
+                                if (matcho.Success)
                                 {
-                                        string sepa_seg = regex.Replace(pathSegments[i], "");
-                                        obj = obj[sepa_seg];
-                                        string matchedNumber = matcho.Value;
-                                        string po = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
-                                        int no = Convert.ToInt32(po);
-                                        obj = obj[no];
-                                        i++;
+                                    string sepa_seg = regex.Replace(pathSegments[i], "");
+                                    obj = obj[sepa_seg];
+                                    string matchedNumber = matcho.Value;
+                                    string po = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
+                                    int no = Convert.ToInt32(po);
+                                    obj = obj[no];
+                                    i++;
+                                    matcho = matcho.NextMatch();
+                                    while (matcho.Success)
+                                    {
+                                        matchedNumber = matcho.Value;
+                                        string p = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
+                                        int n = Convert.ToInt32(p);
+                                        obj = obj[n];
                                         matcho = matcho.NextMatch();
-                                        while (matcho.Success)
-                                        {
-                                            matchedNumber = matcho.Value;
-                                            string p = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
-                                            int n = Convert.ToInt32(p);
-                                            obj = obj[n];
-                                            matcho = matcho.NextMatch();
 
-                                        }
+                                    }
                                     i--;
                                     if (obj is DynamicJson) // または productDetails.GetType() == typeof(DynamicJson)
                                     {
@@ -602,7 +596,7 @@ namespace neta
                                 if (end)
                                 {
                                     break;
-                                }    
+                                }
                             }
                             else
                             {
@@ -711,7 +705,7 @@ namespace neta
 
         private void oBSタイマーToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void wEBせかいどけいToolStripMenuItem_Click(object sender, EventArgs e)
@@ -809,7 +803,7 @@ namespace neta
 
         private void pythonToolStripMenuItem_Click(object sender, EventArgs e)
         {
-          String  url = "https://raw.githubusercontent.com/sokudon/gakumasu/master/date-time_with_tzinfo_gaku.py";
+            String url = "https://raw.githubusercontent.com/sokudon/gakumasu/master/date-time_with_tzinfo_gaku.py";
             WebClient wc = new WebClient();
             wc.Encoding = Encoding.UTF8;
             string text = wc.DownloadString(url);
@@ -853,8 +847,101 @@ namespace neta
             }
         }
 
+        private void 下パネルを隠すToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            panel2.Visible = false;
+        }
 
-     
+        private void 下パネルを表示ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            panel2.Visible = true;
+        }
+
+
+
+        private void クロマキー青_Click(object sender, EventArgs e)
+        {
+            this.BackColor = Color.Blue;
+            panel1.BackColor = Color.Blue;
+        }
+
+        private void クロマキー赤_Click(object sender, EventArgs e)
+        {
+
+            this.BackColor = Color.Red;
+            panel1.BackColor = Color.Red;
+        }
+
+        private void クロマキー緑_Click(object sender, EventArgs e)
+        {
+
+            this.BackColor = Color.Green;
+            panel1.BackColor = Color.Green;
+        }
+
+        private void カラーキー今のメニューToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.TransparencyKey = this.BackColor;
+        }
+
+        private void カラーキーなしToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //int alpha = 128;
+            //Color color = Color.FromArgb(alpha, 255, 0, 0);//R
+            this.TransparencyKey = Color.Empty;
+        }
+
+        private void parcent_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void 文字白ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.ForeColor = Color.White;
+            panel1.ForeColor = Color.White;
+        }
+
+        private void 文字黒ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            this.ForeColor = Color.Black;
+            panel1.ForeColor = Color.Black;
+        }
+
+        private void フォントToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        FontDialog fd = new FontDialog();
+
+            //ユーザーが選択できるポイントサイズの最大値を設定する
+            fd.MaxSize = 15;
+            fd.MinSize = 10;
+            //存在しないフォントやスタイルをユーザーが選択すると
+            //エラーメッセージを表示する
+            fd.FontMustExist = true;
+            //横書きフォントだけを表示する
+            fd.AllowVerticalFonts = false;
+            //色を選択できるようにする
+            fd.ShowColor = true;
+            //取り消し線、下線、テキストの色などのオプションを指定可能にする
+            //デフォルトがTrueのため必要はない
+            fd.ShowEffects = true;
+            //固定ピッチフォント以外も表示する
+            //デフォルトがFalseのため必要はない
+            fd.FixedPitchOnly = false;
+            //ベクタ フォントを選択できるようにする
+            //デフォルトがTrueのため必要はない
+            fd.AllowVectorFonts = true;
+
+            //ダイアログを表示する
+            if (fd.ShowDialog() != DialogResult.Cancel)
+            {
+                //TextBox1のフォントと色を変える
+                this.Font = fd.Font;
+                this.ForeColor = fd.Color;
+            }
+        }
     }
 }
     
