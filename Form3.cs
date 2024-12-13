@@ -24,6 +24,7 @@ using Codeplex.Data;
 using System.Text.Json;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Collections;
+using static System.Windows.Forms.AxHost;
 
 
 namespace neta
@@ -58,6 +59,9 @@ namespace neta
             textBox4.Text = Properties.Settings.Default.parse;
             textBox5.Text = Properties.Settings.Default.lasttzdatapath;
             textBox6.Text = Properties.Settings.Default.datetester;
+            comboBox7.Text = Properties.Settings.Default.stfilter;
+            comboBox8.Text = Properties.Settings.Default.enfilter;
+
             checkBox1.Checked = Properties.Settings.Default.useutc;
             checkBox2.Checked = Properties.Settings.Default.usems;
             checkBox3.Checked = Properties.Settings.Default.usetz;
@@ -762,9 +766,55 @@ namespace neta
                         string abb = tzData.Abbrs[lastTransitionIdx];
                         string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss" + abb);
 
+
+                        string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
+                        string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
+
+
+                        TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(Properties.Settings.Default.mstime);
+                        DateTimeOffset ddt = DateTime.SpecifyKind(testDateTime, DateTimeKind.Local);
+
+                        string pattern = @"(%TZ|%z|%Z)";
+                        string format_ms = Regex.Replace(format, pattern, match => "");
+
+
+                        var o1 = tzi.GetUtcOffset(ddt);
+                        string st = o1.ToString();
+
+                        string rrp = Regex.Replace("+" + st, ":\\d\\d$", "");
+                        string rp2 = Regex.Replace("+" + st, ":\\d\\d:\\d\\d$", "");
+                        rrp = Regex.Replace(rrp, "\\+\\-", "-");
+                        rp2 = Regex.Replace(rp2, "\\+\\-", "-");
+
+                        string tmp = tzi.StandardName;
+
+                        var DST = tzi.IsDaylightSavingTime(ddt);
+                        if (DST)
+                        {
+                            tmp = tzi.DaylightName;
+                        }
+
+                        string format_mstz = format_ms.Replace("zzz", rrp).Replace("zz", rp2).Replace("z", rp2).Replace("K", tmp);
+
+                        format_ms = format_ms.Replace("K", rp).Replace("zzz", rp).Replace("zz", Properties.Settings.Default.useutch).Replace("z", Properties.Settings.Default.useutch);
+
+                        string ms_utc = testDateTime.ToUniversalTime().AddHours(Properties.Settings.Default.useutcint).ToString(format_ms);
+                        string ms_tz =TimeZoneInfo.ConvertTime(ddt, tzi).ToString(format_mstz);
+
+
                         sb.AppendLine(finaltz);
-                        sb.AppendLine("日付パースのてすと\r\nlocal utc tzdate:" + localt + "\r\n" + utct + "\r\n" + iso8601tz);
-                        sb.AppendLine($"Last transition index: {lastTransitionIdx}");
+                        sb.AppendLine("日付パースのてすと");
+                        sb.Append("M$ local:"); //local utc tzdate
+                        sb.AppendLine(localt);
+                        sb.Append("M$ UTC master:"); //local utc tzdate
+                        sb.AppendLine(ms_utc);
+                        sb.Append("M$ timezone:"); //local utc tzdate
+                        sb.AppendLine(ms_tz);
+                        sb.Append("utc:"); // utc tzdate
+                        sb.AppendLine(utct);
+                        sb.Append("tzdata iso8601+zone:"); // utc tzdate
+                        sb.AppendLine(iso8601tz);
+                        sb.AppendLine($"//tzdata_info\r\nLast transition index: {lastTransitionIdx}");
                         sb.AppendLine($"Timestamp: {tzData.TransList[lastTransitionIdx]}");
                         sb.AppendLine($"Offset: {tzData.Offsets[lastTransitionIdx]}");
                         sb.AppendLine($"Abbreviation: {tzData.Abbrs[lastTransitionIdx]}");
