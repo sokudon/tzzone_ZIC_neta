@@ -28,7 +28,7 @@ namespace neta.Properties {
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance","CA1811:AvoidUncalledPrivateCode")]
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
         
@@ -39,7 +39,7 @@ namespace neta.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("neta.Properties.Resources",typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("neta.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,7 +61,15 @@ namespace neta.Properties {
         }
         
         /// <summary>
-        ///   BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//はんようたいまー//NONSGML v1.0//EN\r\nBEGIN:VEVENT\r\nDTSTART:20200423T150000Z\r\nDTEND:20200424T150000Z\r\nSUMMARY:うづき\r\nEND:VEVENT\r\nEND:VCALENDAR に類似しているローカライズされた文字列を検索します。
+        ///   BEGIN:VCALENDAR
+        ///VERSION:2.0
+        ///PRODID:-//はんようたいまー//NONSGML v1.0//EN
+        ///BEGIN:VEVENT
+        ///DTSTART:20200423T150000Z
+        ///DTEND:20200424T150000Z
+        ///SUMMARY:うづき
+        ///END:VEVENT
+        ///END:VCALENDAR に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string ical {
             get {

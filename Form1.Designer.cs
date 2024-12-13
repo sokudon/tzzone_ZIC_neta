@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NETA_TIMER));
             current = new System.Windows.Forms.Label();
             startbox = new System.Windows.Forms.TextBox();
             endbox = new System.Windows.Forms.TextBox();
@@ -59,6 +60,7 @@
             wEBせかいどけいToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             バージョンToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             netaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            色の設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -77,6 +79,7 @@
             // 
             // startbox
             // 
+            startbox.ForeColor = System.Drawing.Color.Transparent;
             startbox.Location = new System.Drawing.Point(16, 61);
             startbox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             startbox.Name = "startbox";
@@ -86,6 +89,7 @@
             // 
             // endbox
             // 
+            endbox.ForeColor = System.Drawing.Color.Transparent;
             endbox.Location = new System.Drawing.Point(16, 104);
             endbox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             endbox.Name = "endbox";
@@ -115,6 +119,7 @@
             // 
             // panel1
             // 
+            panel1.BackColor = System.Drawing.Color.Blue;
             panel1.Controls.Add(parcent);
             panel1.Controls.Add(progressBar1);
             panel1.Controls.Add(eventname);
@@ -142,6 +147,8 @@
             // 
             // progressBar1
             // 
+            progressBar1.BackColor = System.Drawing.Color.FromArgb(192, 255, 192);
+            progressBar1.ForeColor = System.Drawing.Color.FromArgb(192, 255, 192);
             progressBar1.Location = new System.Drawing.Point(7, 277);
             progressBar1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             progressBar1.Name = "progressBar1";
@@ -192,6 +199,7 @@
             // 
             // button2
             // 
+            button2.ForeColor = System.Drawing.Color.Transparent;
             button2.Location = new System.Drawing.Point(325, 88);
             button2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             button2.Name = "button2";
@@ -203,6 +211,8 @@
             // 
             // ibemei
             // 
+            ibemei.BackColor = System.Drawing.Color.FromArgb(192, 255, 192);
+            ibemei.ForeColor = System.Drawing.Color.Transparent;
             ibemei.Location = new System.Drawing.Point(15, 24);
             ibemei.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             ibemei.Name = "ibemei";
@@ -227,6 +237,7 @@
             // 
             // button3
             // 
+            button3.ForeColor = System.Drawing.Color.Transparent;
             button3.Location = new System.Drawing.Point(459, 24);
             button3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             button3.Name = "button3";
@@ -238,6 +249,7 @@
             // 
             // button1
             // 
+            button1.ForeColor = System.Drawing.Color.Transparent;
             button1.Location = new System.Drawing.Point(453, 88);
             button1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             button1.Name = "button1";
@@ -249,6 +261,8 @@
             // 
             // comboBox1
             // 
+            comboBox1.BackColor = System.Drawing.Color.FromArgb(192, 255, 192);
+            comboBox1.ForeColor = System.Drawing.Color.Transparent;
             comboBox1.FormattingEnabled = true;
             comboBox1.Items.AddRange(new object[] { "シャニマス", "でれすて", "みりした", "プロセカ", "かすたむJS" });
             comboBox1.Location = new System.Drawing.Point(325, 24);
@@ -267,11 +281,11 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { 時刻設定ToolStripMenuItem, 外部つーるへエクスポートToolStripMenuItem, バージョンToolStripMenuItem, netaToolStripMenuItem });
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { 時刻設定ToolStripMenuItem, 外部つーるへエクスポートToolStripMenuItem, バージョンToolStripMenuItem, netaToolStripMenuItem, 色の設定ToolStripMenuItem });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new System.Windows.Forms.Padding(6, 3, 0, 3);
-            menuStrip1.Size = new System.Drawing.Size(680, 30);
+            menuStrip1.Size = new System.Drawing.Size(943, 30);
             menuStrip1.TabIndex = 10;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -293,42 +307,42 @@
             // 
             oBSタイマーToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { luascriptToolStripMenuItem, pythonToolStripMenuItem });
             oBSタイマーToolStripMenuItem.Name = "oBSタイマーToolStripMenuItem";
-            oBSタイマーToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            oBSタイマーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
             oBSタイマーToolStripMenuItem.Text = "OBSたいまーぷらぐいん";
             oBSタイマーToolStripMenuItem.Click += oBSタイマーToolStripMenuItem_Click;
             // 
             // luascriptToolStripMenuItem
             // 
             luascriptToolStripMenuItem.Name = "luascriptToolStripMenuItem";
-            luascriptToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            luascriptToolStripMenuItem.Size = new System.Drawing.Size(148, 26);
             luascriptToolStripMenuItem.Text = "luascript";
             luascriptToolStripMenuItem.Click += luascriptToolStripMenuItem_Click;
             // 
             // pythonToolStripMenuItem
             // 
             pythonToolStripMenuItem.Name = "pythonToolStripMenuItem";
-            pythonToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            pythonToolStripMenuItem.Size = new System.Drawing.Size(148, 26);
             pythonToolStripMenuItem.Text = "python";
             pythonToolStripMenuItem.Click += pythonToolStripMenuItem_Click;
             // 
             // ぱいそんたいまーToolStripMenuItem
             // 
             ぱいそんたいまーToolStripMenuItem.Name = "ぱいそんたいまーToolStripMenuItem";
-            ぱいそんたいまーToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            ぱいそんたいまーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
             ぱいそんたいまーToolStripMenuItem.Text = "ぱいそんたいまー";
             ぱいそんたいまーToolStripMenuItem.Click += ぱいそんたいまーToolStripMenuItem_Click;
             // 
             // wEBたいまーToolStripMenuItem
             // 
             wEBたいまーToolStripMenuItem.Name = "wEBたいまーToolStripMenuItem";
-            wEBたいまーToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            wEBたいまーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
             wEBたいまーToolStripMenuItem.Text = "WEBたいまー";
             wEBたいまーToolStripMenuItem.Click += wEBたいまーToolStripMenuItem_Click;
             // 
             // wEBせかいどけいToolStripMenuItem
             // 
             wEBせかいどけいToolStripMenuItem.Name = "wEBせかいどけいToolStripMenuItem";
-            wEBせかいどけいToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            wEBせかいどけいToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
             wEBせかいどけいToolStripMenuItem.Text = "WEBせかいどけい";
             wEBせかいどけいToolStripMenuItem.Click += wEBせかいどけいToolStripMenuItem_Click;
             // 
@@ -346,18 +360,32 @@
             netaToolStripMenuItem.Text = "tzdata_neta zic binary view";
             netaToolStripMenuItem.Click += netaToolStripMenuItem_Click;
             // 
+            // 色の設定ToolStripMenuItem
+            // 
+            色の設定ToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
+            色の設定ToolStripMenuItem.ForeColor = System.Drawing.Color.Black;
+            色の設定ToolStripMenuItem.Name = "色の設定ToolStripMenuItem";
+            色の設定ToolStripMenuItem.Size = new System.Drawing.Size(80, 24);
+            色の設定ToolStripMenuItem.Text = "色の設定";
+            // 
             // NETA_TIMER
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(680, 557);
+            BackColor = System.Drawing.Color.Blue;
+            BackgroundImage = (System.Drawing.Image)resources.GetObject("$this.BackgroundImage");
+            BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            ClientSize = new System.Drawing.Size(943, 578);
             Controls.Add(panel2);
             Controls.Add(panel1);
             Controls.Add(menuStrip1);
+            DoubleBuffered = true;
+            ForeColor = System.Drawing.Color.White;
             MainMenuStrip = menuStrip1;
             Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             Name = "NETA_TIMER";
             Text = "NETA_TIMER";
+            TransparencyKey = System.Drawing.Color.Transparent;
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             panel1.ResumeLayout(false);
@@ -402,6 +430,7 @@
         private System.Windows.Forms.ToolStripMenuItem netaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem luascriptToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pythonToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 色の設定ToolStripMenuItem;
     }
 }
 

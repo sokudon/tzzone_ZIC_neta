@@ -76,7 +76,7 @@ OS時間:%N
 --%y two-digit year (98) [00-99] ２桁の年 
 --%y 年の最後の 2 つの数字 (00..99) 
 --%Y 年 (1970...) 
---%Z タイムゾーン (例 EDT)、あるいはタイムゾーンが決定できないならば無し 
+--%Z タイムゾーン (例 EDT)、あるいはタイムゾーンが決定できないならば無し  windows11だとエラーで落ちるので除去ストリングに（）　win7+⑨OBSだと文字化けするだけだった
 --%z timezone,osdateのサマータイム有り 
 
 //経過残書式一覧
@@ -290,7 +290,7 @@ function set_time_text()
 	bar=makebar(prog)
 	end
 	
-	local time_textq=string.gsub(time_text, "%%[EJKLNOPQfikloqsv]","")	 --フリーズ文字 %%[EJKLNOPQfikloqsv]
+	local time_textq=string.gsub(time_text, "%%[EJKLNOPQfikloqsvZ]","")	 --フリーズ文字 %%[EJKLNOPQfikloqsvZ]
 	text = string.gsub(text, "%%N", os.date(time_textq,os.time() ))
 	local time_textj="!".. string.gsub(time_textq, "%%z", "+0900")
 	local time_textu="!".. string.gsub(time_textq, "%%z", get_tzoffset(utc*3600))
@@ -316,7 +316,7 @@ function set_time_text()
 	text = string.gsub(text, "%%EJ",os.date(time_textj,ends+9*3600 ))
 	text = string.gsub(text, "%%E",os.date(time_textq,ends))
 	end
-	text=  string.gsub(text, "%%[EJKLNOPQfikloqsv]","")	 --フリーズ文字 %%[EJKLNOPQfikloqsv]
+	text=  string.gsub(text, "%%[EJKLNOPQfikloqsvZ]","")	 --フリーズ文字 %%[EJKLNOPQfikloqsvZ]
 	
 	text =os.date(text)
 	
@@ -1039,16 +1039,17 @@ end
 
 function script_defaults(settings)
 	obs.obs_data_set_default_double(settings, "UTC", 0)
-	obs.obs_data_set_default_string(settings, "start_text", "2024-11-30T08:00:00Z")
-	obs.obs_data_set_default_string(settings, "stop_text", "2024-12-08T13:00:00Z")
+	obs.obs_data_set_default_string(settings, "start_text", "2024-09-30T15:00:00+09:00")
+	obs.obs_data_set_default_string(settings, "stop_text", "2024-10-09T21:00:00+09:00")
 	obs.obs_data_set_default_string(settings, "mode", "Countdown")
 	obs.obs_data_set_default_string(settings, "a_mode", "Global (timer always active)")
-	obs.obs_data_set_default_string(settings, "format", "%d %hh:%mm:%ss")
-	obs.obs_data_set_default_string(settings, "title_text", "[ユメステ]Jump！L0ve→L1ve!!(後編)")
+	obs.obs_data_set_default_string(settings, "format", "%d %hh:%mm:%ss(%dsD)")
+	obs.obs_data_set_default_string(settings, "title_text", "Fin[e]〜美しき終焉〜")
 	obs.obs_data_set_default_string(settings, "time_text", "%Y-%m-%d(%a)%H:%M:%S(GMT%z)")
-	obs.obs_data_set_default_string(settings, "para_text", "日本時間%JST%n経過時間%K%n残り時間%L%nイベント時間%I%n%T%P％%n%Q")
-	obs.obs_data_set_default_string(settings, "end_text", "タイマー停止中(開始前/終了)")
-	obs.obs_data_set_default_double(settings, "bar",2)
+	obs.obs_data_set_default_string(settings, "para_text", "日本時間%JST\n経過時間%K\n残り時間%L\nイベント時間%I\n%T%P％\n%Q")
+	obs.obs_data_set_default_string(settings, "end_text", "終了しました")
+	obs.obs_data_set_default_double(settings, "bar", 2)
+
 
 end
 

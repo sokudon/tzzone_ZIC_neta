@@ -215,7 +215,7 @@
             // 
             comboBox5.FormattingEnabled = true;
             comboBox5.ImeMode = System.Windows.Forms.ImeMode.On;
-            comboBox5.Items.AddRange(new object[] { "JSONサンプル{} https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec?game=all", "JSONサンプル[] https://script.google.com/macros/s/AKfycbx1-Bds_m3ouWAVt-igCN26kbAq1-AEe3IVwq3D0_m0ToWFnYumCXtMe8x5Pyhv1zRV/exec", "テストケース　https://script.google.com/macros/s/AKfycbwhsv6LlhTmFM0CIc7vlXrNhMMQ9II23HxuTIfWYUSTyNRewsOJAm-des6xI2uhWYKN/exec" });
+            comboBox5.Items.AddRange(new object[] { "JSONサンプル{} https://script.google.com/macros/s/AKfycbw27NVH4JZWekqFZIXiNsZ08e3S2MxL6sFW01rZpBFLIVEIK1VAPkiMffpCE46r6ZRL/exec", "JSONサンプル[] https://script.google.com/macros/s/AKfycbyW31ZFRACSjXccnna6ZfYOJaIZj1LMJa-fg9tKVmfW01acsc2sJP2HR6CJa7rpt2xA/exec", "旧ぐぐるのパラメーター対応版()このあぷりのでふぉ　https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec?game=all", "テストケース多重ねすと　https://script.google.com/macros/s/AKfycbwhsv6LlhTmFM0CIc7vlXrNhMMQ9II23HxuTIfWYUSTyNRewsOJAm-des6xI2uhWYKN/exec", "さしゅうあいまも含んだやつ()これだけあった()　https://script.google.com/macros/s/AKfycbyVRqHhnG40A5RSAyIe9nX4kypbQ4_67hqXHCErEnKv3ZwoycmtUo-492jfq3Hy4rCxEw/exec", "...でのファイル読み込みいちおうローカルファイルも対応している" });
             comboBox5.Location = new System.Drawing.Point(82, 20);
             comboBox5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             comboBox5.Name = "comboBox5";
