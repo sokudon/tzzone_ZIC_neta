@@ -102,6 +102,11 @@ namespace neta
 
             DateTime st;//= DateTime.Parse(startbox.Text);
             DateTime en;//= DateTime.Parse(endbox.Text);
+            if (!tz)
+            {
+                string pattern = @"(%TZ|%z|%Z)";
+                format = Regex.Replace(format, pattern, match => "");
+            }
 
             if (DateTime.TryParse(startbox.Text, out st))
             {
@@ -162,47 +167,92 @@ namespace neta
 
             }
             else if (tz)
-            {
+           {
 
                 string mkjson = Properties.Settings.Default.TZJSON;
                 // JSONパース
-                if (mkjson != null)
+                if (mkjson != null && mkjson !="")
                 {
-                    TimeZoneData tzData = System.Text.Json.JsonSerializer.Deserialize<TimeZoneData>(mkjson);
-
-                    // TimeZoneTransitionsインスタンスを作成
-                    TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
-                        tzData.TransList,
-                        tzData.Offsets,
-                        tzData.Abbrs
-                    );
-                    int lastTransitionIdx = tzTransitions.FindLastTransition(dt);
-                    int lastTransitionIdx_s = tzTransitions.FindLastTransition(st);
-                    int lastTransitionIdx_d = tzTransitions.FindLastTransition(en);
-
-                    if (lastTransitionIdx >= 0 && lastTransitionIdx_s >= 0 && lastTransitionIdx_d >= 0)
+                    try
                     {
-                        int uo = tzData.Offsets[lastTransitionIdx];
-                        string abb = tzData.Abbrs[lastTransitionIdx];
-                        string uoff = uo.ToString();
+                        TimeZoneData tzData = System.Text.Json.JsonSerializer.Deserialize<TimeZoneData>(mkjson);
 
-                        int uoc = tzData.Offsets[lastTransitionIdx_s];
-                        string abbc = tzData.Abbrs[lastTransitionIdx_s];
-                        string uoffc = uoc.ToString();
+                        // TimeZoneTransitionsインスタンスを作成
+                        TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
+                            tzData.TransList,
+                            tzData.Offsets,
+                            tzData.Abbrs
+                        );
 
-                        int uoe = tzData.Offsets[lastTransitionIdx_d];
-                        string abbe = tzData.Abbrs[lastTransitionIdx_d];
-                        string uoffe = uoe.ToString();
+                        string tzst = (Properties.Settings.Default.usetzdatabin);
+                        int lastTransitionIdx = tzTransitions.FindLastTransition(dt);
+                        int lastTransitionIdx_s = tzTransitions.FindLastTransition(st);
+                        int lastTransitionIdx_d = tzTransitions.FindLastTransition(en);
 
-                        format = format.Replace("K", abb).Replace("zzz", uoff).Replace("zz", uoff).Replace("z", uoff);
-                        string formats = format.Replace("K", abbc).Replace("zzz", uoffc).Replace("zz", uoffc).Replace("z", uoffc);
-                        string formate = format.Replace("K", abbe).Replace("zzz", uoffe).Replace("zz", uoffe).Replace("z", uoffe);
+                        if (lastTransitionIdx >= 0 && lastTransitionIdx_s >= 0 && lastTransitionIdx_d >= 0)
+                        {
+                            // マッチさせたい文字群を指定
+                            string pattern = @"[dfFgGhtHKmMsTyz:/]";
+                            tzst = Regex.Replace(tzst, pattern, match => "\\" + match.Value);
 
-                        current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(uo).ToString(format);
-                        start.Text = "開始時間:" + st.ToUniversalTime().AddHours(uoc).ToString(formats);
-                        end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uoe).ToString(formate);
+
+                            double uo = tzData.Offsets[lastTransitionIdx];
+                            string abb = tzData.Abbrs[lastTransitionIdx];
+                            string uoff = ToCustomFormat(uo, true).ToString();
+                            abb = Regex.Replace(abb, pattern, match => "\\" + match.Value);
+
+                            double uoc = tzData.Offsets[lastTransitionIdx_s];
+                            string abbc = tzData.Abbrs[lastTransitionIdx_s];
+                            string uoffc = ToCustomFormat(uoc, true).ToString();
+                            abbc = Regex.Replace(abbc, pattern, match => "\\" + match.Value);
+
+                            double uoe = tzData.Offsets[lastTransitionIdx_d];
+                            string abbe = tzData.Abbrs[lastTransitionIdx_d];
+                            string uoffe = ToCustomFormat(uoe, true).ToString();
+                            abbe = Regex.Replace(abbe, pattern, match => "\\" + match.Value);
+
+
+                            format = format.Replace("%TZ", tzst).Replace("%Z", abb).Replace("%z", uoff);
+                            string formats = format.Replace("%TZ", tzst).Replace("%Z", abbc).Replace("%z", uoffc);
+                            string formate = format.Replace("%TZ", tzst).Replace("%Z", abbe).Replace("%z", uoffe);
+                            string patternn = @"[Kz]";
+                            format = Regex.Replace(format, patternn, match => "");
+                            formats = Regex.Replace(formats, patternn, match => "");
+                            formate = Regex.Replace(formate, patternn, match => "");
+
+                            current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(uo).ToString(format);
+                            start.Text = "開始時間:" + st.ToUniversalTime().AddHours(uoc).ToString(formats);
+                            end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uoe).ToString(formate);
+                        }
+                        else
+                        {
+
+
+                            string pattern = @"(%TZ|%z|%Z)";
+                            format = Regex.Replace(format, pattern, match => "\\" + match.Value);
+
+                            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("UTC");
+
+                            DateTimeOffset ddt = DateTime.SpecifyKind(dt, DateTimeKind.Local);
+                            DateTimeOffset sst = DateTime.SpecifyKind(st, DateTimeKind.Local);
+                            DateTimeOffset een = DateTime.SpecifyKind(en, DateTimeKind.Local);
+
+                            string formatd = getoffset(ddt, format, tzi);
+                            string formats = getoffset(sst, format, tzi);
+                            string formate = getoffset(een, format, tzi);
+
+
+                            current.Text = "現在時間:" + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
+                            start.Text = "開始時間:" + TimeZoneInfo.ConvertTime(sst, tzi).ToString(formats);
+                            end.Text = "終了時間:" + TimeZoneInfo.ConvertTime(een, tzi).ToString(formate);
+
+                        }
+
                     }
-
+                    catch (Exception ex)
+                    {
+                       MessageBox.Show(ex.ToString());
+                    }
 
                 }
             }
@@ -212,9 +262,6 @@ namespace neta
                 start.Text = "開始時間:" + st.ToString(format);
                 end.Text = "終了時間:" + en.ToString(format);
             }
-
-
-
 
             if (st < dt)
             {
@@ -256,6 +303,37 @@ namespace neta
             bar = Math.Floor(bar);
             progressBar1.Value = Convert.ToInt32(bar.ToString());
 
+        }
+
+        //https://chatgpt.com/c/675c1ac5-6f48-800f-b683-ae9745604c89
+        static string ToCustomFormat(double value, bool useColon)
+        {
+            // 符号を取得
+            string sign = value >= 0 ? "+" : "-";
+
+            // 絶対値を取得
+            double absValue = Math.Abs(value);
+
+            // 整数部と小数部を分ける
+            int hours = (int)Math.Floor(absValue);
+            int minutes = (int)Math.Round((absValue - hours) * 60);
+
+            // 時間が60分を超える場合の調整（丸め処理のため）
+            if (minutes == 60)
+            {
+                hours += 1;
+                minutes = 0;
+            }
+
+            // 書式を整える
+            if (useColon)
+            {
+                return $"{sign}{hours:D2}:{minutes:D2}";
+            }
+            else
+            {
+                return $"{sign}{hours:D2}{minutes:D2}";
+            }
         }
 
         private string getoffset(DateTimeOffset dt, string format, TimeZoneInfo tz)

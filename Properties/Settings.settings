@@ -90,9 +90,12 @@
       <Value Profile="(Default)">2038</Value>
     </Setting>
     <Setting Name="datetester" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2024/12/11</Value>
+      <Value Profile="(Default)">2024/12/14</Value>
     </Setting>
     <Setting Name="TZJSON" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="lasttzdatapath_base_utc" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

@@ -374,7 +374,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/11")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/14")]
         public string datetester {
             get {
                 return ((string)(this["datetester"]));
@@ -393,6 +393,18 @@ namespace neta.Properties {
             }
             set {
                 this["TZJSON"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string lasttzdatapath_base_utc {
+            get {
+                return ((string)(this["lasttzdatapath_base_utc"]));
+            }
+            set {
+                this["lasttzdatapath_base_utc"] = value;
             }
         }
     }

@@ -55,17 +55,18 @@ namespace neta
 
             textBox1.Text = Properties.Settings.Default.lefttimeformat;
             textBox2.Text = Properties.Settings.Default.datetimeformat;
+            textBox4.Text = Properties.Settings.Default.parse;
+            textBox5.Text = Properties.Settings.Default.lasttzdatapath;
+            textBox6.Text = Properties.Settings.Default.datetester;
             checkBox1.Checked = Properties.Settings.Default.useutc;
             checkBox2.Checked = Properties.Settings.Default.usems;
+            checkBox3.Checked = Properties.Settings.Default.usetz;
+            checkBox4.Checked = Properties.Settings.Default.usefiler;
             comboBox1.Text = Properties.Settings.Default.useutczone;
             comboBox2.Text = Properties.Settings.Default.msstring;
             comboBox3.Text = Properties.Settings.Default.barlen.ToString();
-            comboBox5.Text = Properties.Settings.Default.api;
-            textBox4.Text = Properties.Settings.Default.parse;
             comboBox4.Text = Properties.Settings.Default.usetzdatabin;
-            textBox5.Text = Properties.Settings.Default.lasttzdatapath;
-            checkBox3.Checked = Properties.Settings.Default.usetz;
-            checkBox4.Checked = Properties.Settings.Default.usefiler;
+            comboBox5.Text = Properties.Settings.Default.api;
         }
 
 
@@ -293,7 +294,9 @@ namespace neta
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.InitialDirectory = Properties.Settings.Default.lasttzdatapath;
+                openFileDialog.InitialDirectory = Properties.Settings.Default.lasttzdatapath_base_utc;
+
+                openFileDialog.Title = "unix usr/share/tzinfoやpython pytz dateutilのtzdatabaseフォルダのUTCがあるところを選択してください";
                 openFileDialog.Filter = "すべてのファイル (*.*)|*.*";
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
@@ -303,7 +306,7 @@ namespace neta
                     // 選択したファイルのパスを取得
                     string filePath = Path.GetDirectoryName(openFileDialog.FileName);
 
-                    Properties.Settings.Default.lasttzdatapath = filePath;
+                    Properties.Settings.Default.lasttzdatapath_base_utc = filePath;
                     textBox5.Text = filePath;
                 }
             }
@@ -328,7 +331,7 @@ namespace neta
                 using (OpenFileDialog openFileDialog = new OpenFileDialog())
                 {
 
-                    string tzdata = Path.Combine(Properties.Settings.Default.lasttzdatapath, Properties.Settings.Default.usetzdatabin);
+                    string tzdata = Path.Combine(Properties.Settings.Default.lasttzdatapath_base_utc, Properties.Settings.Default.usetzdatabin);
                     if (File.Exists(tzdata))
                     {
                         System.IO.FileStream fs = new FileStream(tzdata, FileMode.Open, FileAccess.Read);
@@ -416,7 +419,7 @@ namespace neta
 
             index -= TZifHead.Length;
 
-            string tzdata = Path.Combine(Properties.Settings.Default.lasttzdatapath, Properties.Settings.Default.usetzdatabin);
+            string tzdata = Path.Combine(Properties.Settings.Default.lasttzdatapath_base_utc, Properties.Settings.Default.usetzdatabin);
             string tzst = (Properties.Settings.Default.usetzdatabin);
             byte[] bs = new byte[data.Length];
             Array.ConstrainedCopy(data, 0, bs, 0, data.Length);
@@ -450,7 +453,7 @@ namespace neta
 
             if (header2.Contains("TZif") == false)
             {
-                sb.AppendLine("2番目のZICバイナリ,TZifはありません");
+                sb.AppendLine("2番目のZone infomation compiler で作成されたtzdataバイナリTZifはありません");
                 sb.AppendLine();
             }
             else
@@ -460,7 +463,7 @@ namespace neta
 
                 if (bs[pos + 4] == 0)
                 {
-                    sb.AppendLine("2番目のZICバイナリ,TZif version NULL(1) はMUST BE IGNOREです");
+                    sb.AppendLine("2番目のZone infomation compiler で作成されたtzdataバイナリTZif version NULL(1) はMUST BE IGNOREです");
                     sb.AppendLine();
                 }
                 else
@@ -566,14 +569,13 @@ namespace neta
                         if (filter == false)
                         {
                             tr = tr + transitionsn[i][0] + @",";
-                            of = of + Convert.ToString(local_time_types_gmtn[type] / 3600) + @",";
+                            of = of + Convert.ToString(Convert.ToDouble(local_time_types_gmtn[type]) / 3600) + @",";
                             ab = ab + @"""" + transitionsn[i][3] + @""",";
                         }
                         else
                         {
-                            TimeSpan utcOffset = TimeSpan.FromHours(local_time_types_gmtn[type] / 3600);
                             // DateTimeOffsetに変換
-                            DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_timesn[i]).ToOffset(utcOffset);
+                            DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_timesn[i]);
 
                             // オフセット付きのフォーマットに変換
                             string y = dateTimeWithOffset.ToString("yyyy");
@@ -581,24 +583,79 @@ namespace neta
                             if (YY >= Y_filter_st && YY <= Y_filter_en)
                             {
                                 tr = tr + transitionsn[i][0] + @",";
-                                of = of + Convert.ToString(local_time_types_gmtn[type] / 3600) + @",";
+                                of = of + Convert.ToString(Convert.ToDouble(local_time_types_gmtn[type]) / 3600) + @",";
                                 ab = ab + @"""" + transitionsn[i][3] + @""",";
                             }
                         }
 
                         if (true)
                         {
-                            transitionsn[i][1] = Convert.ToString(local_time_types_gmtn[type] / 3600);
-                            // UTCオフセット (例: +09:00)
-                            TimeSpan utcOffset = TimeSpan.FromHours(local_time_types_gmtn[type] / 3600);
-                            // DateTimeOffsetに変換
-                            DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_timesn[i]).ToOffset(utcOffset);
+                            transitionsn[i][1] = Convert.ToString(Convert.ToDouble(local_time_types_gmtn[type]) / 3600);
+                            double localTimeOffseth = Convert.ToDouble(local_time_types_gmtn[type]) / 3600;
 
-                            // オフセット付きのフォーマットに変換
-                            string formattedDate = dateTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
-                            transitionsn[i][0] = formattedDate;
+                            long unixTimestamp = transition_timesn[i];
+
+
+                            TimeSpan utcOffset = TimeSpan.FromHours(localTimeOffseth);
+                            // TotalHours で符号を判定
+                            double totalHours = utcOffset.TotalHours; // 全体の時間（小数部分を含む）
+                            string sign = totalHours >= 0 ? "+" : "-";
+                            // HH と MM を取得
+                            int hours = (int)Math.Abs(totalHours); // 絶対値を取った整数部の時間
+                            double totalMinutes = Math.Abs(utcOffset.TotalMinutes % 60); // 分部分（絶対値）
+
+                            // フォーマット
+                            string formattedOffset = $"{sign}{hours:00}:{totalMinutes:00.00}";
+
+                            try
+                            {
+                                // HH:MM の形式に変換可能かどうかを判定
+                                if (utcOffset.Seconds == 0)
+                                {
+                                    // HH:MM 形式が可能
+                                    DateTimeOffset dateTimeWithOffset = DateTimeOffset
+                                        .FromUnixTimeSeconds(unixTimestamp)
+                                        .ToOffset(utcOffset);
+
+                                    // 標準フォーマットで変換
+                                    string formattedDateh = dateTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:sszzz");
+                                    transitionsn[i][0] = formattedDateh;
+                                }
+                                else
+                                {
+                                    // カスタムフォーマット
+                                    DateTimeOffset originalTime = DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).AddHours(localTimeOffseth);
+                                    string formattedDate = $"{originalTime:yyyy-MM-ddTHH:mm:ss.fff} {formattedOffset}";
+                                    transitionsn[i][0] = formattedDate;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                sb.AppendLine(ex.ToString());
+                                break;
+                            }
 
                         }
+                        if (filter == true)
+                        {
+                            // DateTimeOffsetに変換
+                            DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_timesn[i]);
+
+                            // オフセット付きのフォーマットに変換
+                            string yy = dateTimeWithOffset.ToString("yyyy");
+                            int YYy = Convert.ToInt32(yy);
+                            if (YYy >= Y_filter_st && YYy <= Y_filter_en)
+                            {
+                                sb.Append(transitionsn[i][0]);
+                                sb.Append(",");
+                                sb.Append(transitionsn[i][1]);
+                                sb.Append(",");
+                                sb.Append(transitionsn[i][2]);
+                                sb.Append(",");
+                                sb.AppendLine(transitionsn[i][3]);
+                            }
+                        }
+                        else { 
                         sb.Append(transitionsn[i][0]);
                         sb.Append(",");
                         sb.Append(transitionsn[i][1]);
@@ -606,20 +663,27 @@ namespace neta
                         sb.Append(transitionsn[i][2]);
                         sb.Append(",");
                         sb.AppendLine(transitionsn[i][3]);
-
+                        }
 
                     }
                     if (tr == "")
                     {
                         if (tzh_timecntn > 0)
                         {
+                            sb.Append(transitionsn[max][0]);
+                            sb.Append(",");
+                            sb.Append(transitionsn[max][1]);
+                            sb.Append(",");
+                            sb.Append(transitionsn[max][2]);
+                            sb.Append(",");
+                            sb.AppendLine(transitionsn[max][3]);
                             tr = tr + transition_timesn[max].ToString() + @",";
                             of = of + transitionsn[max][1] + @",";
                             ab = ab + @"""" + transitionsn[max][3] + @""",";
                             finaltz = Y_filter_st +"～"+ Y_filter_en +"年期間内にはゾーン情報存在しませんが、から配列回避のため最後のゾーン情報を追加しています(から配列＝UTCになるため)";
                         }
                     }
-                    else
+                    if(filter)
                     {
                         finaltz = "カッティングしたゾーン情報になっています" +Y_filter_st + "～" + Y_filter_en + "年期間内のみ";
 
@@ -665,54 +729,60 @@ namespace neta
             sb.AppendLine();
             sb.AppendLine(mkjson);
 
-
-            // JSONパース
-            TimeZoneData tzData = JsonSerializer.Deserialize<TimeZoneData>(mkjson);
-            Properties.Settings.Default.TZJSON = mkjson;
-
-            // TimeZoneTransitionsインスタンスを作成
-            TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
-                tzData.TransList,
-                tzData.Offsets,
-                tzData.Abbrs
-            );
-            string tester = Properties.Settings.Default.datetester;
-            DateTime testDateTime;
-
-            // TryParseを使って文字列をDateTimeに変換
-            if (DateTime.TryParse(tester, out testDateTime))
+            try
             {
-            
+                // JSONパース
+                TimeZoneData tzData = JsonSerializer.Deserialize<TimeZoneData>(mkjson);
 
-            int lastTransitionIdx = tzTransitions.FindLastTransition(testDateTime);
+                // TimeZoneTransitionsインスタンスを作成
+                TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
+                    tzData.TransList,
+                    tzData.Offsets,
+                    tzData.Abbrs
+                );
+                string tester = Properties.Settings.Default.datetester;
+                DateTime testDateTime;
 
-            string localt = testDateTime.ToString();
-            string utct = testDateTime.ToUniversalTime().ToString();
+                Properties.Settings.Default.TZJSON = mkjson;
+
+                // TryParseを使って文字列をDateTimeに変換
+                if (DateTime.TryParse(tester, out testDateTime))
+                {
 
 
-            if (lastTransitionIdx >= 0)
-            {
-                int uo = tzData.Offsets[lastTransitionIdx];
-                string abb = tzData.Abbrs[lastTransitionIdx];
-                string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss" + abb);
+                    int lastTransitionIdx = tzTransitions.FindLastTransition(testDateTime);
 
-                sb.AppendLine(finaltz);
-                sb.AppendLine("local utc tzdate:" + localt + "\r\n" + utct + "\r\n" + iso8601tz);
-                sb.AppendLine($"Last transition index: {lastTransitionIdx}");
-                sb.AppendLine($"Timestamp: {tzData.TransList[lastTransitionIdx]}");
-                sb.AppendLine($"Offset: {tzData.Offsets[lastTransitionIdx]}");
-                sb.AppendLine($"Abbreviation: {tzData.Abbrs[lastTransitionIdx]}");
+                    string localt = testDateTime.ToString();
+                    string utct = testDateTime.ToUniversalTime().ToString();
+
+
+                    if (lastTransitionIdx >= 0)
+                    {
+                        double uo = tzData.Offsets[lastTransitionIdx];
+                        string abb = tzData.Abbrs[lastTransitionIdx];
+                        string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss" + abb);
+
+                        sb.AppendLine(finaltz);
+                        sb.AppendLine("日付パースのてすと\r\nlocal utc tzdate:" + localt + "\r\n" + utct + "\r\n" + iso8601tz);
+                        sb.AppendLine($"Last transition index: {lastTransitionIdx}");
+                        sb.AppendLine($"Timestamp: {tzData.TransList[lastTransitionIdx]}");
+                        sb.AppendLine($"Offset: {tzData.Offsets[lastTransitionIdx]}");
+                        sb.AppendLine($"Abbreviation: {tzData.Abbrs[lastTransitionIdx]}");
+                    }
+                    else
+                    {
+                        string iso8601tz = testDateTime.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ssUTC");
+                        sb.AppendLine("期間内に偏移ファイルがみつかりませんでした、暫定でUTCになります");
+                        sb.AppendLine("日付パースのてすと\r\nllocal utc tzdate:" + localt + "\r\n" + utct + "\r\n" + iso8601tz);
+                    }
+                }
+                else
+                {
+                    sb.AppendLine("日付てすとのパースに失敗しました、正しい日付を入力してください");
+                }
             }
-            else
-            {
-                string iso8601tz = testDateTime.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ssUTC");
-                sb.AppendLine("期間内に偏移ファイルがみつかりませんでした、暫定でUTCになります");
-                sb.AppendLine("local utc tzdate:" + localt + "\r\n" + utct + "\r\n" + iso8601tz);
-            }
-            }
-            else
-            {
-                sb.AppendLine("日付てすとのパースに失敗しました、正しい日付を入力してください");
+            catch (Exception ex) { 
+            sb.AppendLine(ex.ToString());
             }
 
 
@@ -725,20 +795,20 @@ namespace neta
         {
             public string Zone { get; set; }
             public List<long> TransList { get; set; }
-            public List<int> Offsets { get; set; }
+            public List<double> Offsets { get; set; }
             public List<string> Abbrs { get; set; }
         }
 
         public class TimeZoneTransitions
         {
             private List<long> transList;
-            private List<int> offsets;
+            private List<double> offsets;
             private List<string> abbrs;
 
-            public TimeZoneTransitions(List<long> transList, List<int> offsets, List<string> abbrs)
+            public TimeZoneTransitions(List<long> transList, List<double> offsets, List<string> abbrs)
             {
                 this.transList = transList ?? new List<long>();
-                this.offsets = offsets ?? new List<int>();
+                this.offsets = offsets ?? new List<double>();
                 this.abbrs = abbrs ?? new List<string>();
             }
 
@@ -863,9 +933,6 @@ namespace neta
 
             OpenFileDialog ofd = new OpenFileDialog();
 
-            //はじめのファイル名を指定する
-            //はじめに「ファイル名」で表示される文字列を指定する
-            ofd.FileName = "default.html";
             //はじめに表示されるフォルダを指定する
             //指定しない（空の文字列）の時は、現在のディレクトリが表示される
             ofd.InitialDirectory = Properties.Settings.Default.lastfile;
@@ -876,7 +943,7 @@ namespace neta
             //2番目の「すべてのファイル」が選択されているようにする
             ofd.FilterIndex = 2;
             //タイトルを設定する
-            ofd.Title = "開くファイルを選択してください";
+            ofd.Title = "開くjsonファイルを選択してください";
             //ダイアログボックスを閉じる前に現在のディレクトリを復元するようにする
             ofd.RestoreDirectory = true;
             //存在しないファイルの名前が指定されたとき警告を表示する

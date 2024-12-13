@@ -60,6 +60,8 @@ namespace neta
                 //ダイアログを表示する
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
+                    ofd.InitialDirectory = Properties.Settings.Default.lasttzdatapath;
+                    ofd.Title = "unix usr/share/tzinfoやpython pytz dateutilのtzdatabaseフォルダのバイナリふぁいるを選択してください";
                     //python dateutil一部をC#ぽくしただけのもの 下にgoogle colabでうごくやつも貼っとく 
                     //zicバイナリの情報　https://tex2e.github.io/rfc-translater/html/rfc8536.html
                     string tzdata = ofd.FileName;// "Tokyo";
@@ -78,372 +80,452 @@ namespace neta
                         bool tzcv= tzutc.Checked;
 
                         StringBuilder sb = new StringBuilder();
-                        if (header.Contains("TZif") == false)
+
+                        try
                         {
-                            sb.AppendLine("ZICバイナリ,TZifファイルではありません");
-                        }
-                        else
-                        {
-                            //python tzinfoのうるう秒こみのDBには非対応
-                            //#unix/linux系 google colabとかもcygwinとか
-                            //#/usr/share/lib/zoneinfo/
-
-                            //#python系　tar.gzなので解凍必要
-                            //#Python312\Lib\site-packages\dateutil\zoneinfo
-                            //#Python312\Lib\site-packages\pytz\zoneinfo
-
-                            //#64bitデータベースだけ読む模様,しかしロサンゼルスが2006年までしか入ってないのでいまいち
-                            //#Python312\Lib\site-packages\tzdata\zoneinfo
-
-                            //version NULL(1) 0x32=2 0x33=3がある模様
-                            string version = encoding.GetString(bs).Substring(4, 1);
-
-                            if (bs[4] == 0)
+                            if (header.Contains("TZif") == false)
                             {
-                                sb.AppendLine("ZICバイナリ,TZif version NULL(1) はMUST BE IGNOREです");
+                                sb.AppendLine("Zone infomation compiler で作成されたtzdataバイナリTZifファイルではありません");
                             }
                             else
                             {
+                                //python tzinfoのうるう秒こみのDBには非対応
+                                //#unix/linux系 google colabとかもcygwinとか
+                                //#/usr/share/lib/zoneinfo/
 
-                                int pos = 20;
+                                //#python系　tar.gzなので解凍必要
+                                //#Python312\Lib\site-packages\dateutil\zoneinfo
+                                //#Python312\Lib\site-packages\pytz\zoneinfo
 
-                                int tzh_ttisgmtcnt = BitConverter.ToInt32(Bigval(bs, pos), 0);
+                                //#64bitデータベースだけ読む模様,しかしロサンゼルスが2006年までしか入ってないのでいまいち
+                                //#Python312\Lib\site-packages\tzdata\zoneinfo
 
-                                int tzh_ttisstdcnt = BitConverter.ToInt32(Bigval(bs, pos + 4), 0);
+                                //version NULL(1) 0x32=2 0x33=3がある模様
+                                string version = encoding.GetString(bs).Substring(4, 1);
 
-                                int tzh_leapcnt = BitConverter.ToInt32(Bigval(bs, pos + 8), 0);
-
-                                int tzh_timecnt = BitConverter.ToInt32(Bigval(bs, pos + 12), 0);
-
-                                int tzh_typecnt = BitConverter.ToInt32(Bigval(bs, pos + 16), 0);
-
-                                int tzh_charcnt = BitConverter.ToInt32(Bigval(bs, pos + 20), 0);
-
-
-
-                                //C# 適切なメンテナンスをしないと2038年問題が起きる可能性がある transition_timeが32bitのため
-                                int[] transition_times = new int[tzh_timecnt];
-                                int[] transition_types = new int[tzh_timecnt];
-
-                                pos = 44;
-                                if (tzh_timecnt != 0)
+                                if (bs[4] == 0)
                                 {
+                                    sb.AppendLine("Zone infomation compiler で作成されたtzdataバイナリTZif version NULL(1) はMUST BE IGNOREです");
+                                }
+                                else
+                                {
+
+                                    int pos = 20;
+
+                                    int tzh_ttisgmtcnt = BitConverter.ToInt32(Bigval(bs, pos), 0);
+
+                                    int tzh_ttisstdcnt = BitConverter.ToInt32(Bigval(bs, pos + 4), 0);
+
+                                    int tzh_leapcnt = BitConverter.ToInt32(Bigval(bs, pos + 8), 0);
+
+                                    int tzh_timecnt = BitConverter.ToInt32(Bigval(bs, pos + 12), 0);
+
+                                    int tzh_typecnt = BitConverter.ToInt32(Bigval(bs, pos + 16), 0);
+
+                                    int tzh_charcnt = BitConverter.ToInt32(Bigval(bs, pos + 20), 0);
+
+
+
+                                    //C# 適切なメンテナンスをしないと2038年問題が起きる可能性がある transition_timeが32bitのため
+                                    int[] transition_times = new int[tzh_timecnt];
+                                    int[] transition_types = new int[tzh_timecnt];
+
+                                    pos = 44;
+                                    if (tzh_timecnt != 0)
+                                    {
+                                        for (int i = 0; i < tzh_timecnt; i++)
+                                        {
+                                            transition_times[i] = BitConverter.ToInt32(Bigval(bs, pos + 4 * i), 0);
+                                            transition_types[i] = bs[pos + tzh_timecnt * 4 + i];
+                                        }
+                                    }
+                                    else
+                                    {
+                                        transition_times = [];
+                                        transition_types = [];
+                                    }
+
+                                    pos = 44 + tzh_timecnt * 5;
+                                    int[] local_time_types_gmt = new int[tzh_typecnt];
+                                    int[] local_time_types_isdst = new int[tzh_typecnt];
+                                    int[] local_time_types_abbr = new int[tzh_typecnt];
+
+                                    for (int i = 0; i < tzh_typecnt; i++)
+                                    {
+                                        local_time_types_gmt[i] = BitConverter.ToInt32(Bigval(bs, pos + i * 6), 0);
+                                        local_time_types_isdst[i] = bs[pos + 4 + i * 6];
+                                        local_time_types_abbr[i] = bs[pos + 5 + i * 6];
+                                    }
+
+                                    pos = pos + 6 * tzh_typecnt;
+                                    byte[] abbr = new byte[tzh_charcnt + 10];
+                                    Array.ConstrainedCopy(bs, pos, abbr, 0, tzh_charcnt);
+
+                                    sb.AppendLine("1stTZif transitions,gmtoffset,isdst,abbr");
+                                    pos = pos + tzh_charcnt;
+                                    if (tzh_leapcnt > 0)
+                                    {
+                                        pos = pos + tzh_leapcnt * 8;
+                                    }
+
+
+                                    if (tzh_ttisstdcnt > 0)
+                                    {
+                                        //isstd = struct.unpack(">%db" % ttisstdcnt fileobj.read(ttisstdcnt))
+                                        byte[] isstd = new byte[tzh_ttisstdcnt];
+                                        Array.ConstrainedCopy(bs, pos, isstd, 0, tzh_ttisstdcnt);
+                                        pos += tzh_ttisstdcnt;
+                                    }
+
+                                    if (tzh_ttisgmtcnt > 0)
+                                    {
+                                        //isgmt = struct.unpack(">%db" % ttisgmtcnt, fileobj.read(ttisgmtcnt))
+                                        byte[] isgmt = new byte[tzh_ttisgmtcnt];
+                                        Array.ConstrainedCopy(bs, pos, isgmt, 0, tzh_ttisgmtcnt);
+                                        pos += tzh_ttisgmtcnt;
+
+                                    }
+
+                                    string[][] transitions = new string[tzh_timecnt][];
                                     for (int i = 0; i < tzh_timecnt; i++)
                                     {
-                                        transition_times[i] = BitConverter.ToInt32(Bigval(bs, pos + 4 * i), 0);
-                                        transition_types[i] = bs[pos + tzh_timecnt * 4 + i];
-                                    }
-                                }
-                                else
-                                {
-                                    transition_times = [];
-                                    transition_types = [];
-                                }
+                                        int type = transition_types[i];
+                                        transitions[i] = new string[4];
+                                        transitions[i][0] = transition_times[i].ToString();
+                                        transitions[i][1] = Convert.ToString(local_time_types_gmt[type]);
+                                        transitions[i][2] = Convert.ToString(local_time_types_isdst[type]);
+                                        byte[] tmp = new byte[20];
+                                        Array.ConstrainedCopy(abbr, local_time_types_abbr[type], tmp, 0, 10);
+                                        char[] charArray = ByteArrayToCharArray(tmp, Encoding.UTF8);
+                                        transitions[i][3] = TerminateAtNull(charArray);
 
-                                pos = 44 + tzh_timecnt * 5;
-                                int[] local_time_types_gmt = new int[tzh_typecnt];
-                                int[] local_time_types_isdst = new int[tzh_typecnt];
-                                int[] local_time_types_abbr = new int[tzh_typecnt];
+                                        if (tzcv)
+                                        {
 
-                                for (int i = 0; i < tzh_typecnt; i++)
-                                {
-                                    local_time_types_gmt[i] = BitConverter.ToInt32(Bigval(bs, pos + i * 6), 0);
-                                    local_time_types_isdst[i] = bs[pos + 4 + i * 6];
-                                    local_time_types_abbr[i] = bs[pos + 5 + i * 6];
-                                }
+                                            transitions[i][1] = Convert.ToString(Convert.ToDouble(local_time_types_gmt[type]) / 3600);
+                                            double localTimeOffseth = Convert.ToDouble(local_time_types_gmt[type]) / 3600;
 
-                                pos = pos + 6 * tzh_typecnt;
-                                byte[] abbr = new byte[tzh_charcnt + 10];
-                                Array.ConstrainedCopy(bs, pos, abbr, 0, tzh_charcnt);
-
-                                sb.AppendLine("1stTZif transitions,gmtoffset,isdst,abbr");
-                                pos = pos + tzh_charcnt;
-                                if (tzh_leapcnt > 0)
-                                {
-                                    pos = pos + tzh_leapcnt * 8;
-                                }
+                                            long unixTimestamp = transition_times[i];
 
 
-                                if (tzh_ttisstdcnt > 0)
-                                {
-                                    //isstd = struct.unpack(">%db" % ttisstdcnt fileobj.read(ttisstdcnt))
-                                    byte[] isstd = new byte[tzh_ttisstdcnt];
-                                    Array.ConstrainedCopy(bs, pos, isstd, 0, tzh_ttisstdcnt);
-                                    pos += tzh_ttisstdcnt;
-                                }
+                                            TimeSpan utcOffset = TimeSpan.FromHours(localTimeOffseth);
+                                            // TotalHours で符号を判定
+                                            double totalHours = utcOffset.TotalHours; // 全体の時間（小数部分を含む）
+                                            string sign = totalHours >= 0 ? "+" : "-";
+                                            // HH と MM を取得
+                                            int hours = (int)Math.Abs(totalHours); // 絶対値を取った整数部の時間
+                                            double totalMinutes = Math.Abs(utcOffset.TotalMinutes % 60); // 分部分（絶対値）
 
-                                if (tzh_ttisgmtcnt > 0)
-                                {
-                                    //isgmt = struct.unpack(">%db" % ttisgmtcnt, fileobj.read(ttisgmtcnt))
-                                    byte[] isgmt = new byte[tzh_ttisgmtcnt];
-                                    Array.ConstrainedCopy(bs, pos, isgmt, 0, tzh_ttisgmtcnt);
-                                    pos += tzh_ttisgmtcnt;
+                                            // フォーマット
+                                            string formattedOffset = $"{sign}{hours:00}:{totalMinutes:00.00}";
 
-                                }
+                                            try
+                                            {
+                                                // HH:MM の形式に変換可能かどうかを判定
+                                                if (utcOffset.Seconds == 0)
+                                                {
+                                                    // HH:MM 形式が可能
+                                                    DateTimeOffset dateTimeWithOffset = DateTimeOffset
+                                                        .FromUnixTimeSeconds(unixTimestamp)
+                                                        .ToOffset(utcOffset);
 
-                                string[][] transitions = new string[tzh_timecnt][];
-                                for (int i = 0; i < tzh_timecnt; i++)
-                                {
-                                    int type = transition_types[i];
-                                    transitions[i] = new string[4];
-                                    transitions[i][0] = transition_times[i].ToString();
-                                    transitions[i][1] = Convert.ToString(local_time_types_gmt[type]);
-                                    transitions[i][2] = Convert.ToString(local_time_types_isdst[type]);
-                                    byte[] tmp = new byte[20];
-                                    Array.ConstrainedCopy(abbr, local_time_types_abbr[type], tmp, 0, 10);
-                                    char[] charArray = ByteArrayToCharArray(tmp, Encoding.UTF8);
-                                    transitions[i][3] = TerminateAtNull(charArray);
+                                                    // 標準フォーマットで変換
+                                                    string formattedDateh = dateTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:sszzz");
+                                                    transitions[i][0] = formattedDateh;
+                                                }
+                                                else
+                                                {
+                                                    // カスタムフォーマット
+                                                    DateTimeOffset originalTime = DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).AddHours(localTimeOffseth);
+                                                    string formattedDate = $"{originalTime:yyyy-MM-ddTHH:mm:ss.fff} {formattedOffset}";
+                                                    transitions[i][0] = formattedDate;
+                                                }
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                sb.AppendLine(ex.ToString());
+                                                break;
+                                            }
 
-                                    if (tzcv) {
 
-                                        transitions[i][1] = Convert.ToString(local_time_types_gmt[type] / 3600);
-                                        // UTCオフセット (例: +09:00)
-                                        TimeSpan utcOffset = TimeSpan.FromHours(local_time_types_gmt[type] / 3600);
-                                        // DateTimeOffsetに変換
-                                        DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_times[i]).ToOffset(utcOffset);
+                                        }
 
-                                        // オフセット付きのフォーマットに変換
-                                        string formattedDate = dateTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
-                                        transitions[i][0] = formattedDate;
-
+                                        sb.Append(transitions[i][0]);
+                                        sb.Append(",");
+                                        sb.Append(transitions[i][1]);
+                                        sb.Append(",");
+                                        sb.Append(transitions[i][2]);
+                                        sb.Append(",");
+                                        sb.AppendLine(transitions[i][3]);
                                     }
 
-                                    sb.Append(transitions[i][0]);
-                                    sb.Append(",");
-                                    sb.Append(transitions[i][1]);
-                                    sb.Append(",");
-                                    sb.Append(transitions[i][2]);
-                                    sb.Append(",");
-                                    sb.AppendLine(transitions[i][3]);
-                                }
-
-                                sb.AppendLine();
-
-                                byte[] TZifnext = new byte[4];
-                                Array.ConstrainedCopy(bs, pos, TZifnext, 0, 4);
-                                var header2 = encoding.GetString(TZifnext).Substring(0, 4);
-                                nexttzpos = pos;
-                                finalpos = -1;
-
-
-                                int tzh_ttisgmtcntn = 0;
-                                int tzh_ttisstdcntn = 0;
-                                int tzh_leapcntn = 0;
-                                int tzh_timecntn = 0;
-                                int tzh_typecntn = 0;
-                                int tzh_charcntn = 0;
-
-                                if (header2.Contains("TZif") == false)
-                                {
-                                    sb.AppendLine("2番目のZICバイナリ,TZifはありません");
                                     sb.AppendLine();
-                                }
-                                else
-                                {
-                                    byte[] v = new byte[] { bs[pos + 4] };
-                                    versionn = encoding.GetString(v);
 
-                                    if (bs[pos + 4] == 0)
+                                    byte[] TZifnext = new byte[4];
+                                    Array.ConstrainedCopy(bs, pos, TZifnext, 0, 4);
+                                    var header2 = encoding.GetString(TZifnext).Substring(0, 4);
+                                    nexttzpos = pos;
+                                    finalpos = -1;
+
+
+                                    int tzh_ttisgmtcntn = 0;
+                                    int tzh_ttisstdcntn = 0;
+                                    int tzh_leapcntn = 0;
+                                    int tzh_timecntn = 0;
+                                    int tzh_typecntn = 0;
+                                    int tzh_charcntn = 0;
+
+                                    if (header2.Contains("TZif") == false)
                                     {
-                                        sb.AppendLine("2番目のZICバイナリ,TZif version NULL(1) はMUST BE IGNOREです");
+                                        sb.AppendLine("2番目のZone infomation compiler で作成されたtzdataバイナリTZifはありません");
                                         sb.AppendLine();
                                     }
                                     else
                                     {
+                                        byte[] v = new byte[] { bs[pos + 4] };
+                                        versionn = encoding.GetString(v);
 
-                                        pos += 20;
-                                        tzh_ttisgmtcntn = BitConverter.ToInt32(Bigval(bs, pos), 0);
-
-                                        tzh_ttisstdcntn = BitConverter.ToInt32(Bigval(bs, pos + 4), 0);
-
-                                        tzh_leapcntn = BitConverter.ToInt32(Bigval(bs, pos + 8), 0);
-
-                                        tzh_timecntn = BitConverter.ToInt32(Bigval(bs, pos + 12), 0);
-
-                                        tzh_typecntn = BitConverter.ToInt32(Bigval(bs, pos + 16), 0);
-
-                                        tzh_charcntn = BitConverter.ToInt32(Bigval(bs, pos + 20), 0);
-
-
-                                        //C#  transition_timeが64bitのため
-                                        long[] transition_timesn = new long[tzh_timecntn];
-                                        int[] transition_typesn = new int[tzh_timecntn];
-
-                                        pos += 24;
-                                        if (tzh_timecntn != 0)
+                                        if (bs[pos + 4] == 0)
                                         {
-                                            for (int i = 0; i < tzh_timecntn; i++)
-                                            {
-                                                transition_timesn[i] = BitConverter.ToInt64(Bigval64(bs, pos + 8 * i), 0);
-                                                transition_typesn[i] = bs[pos + tzh_timecntn * 8 + i];
-                                            }
+                                            sb.AppendLine("2番目のZone infomation compiler で作成されたtzdataバイナリTZif version NULL(1) はMUST BE IGNOREです");
+                                            sb.AppendLine();
                                         }
                                         else
                                         {
-                                            transition_timesn = [];
-                                            transition_typesn = [];
-                                        }
 
-                                        pos += tzh_timecntn * 9;
-                                        int[] local_time_types_gmtn = new int[tzh_typecntn];
-                                        int[] local_time_types_isdstn = new int[tzh_typecntn];
-                                        int[] local_time_types_abbrn = new int[tzh_typecntn];
+                                            pos += 20;
+                                            tzh_ttisgmtcntn = BitConverter.ToInt32(Bigval(bs, pos), 0);
 
-                                        for (int i = 0; i < tzh_typecntn; i++)
-                                        {
-                                            local_time_types_gmtn[i] = BitConverter.ToInt32(Bigval(bs, pos + i * 6), 0);
-                                            local_time_types_isdstn[i] = bs[pos + 4 + i * 6];
-                                            local_time_types_abbrn[i] = bs[pos + 5 + i * 6];
-                                        }
+                                            tzh_ttisstdcntn = BitConverter.ToInt32(Bigval(bs, pos + 4), 0);
 
-                                        pos = pos + 6 * tzh_typecntn;
-                                        byte[] abbr2 = new byte[tzh_charcntn + 10];
-                                        Array.ConstrainedCopy(bs, pos, abbr2, 0, tzh_charcntn);
+                                            tzh_leapcntn = BitConverter.ToInt32(Bigval(bs, pos + 8), 0);
+
+                                            tzh_timecntn = BitConverter.ToInt32(Bigval(bs, pos + 12), 0);
+
+                                            tzh_typecntn = BitConverter.ToInt32(Bigval(bs, pos + 16), 0);
+
+                                            tzh_charcntn = BitConverter.ToInt32(Bigval(bs, pos + 20), 0);
 
 
-                                        sb.AppendLine("2ndTZif transitions,gmtoffset,isdst,abbr");
-                                        pos = pos + tzh_charcntn;
-                                        if (tzh_leapcntn > 0)
-                                        {
-                                            pos = pos + tzh_leapcntn * 8;
-                                        }
+                                            //C#  transition_timeが64bitのため
+                                            long[] transition_timesn = new long[tzh_timecntn];
+                                            int[] transition_typesn = new int[tzh_timecntn];
 
-
-                                        if (tzh_ttisstdcntn > 0)
-                                        {
-                                            //isstd = struct.unpack(">%db" % ttisstdcnt fileobj.read(ttisstdcnt))
-                                            byte[] isstd = new byte[tzh_ttisstdcntn];
-                                            Array.ConstrainedCopy(bs, pos, isstd, 0, tzh_ttisstdcntn);
-                                            pos += tzh_ttisstdcntn;
-                                        }
-
-                                        if (tzh_ttisgmtcntn > 0)
-                                        {
-                                            //isgmt = struct.unpack(">%db" % ttisgmtcnt, fileobj.read(ttisgmtcnt))
-                                            byte[] isgmt = new byte[tzh_ttisgmtcntn];
-                                            Array.ConstrainedCopy(bs, pos, isgmt, 0, tzh_ttisgmtcntn);
-                                            pos += tzh_ttisgmtcntn;
-
-                                        }
-
-                                        string[][] transitionsn = new string[tzh_timecntn][];
-                                        for (int i = 0; i < tzh_timecntn; i++)
-                                        {
-                                            int type = transition_typesn[i];
-                                            transitionsn[i] = new string[4];
-                                            transitionsn[i][0] = transition_timesn[i].ToString();
-                                            transitionsn[i][1] = Convert.ToString(local_time_types_gmtn[type]);
-                                            transitionsn[i][2] = Convert.ToString(local_time_types_isdstn[type]);
-                                            byte[] tmp2 = new byte[20];
-                                            Array.ConstrainedCopy(abbr2, local_time_types_abbrn[type], tmp2, 0, 10);
-                                            char[] charArray = ByteArrayToCharArray(tmp2, Encoding.UTF8);
-                                            transitionsn[i][3] = TerminateAtNull(charArray);
-                                            if (tzcv)
+                                            pos += 24;
+                                            if (tzh_timecntn != 0)
                                             {
-                                                transitionsn[i][1] = Convert.ToString(local_time_types_gmtn[type] / 3600);
-                                                // UTCオフセット (例: +09:00)
-                                                TimeSpan utcOffset = TimeSpan.FromHours(local_time_types_gmtn[type] / 3600);
-                                                // DateTimeOffsetに変換
-                                                DateTimeOffset dateTimeWithOffset = DateTimeOffset.FromUnixTimeSeconds(transition_timesn[i]).ToOffset(utcOffset);
+                                                for (int i = 0; i < tzh_timecntn; i++)
+                                                {
+                                                    transition_timesn[i] = BitConverter.ToInt64(Bigval64(bs, pos + 8 * i), 0);
+                                                    transition_typesn[i] = bs[pos + tzh_timecntn * 8 + i];
+                                                }
+                                            }
+                                            else
+                                            {
+                                                transition_timesn = [];
+                                                transition_typesn = [];
+                                            }
 
-                                                // オフセット付きのフォーマットに変換
-                                                string formattedDate = dateTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
-                                                transitionsn[i][0] = formattedDate;
+                                            pos += tzh_timecntn * 9;
+                                            int[] local_time_types_gmtn = new int[tzh_typecntn];
+                                            int[] local_time_types_isdstn = new int[tzh_typecntn];
+                                            int[] local_time_types_abbrn = new int[tzh_typecntn];
+
+                                            for (int i = 0; i < tzh_typecntn; i++)
+                                            {
+                                                local_time_types_gmtn[i] = BitConverter.ToInt32(Bigval(bs, pos + i * 6), 0);
+                                                local_time_types_isdstn[i] = bs[pos + 4 + i * 6];
+                                                local_time_types_abbrn[i] = bs[pos + 5 + i * 6];
+                                            }
+
+                                            pos = pos + 6 * tzh_typecntn;
+                                            byte[] abbr2 = new byte[tzh_charcntn + 10];
+                                            Array.ConstrainedCopy(bs, pos, abbr2, 0, tzh_charcntn);
+
+
+                                            sb.AppendLine("2ndTZif transitions,gmtoffset,isdst,abbr");
+                                            pos = pos + tzh_charcntn;
+                                            if (tzh_leapcntn > 0)
+                                            {
+                                                pos = pos + tzh_leapcntn * 8;
+                                            }
+
+
+                                            if (tzh_ttisstdcntn > 0)
+                                            {
+                                                //isstd = struct.unpack(">%db" % ttisstdcnt fileobj.read(ttisstdcnt))
+                                                byte[] isstd = new byte[tzh_ttisstdcntn];
+                                                Array.ConstrainedCopy(bs, pos, isstd, 0, tzh_ttisstdcntn);
+                                                pos += tzh_ttisstdcntn;
+                                            }
+
+                                            if (tzh_ttisgmtcntn > 0)
+                                            {
+                                                //isgmt = struct.unpack(">%db" % ttisgmtcnt, fileobj.read(ttisgmtcnt))
+                                                byte[] isgmt = new byte[tzh_ttisgmtcntn];
+                                                Array.ConstrainedCopy(bs, pos, isgmt, 0, tzh_ttisgmtcntn);
+                                                pos += tzh_ttisgmtcntn;
 
                                             }
-                                            sb.Append(transitionsn[i][0]);
-                                            sb.Append(",");
-                                            sb.Append(transitionsn[i][1]);
-                                            sb.Append(",");
-                                            sb.Append(transitionsn[i][2]);
-                                            sb.Append(",");
-                                            sb.AppendLine(transitionsn[i][3]);
-                                        }
-                                        finalpos = pos;
-                                        int finalstring = bs.Length - pos;
-                                        byte[] foolerbyte = new byte[finalstring];
-                                        if (finalstring > 0)
-                                        {
-                                            Array.ConstrainedCopy(bs, pos, foolerbyte, 0, finalstring);
-                                            footer = encoding.GetString(foolerbyte);
-                                        }
 
-                                        sb.AppendLine();
+                                            string[][] transitionsn = new string[tzh_timecntn][];
+                                            for (int i = 0; i < tzh_timecntn; i++)
+                                            {
+                                                int type = transition_typesn[i];
+                                                transitionsn[i] = new string[4];
+                                                transitionsn[i][0] = transition_timesn[i].ToString();
+                                                transitionsn[i][1] = Convert.ToString(local_time_types_gmtn[type]);
+                                                transitionsn[i][2] = Convert.ToString(local_time_types_isdstn[type]);
+                                                byte[] tmp2 = new byte[20];
+                                                Array.ConstrainedCopy(abbr2, local_time_types_abbrn[type], tmp2, 0, 10);
+                                                char[] charArray = ByteArrayToCharArray(tmp2, Encoding.UTF8);
+                                                transitionsn[i][3] = TerminateAtNull(charArray);
+                                                if (tzcv)
+                                                {
+
+                                                    transitionsn[i][1] = Convert.ToString(Convert.ToDouble(local_time_types_gmtn[type]) / 3600);
+                                                    double localTimeOffseth = Convert.ToDouble(local_time_types_gmtn[type]) / 3600;
+
+                                                    long unixTimestamp = transition_timesn[i];
+
+
+                                                    TimeSpan utcOffset = TimeSpan.FromHours(localTimeOffseth);
+                                                    // TotalHours で符号を判定
+                                                    double totalHours = utcOffset.TotalHours; // 全体の時間（小数部分を含む）
+                                                    string sign = totalHours >= 0 ? "+" : "-";
+                                                    // HH と MM を取得
+                                                    int hours = (int)Math.Abs(totalHours); // 絶対値を取った整数部の時間
+                                                    double totalMinutes = Math.Abs(utcOffset.TotalMinutes % 60); // 分部分（絶対値）
+
+                                                    // フォーマット
+                                                    string formattedOffset = $"{sign}{hours:00}:{totalMinutes:00.00}";
+
+                                                    try
+                                                    {
+                                                        // HH:MM の形式に変換可能かどうかを判定
+                                                        if (utcOffset.Seconds == 0)
+                                                        {
+                                                            // HH:MM 形式が可能
+                                                            DateTimeOffset dateTimeWithOffset = DateTimeOffset
+                                                                .FromUnixTimeSeconds(unixTimestamp)
+                                                                .ToOffset(utcOffset);
+
+                                                            // 標準フォーマットで変換
+                                                            string formattedDateh = dateTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:sszzz");
+                                                            transitionsn[i][0] = formattedDateh;
+                                                        }
+                                                        else
+                                                        {
+                                                            // カスタムフォーマット
+                                                            DateTimeOffset originalTime = DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).AddHours(localTimeOffseth);
+                                                            string formattedDate = $"{originalTime:yyyy-MM-ddTHH:mm:ss.fff} {formattedOffset}";
+                                                            transitionsn[i][0] = formattedDate;
+                                                        }
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+                                                        sb.AppendLine(ex.ToString());
+                                                        break;
+                                                    }
+
+
+                                                }
+                                                sb.Append(transitionsn[i][0]);
+                                                sb.Append(",");
+                                                sb.Append(transitionsn[i][1]);
+                                                sb.Append(",");
+                                                sb.Append(transitionsn[i][2]);
+                                                sb.Append(",");
+                                                sb.AppendLine(transitionsn[i][3]);
+                                            }
+                                            finalpos = pos;
+                                            int finalstring = bs.Length - pos;
+                                            byte[] foolerbyte = new byte[finalstring];
+                                            if (finalstring > 0)
+                                            {
+                                                Array.ConstrainedCopy(bs, pos, foolerbyte, 0, finalstring);
+                                                footer = encoding.GetString(foolerbyte);
+                                            }
+
+                                            sb.AppendLine();
+                                        }
                                     }
+
+                                    string crc32 = Crc32Algorithm.Compute(bs).ToString("X");
+                                    string hashsha;
+                                    string hashmd;
+
+                                    using (MD5 md5 = MD5.Create())
+                                    {
+                                        byte[] hashBytes = md5.ComputeHash(bs);
+                                        hashmd = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                                    }
+                                    using (SHA1 sha1 = SHA1.Create())
+                                    {
+                                        byte[] hashBytes2 = sha1.ComputeHash(bs);
+                                        hashsha = BitConverter.ToString(hashBytes2).Replace("-", "").ToLowerInvariant();
+                                    }
+
+                                    sb.Append("tzdata name:");
+                                    sb.Append(tzdata);
+                                    sb.AppendLine();
+                                    sb.Append("filesize:");
+                                    sb.Append(bs.Length.ToString());
+                                    sb.AppendLine("byte ");
+                                    sb.Append("footer position:");
+                                    sb.Append(finalpos.ToString());
+                                    sb.AppendLine();
+                                    sb.Append("foorter string:");
+                                    sb.Append(footer);
+                                    sb.AppendLine();
+
+
+                                    sb.Append("crc32:");
+                                    sb.Append(crc32);
+                                    sb.AppendLine();
+                                    sb.Append("md5:");
+                                    sb.Append(hashmd);
+                                    sb.AppendLine();
+                                    sb.Append("sha1:");
+                                    sb.AppendLine(hashsha);
+                                    sb.AppendLine();
+                                    sb.AppendLine();
+
+                                    sb.Append("tzif version:");
+                                    sb.Append("Tzif" + version);
+                                    sb.AppendLine();
+                                    sb.AppendLine("tzh_ttisgmtcnt:" + tzh_ttisgmtcnt.ToString());
+                                    sb.AppendLine("tzh_ttisstdcnt :" + tzh_ttisstdcnt.ToString());
+                                    sb.AppendLine("tzh_leapcnt:" + tzh_leapcnt.ToString());
+                                    sb.AppendLine("tzh_timecnt:" + tzh_timecnt.ToString());
+                                    sb.AppendLine("tzh_typecnt:" + tzh_typecnt.ToString());
+                                    sb.AppendLine("tzh_charcnt:" + tzh_charcnt.ToString());
+
+
+                                    sb.AppendLine();
+                                    sb.Append("2nd TZif position:");
+                                    sb.Append(nexttzpos.ToString());
+                                    sb.AppendLine();
+                                    sb.Append("2nd tzif version:");
+                                    sb.Append("Tzif" + versionn);
+                                    sb.AppendLine();
+                                    sb.AppendLine("2nd tzh_ttisgmtcnt:" + tzh_ttisgmtcntn.ToString());
+                                    sb.AppendLine("2nd tzh_ttisstdcnt :" + tzh_ttisstdcntn.ToString());
+                                    sb.AppendLine("2nd tzh_leapcnt:" + tzh_leapcntn.ToString());
+                                    sb.AppendLine("2nd tzh_timecnt:" + tzh_timecntn.ToString());
+                                    sb.AppendLine("2nd tzh_typecnt:" + tzh_typecntn.ToString());
+                                    sb.AppendLine("2nd tzh_charcnt:" + tzh_charcntn.ToString());
+
+
+
+
                                 }
-
-                                string crc32 = Crc32Algorithm.Compute(bs).ToString("X");
-                                string hashsha;
-                                string hashmd;
-
-                                using (MD5 md5 = MD5.Create())
-                                {
-                                    byte[] hashBytes = md5.ComputeHash(bs);
-                                    hashmd = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-                                }
-                                using (SHA1 sha1 = SHA1.Create())
-                                {
-                                    byte[] hashBytes2 = sha1.ComputeHash(bs);
-                                    hashsha = BitConverter.ToString(hashBytes2).Replace("-", "").ToLowerInvariant();
-                                }
-
-                                sb.Append("tzdata name:");
-                                sb.Append(tzdata);
-                                sb.AppendLine();
-                                sb.Append("filesize:");
-                                sb.Append(bs.Length.ToString());
-                                sb.AppendLine("byte ");
-                                sb.Append("footer position:");
-                                sb.Append(finalpos.ToString());
-                                sb.AppendLine();
-                                sb.Append("foorter string:");
-                                sb.Append(footer);
-                                sb.AppendLine();
-
-
-                                sb.Append("crc32:");
-                                sb.Append(crc32);
-                                sb.AppendLine();
-                                sb.Append("md5:");
-                                sb.Append(hashmd);
-                                sb.AppendLine();
-                                sb.Append("sha1:");
-                                sb.AppendLine(hashsha);
-                                sb.AppendLine();
-                                sb.AppendLine();
-
-                                sb.Append("tzif version:");
-                                sb.Append("Tzif" + version);
-                                sb.AppendLine();
-                                sb.AppendLine("tzh_ttisgmtcnt:" + tzh_ttisgmtcnt.ToString());
-                                sb.AppendLine("tzh_ttisstdcnt :" + tzh_ttisstdcnt.ToString());
-                                sb.AppendLine("tzh_leapcnt:" + tzh_leapcnt.ToString());
-                                sb.AppendLine("tzh_timecnt:" + tzh_timecnt.ToString());
-                                sb.AppendLine("tzh_typecnt:" + tzh_typecnt.ToString());
-                                sb.AppendLine("tzh_charcnt:" + tzh_charcnt.ToString());
-
-
-                                sb.AppendLine();
-                                sb.Append("2nd TZif position:");
-                                sb.Append(nexttzpos.ToString());
-                                sb.AppendLine();
-                                sb.Append("2nd tzif version:");
-                                sb.Append("Tzif" + versionn);
-                                sb.AppendLine();
-                                sb.AppendLine("2nd tzh_ttisgmtcnt:" + tzh_ttisgmtcntn.ToString());
-                                sb.AppendLine("2nd tzh_ttisstdcnt :" + tzh_ttisstdcntn.ToString());
-                                sb.AppendLine("2nd tzh_leapcnt:" + tzh_leapcntn.ToString());
-                                sb.AppendLine("2nd tzh_timecnt:" + tzh_timecntn.ToString());
-                                sb.AppendLine("2nd tzh_typecnt:" + tzh_typecntn.ToString());
-                                sb.AppendLine("2nd tzh_charcnt:" + tzh_charcntn.ToString());
-
-
-
-
                             }
+                            Properties.Settings.Default.lasttzdatapath = System.IO.Path.GetDirectoryName(tzdata);
                         }
-                        Properties.Settings.Default.lasttzdatapath = System.IO.Path.GetDirectoryName(tzdata);
-
+                        catch (Exception ex) {
+                            sb.AppendLine(ex.ToString());
+                        }
                         textBox1.Text = sb.ToString();
 
                     }
