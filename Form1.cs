@@ -13,6 +13,12 @@ using System.Web;
 using System.Text.Json;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
+using static System.Windows.Forms.DataFormats;
+using System.Runtime.Intrinsics.X86;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace neta
 {
@@ -21,11 +27,27 @@ namespace neta
         public NETA_TIMER()
         {
             InitializeComponent();
+
         }
+
+
 
         private void button1_Click(object sender, EventArgs e)
         {
         }
+
+        void SetFontRecursive(Control parent, Font font)
+        {
+            foreach (Control control in parent.Controls)
+            {
+                control.Font = font;
+                if (control.HasChildren) // 子コントロールがある場合
+                {
+                    SetFontRecursive(control, font);
+                }
+            }
+        }
+
 
         string url = "https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec";
         string[] game = { "shanimasu", "deresute", "mirsita", "proseka", "saisuta", "mirikr", "miricn", "sidem", "mobamasu" };
@@ -68,6 +90,7 @@ namespace neta
             }
         }
 
+
         private void Form1_Load(object sender, EventArgs e)
         {
             this.startbox.Text = Properties.Settings.Default.st;
@@ -95,6 +118,7 @@ namespace neta
             bool utc = Properties.Settings.Default.useutc;
             bool ms = Properties.Settings.Default.usems;
             bool tz = Properties.Settings.Default.usetz;
+            string posix = Properties.Settings.Default.footerstring;
             string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
             eventname.Text = ibemei.Text;
             DateTime dt = DateTime.Now;
@@ -106,6 +130,15 @@ namespace neta
             {
                 string pattern = @"(%TZ|%z|%Z)";
                 format = Regex.Replace(format, pattern, match => "");
+                string patternn = @"(?<!\\)[!""#$'&%]"; // 「\K \z」を無視し、「Kz」のみマッチ !"#$'&%はダメ文字
+                format = Regex.Replace(format, pattern, match => "");
+                format = Regex.Replace(format, "%PO", match => "");
+            }
+            else
+            {
+
+                format = Regex.Replace(format, "%PO", match => posix);
+
             }
 
             if (DateTime.TryParse(startbox.Text, out st))
@@ -167,11 +200,11 @@ namespace neta
 
             }
             else if (tz)
-           {
+            {
 
                 string mkjson = Properties.Settings.Default.TZJSON;
                 // JSONパース
-                if (mkjson != null && mkjson !="")
+                if (mkjson != null && mkjson != "")
                 {
                     try
                     {
@@ -192,7 +225,7 @@ namespace neta
                         if (lastTransitionIdx >= 0 && lastTransitionIdx_s >= 0 && lastTransitionIdx_d >= 0)
                         {
                             // マッチさせたい文字群を指定
-                            string pattern = @"[dfFgGhtHKmMsTyz:/]";
+                            string pattern = @"[dfFgGhtHKkmMsTyz:/]";
                             tzst = Regex.Replace(tzst, pattern, match => "\\" + match.Value);
 
 
@@ -211,11 +244,10 @@ namespace neta
                             string uoffe = ToCustomFormat(uoe, true).ToString();
                             abbe = Regex.Replace(abbe, pattern, match => "\\" + match.Value);
 
-
-                            format = format.Replace("%TZ", tzst).Replace("%Z", abb).Replace("%z", uoff);
-                            string formats = format.Replace("%TZ", tzst).Replace("%Z", abbc).Replace("%z", uoffc);
-                            string formate = format.Replace("%TZ", tzst).Replace("%Z", abbe).Replace("%z", uoffe);
-                            string patternn = @"[Kz]";
+                            format = format.Replace("%TZ", tzst).Replace("%Z", abb).Replace("%z", uoff).Replace("zzz", uoff);
+                            string formats = format.Replace("%TZ", tzst).Replace("%Z", abbc).Replace("%z", uoffc).Replace("zzz", uoffc);
+                            string formate = format.Replace("%TZ", tzst).Replace("%Z", abbe).Replace("%z", uoffe).Replace("zzz", uoffe);
+                            string patternn = @"(?<!\\)[Kz!""#$'&%]"; // 「\K \z」を無視し、「Kz」のみマッチ !"#$'&%はダメ文字
                             format = Regex.Replace(format, patternn, match => "");
                             formats = Regex.Replace(formats, patternn, match => "");
                             formate = Regex.Replace(formate, patternn, match => "");
@@ -226,7 +258,7 @@ namespace neta
                         }
                         else
                         {
-
+                            //みつからなかったらUTC
 
                             string pattern = @"(%TZ|%z|%Z)";
                             format = Regex.Replace(format, pattern, match => "\\" + match.Value);
@@ -251,7 +283,9 @@ namespace neta
                     }
                     catch (Exception ex)
                     {
-                       MessageBox.Show(ex.ToString());
+                        current.Text = "例外発生";
+                        start.Text = "えらー:tzdbを変換したJSONエラーかTZDBを削りすぎてる可能性があります";
+                        end.Text = ex.ToString();
                     }
 
                 }
@@ -940,6 +974,8 @@ namespace neta
         private void クロマキー青_Click(object sender, EventArgs e)
         {
             this.BackColor = Color.Blue;
+            this.eventname.BackColor = Color.Blue;
+            this.current.BackColor = Color.Blue;
             panel1.BackColor = Color.Blue;
         }
 
@@ -947,6 +983,8 @@ namespace neta
         {
 
             this.BackColor = Color.Red;
+            this.eventname.BackColor = Color.Red;
+            this.current.BackColor = Color.Red;
             panel1.BackColor = Color.Red;
         }
 
@@ -954,6 +992,8 @@ namespace neta
         {
 
             this.BackColor = Color.Green;
+            this.eventname.BackColor = Color.Green;
+            this.current.BackColor = Color.Green;
             panel1.BackColor = Color.Green;
         }
 
@@ -977,6 +1017,8 @@ namespace neta
         private void 文字白ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.ForeColor = Color.White;
+            this.eventname.ForeColor = Color.White;
+            this.current.ForeColor = Color.White;
             panel1.ForeColor = Color.White;
         }
 
@@ -984,13 +1026,15 @@ namespace neta
         {
 
             this.ForeColor = Color.Black;
+            this.eventname.ForeColor = Color.Black;
+            this.current.ForeColor = Color.Black;
             panel1.ForeColor = Color.Black;
         }
 
         private void フォントToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-        FontDialog fd = new FontDialog();
+            FontDialog fd = new FontDialog();
 
             //ユーザーが選択できるポイントサイズの最大値を設定する
             fd.MaxSize = 15;
@@ -1017,9 +1061,22 @@ namespace neta
             {
                 //TextBox1のフォントと色を変える
                 this.Font = fd.Font;
+                this.eventname.Font = fd.Font;
+                this.current.Font = fd.Font;
+                this.elapsed.Font = fd.Font;
                 this.ForeColor = fd.Color;
+
+                this.eventname.ForeColor = fd.Color;
+                this.current.ForeColor = fd.Color;
+                panel1.ForeColor = fd.Color;
             }
         }
+
+        private void progressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
+
 }
     

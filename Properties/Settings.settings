@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2024/12/11</Value>
+      <Value Profile="(Default)">2024/12/16</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -96,6 +96,9 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="lasttzdatapath_base_utc" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="footerstring" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

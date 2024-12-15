@@ -156,7 +156,26 @@ namespace neta
             DateTime st = DateTime.Now;
             try
             {
-                st.ToString(textBox2.Text);
+                string format = textBox2.Text;
+                bool tz = checkBox3.Checked;
+            string posix = Properties.Settings.Default.footerstring;
+
+                if (!tz)
+                {
+                    string pattern = @"(%TZ|%z|%Z)";
+                    format = Regex.Replace(format, pattern, match => "");
+                    string patternn = @"(?<!\\)[!""#$'&%]"; // 「\K \z」を無視し、「Kz」のみマッチ !"#$'&%はダメ文字
+                    format = Regex.Replace(format, pattern, match => "");
+                    format = Regex.Replace(format, "%PO", match => "");
+                }
+                else
+                {
+
+                    format = Regex.Replace(format, "%PO", match => posix);
+
+                }
+
+                st.ToString(format);
 
                 Properties.Settings.Default.datetimeformat = textBox2.Text;
             }
@@ -732,6 +751,7 @@ namespace neta
             sb.AppendLine();
             sb.AppendLine();
             sb.AppendLine(mkjson);
+            Properties.Settings.Default.footerstring = footer;
 
             try
             {

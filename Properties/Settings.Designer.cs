@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/11")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/16")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -405,6 +405,18 @@ namespace neta.Properties {
             }
             set {
                 this["lasttzdatapath_base_utc"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string footerstring {
+            get {
+                return ((string)(this["footerstring"]));
+            }
+            set {
+                this["footerstring"] = value;
             }
         }
     }

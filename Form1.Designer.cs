@@ -79,8 +79,9 @@
             // 
             current.AutoSize = true;
             current.BackColor = System.Drawing.SystemColors.Menu;
+            current.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 128);
             current.ForeColor = System.Drawing.Color.Black;
-            current.Location = new System.Drawing.Point(4, 64);
+            current.Location = new System.Drawing.Point(4, 63);
             current.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             current.Name = "current";
             current.Size = new System.Drawing.Size(72, 20);
@@ -112,6 +113,7 @@
             // elapsed
             // 
             elapsed.AutoSize = true;
+            elapsed.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 128);
             elapsed.Location = new System.Drawing.Point(5, 100);
             elapsed.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             elapsed.Name = "elapsed";
@@ -135,10 +137,10 @@
             panel1.Controls.Add(parcent);
             panel1.Controls.Add(progressBar1);
             panel1.Controls.Add(eventname);
+            panel1.Controls.Add(current);
             panel1.Controls.Add(end);
             panel1.Controls.Add(start);
             panel1.Controls.Add(duration);
-            panel1.Controls.Add(current);
             panel1.Controls.Add(left);
             panel1.Controls.Add(elapsed);
             panel1.ForeColor = System.Drawing.Color.Black;
@@ -151,7 +153,7 @@
             // parcent
             // 
             parcent.AutoSize = true;
-            parcent.Location = new System.Drawing.Point(535, 292);
+            parcent.Location = new System.Drawing.Point(547, 292);
             parcent.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             parcent.Name = "parcent";
             parcent.Size = new System.Drawing.Size(29, 20);
@@ -161,21 +163,23 @@
             // 
             // progressBar1
             // 
-            progressBar1.BackColor = System.Drawing.Color.FromArgb(192, 255, 192);
-            progressBar1.ForeColor = System.Drawing.Color.FromArgb(192, 255, 192);
+            progressBar1.BackColor = System.Drawing.SystemColors.Menu;
+            progressBar1.ForeColor = System.Drawing.Color.Black;
             progressBar1.Location = new System.Drawing.Point(7, 277);
             progressBar1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new System.Drawing.Size(520, 35);
+            progressBar1.Size = new System.Drawing.Size(532, 35);
             progressBar1.TabIndex = 10;
             progressBar1.Value = 90;
+            progressBar1.Click += progressBar1_Click;
             // 
             // eventname
             // 
             eventname.AutoSize = true;
             eventname.BackColor = System.Drawing.SystemColors.Menu;
+            eventname.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 128);
             eventname.ForeColor = System.Drawing.Color.Black;
-            eventname.Location = new System.Drawing.Point(5, 27);
+            eventname.Location = new System.Drawing.Point(4, 26);
             eventname.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             eventname.Name = "eventname";
             eventname.Size = new System.Drawing.Size(71, 20);
@@ -387,70 +391,70 @@
             // 下パネルを隠すToolStripMenuItem
             // 
             下パネルを隠すToolStripMenuItem.Name = "下パネルを隠すToolStripMenuItem";
-            下パネルを隠すToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            下パネルを隠すToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
             下パネルを隠すToolStripMenuItem.Text = "下パネルを隠す";
             下パネルを隠すToolStripMenuItem.Click += 下パネルを隠すToolStripMenuItem_Click;
             // 
             // 下パネルを表示ToolStripMenuItem
             // 
             下パネルを表示ToolStripMenuItem.Name = "下パネルを表示ToolStripMenuItem";
-            下パネルを表示ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            下パネルを表示ToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
             下パネルを表示ToolStripMenuItem.Text = "下パネルを表示";
             下パネルを表示ToolStripMenuItem.Click += 下パネルを表示ToolStripMenuItem_Click;
             // 
             // クロマキー青
             // 
             クロマキー青.Name = "クロマキー青";
-            クロマキー青.Size = new System.Drawing.Size(224, 26);
+            クロマキー青.Size = new System.Drawing.Size(213, 26);
             クロマキー青.Text = "クロマキー青";
             クロマキー青.Click += クロマキー青_Click;
             // 
             // クロマキー赤
             // 
             クロマキー赤.Name = "クロマキー赤";
-            クロマキー赤.Size = new System.Drawing.Size(224, 26);
+            クロマキー赤.Size = new System.Drawing.Size(213, 26);
             クロマキー赤.Text = "クロマキー赤";
             クロマキー赤.Click += クロマキー赤_Click;
             // 
             // クロマキー緑
             // 
             クロマキー緑.Name = "クロマキー緑";
-            クロマキー緑.Size = new System.Drawing.Size(224, 26);
+            クロマキー緑.Size = new System.Drawing.Size(213, 26);
             クロマキー緑.Text = "クロマキー緑";
             クロマキー緑.Click += クロマキー緑_Click;
             // 
             // カラーキー今のメニューToolStripMenuItem
             // 
             カラーキー今のメニューToolStripMenuItem.Name = "カラーキー今のメニューToolStripMenuItem";
-            カラーキー今のメニューToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            カラーキー今のメニューToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
             カラーキー今のメニューToolStripMenuItem.Text = "カラーキー今のメニュー";
             カラーキー今のメニューToolStripMenuItem.Click += カラーキー今のメニューToolStripMenuItem_Click;
             // 
             // カラーキーなしToolStripMenuItem
             // 
             カラーキーなしToolStripMenuItem.Name = "カラーキーなしToolStripMenuItem";
-            カラーキーなしToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            カラーキーなしToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
             カラーキーなしToolStripMenuItem.Text = "カラーキーなし";
             カラーキーなしToolStripMenuItem.Click += カラーキーなしToolStripMenuItem_Click;
             // 
             // 文字白ToolStripMenuItem
             // 
             文字白ToolStripMenuItem.Name = "文字白ToolStripMenuItem";
-            文字白ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            文字白ToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
             文字白ToolStripMenuItem.Text = "文字　白";
             文字白ToolStripMenuItem.Click += 文字白ToolStripMenuItem_Click;
             // 
             // 文字黒ToolStripMenuItem
             // 
             文字黒ToolStripMenuItem.Name = "文字黒ToolStripMenuItem";
-            文字黒ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            文字黒ToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
             文字黒ToolStripMenuItem.Text = "文字　黒";
             文字黒ToolStripMenuItem.Click += 文字黒ToolStripMenuItem_Click;
             // 
             // フォントToolStripMenuItem
             // 
             フォントToolStripMenuItem.Name = "フォントToolStripMenuItem";
-            フォントToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            フォントToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
             フォントToolStripMenuItem.Text = "フォント";
             フォントToolStripMenuItem.Click += フォントToolStripMenuItem_Click;
             // 
