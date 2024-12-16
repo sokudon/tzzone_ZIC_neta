@@ -186,6 +186,33 @@ namespace neta
 
                                     }
 
+                                    if (tzh_timecnt == 0)
+                                    {
+                                        int type = 0;
+                                        string[][] transitionsn_zero = new string[1][];
+                                        transitionsn_zero[0] = new string[4];
+                                        transitionsn_zero[0][0] = "";
+                                        transitionsn_zero[0][1] = Convert.ToString(local_time_types_gmt[type]);
+                                        transitionsn_zero[0][2] = Convert.ToString(local_time_types_isdst[type]);
+
+                                        byte[] tmp2 = new byte[20];
+                                        Array.ConstrainedCopy(abbr, local_time_types_abbr[type], tmp2, 0, 10);
+                                        char[] charArray = ByteArrayToCharArray(tmp2, Encoding.UTF8);
+                                        transitionsn_zero[0][3] = TerminateAtNull(charArray);
+                                        if (tzcv)
+                                        {
+
+                                            transitionsn_zero[0][1] = Convert.ToString(Convert.ToDouble(local_time_types_gmt[type]) / 3600);
+                                        }
+                                            sb.Append("null");
+                                        sb.Append(",");
+                                        sb.Append(transitionsn_zero[0][1]);
+                                        sb.Append(",");
+                                        sb.Append(transitionsn_zero[0][2]);
+                                        sb.Append(",");
+                                        sb.AppendLine(transitionsn_zero[0][3]);
+                                    }
+
                                     string[][] transitions = new string[tzh_timecnt][];
                                     for (int i = 0; i < tzh_timecnt; i++)
                                     {
@@ -366,6 +393,32 @@ namespace neta
                                                 Array.ConstrainedCopy(bs, pos, isgmt, 0, tzh_ttisgmtcntn);
                                                 pos += tzh_ttisgmtcntn;
 
+                                            }
+
+                                            if (tzh_timecntn == 0)
+                                            {
+                                                int type = 0;
+                                                string[][] transitionsn_zero = new string[1][];
+                                                transitionsn_zero[0] = new string[4];
+                                                transitionsn_zero[0][0] = "";
+                                                transitionsn_zero[0][1] = Convert.ToString(local_time_types_gmtn[type]);
+                                                transitionsn_zero[0][2] = Convert.ToString(local_time_types_isdstn[type]);
+
+                                                byte[] tmp2 = new byte[20];
+                                                Array.ConstrainedCopy(abbr2, local_time_types_abbrn[type], tmp2, 0, 10);
+                                                char[] charArray = ByteArrayToCharArray(tmp2, Encoding.UTF8);
+                                                transitionsn_zero[0][3] = TerminateAtNull(charArray);
+                                                if (tzcv)
+                                                {
+                                                    transitionsn_zero[0][1] = Convert.ToString(Convert.ToDouble(local_time_types_gmtn[type]) / 3600);
+                                                }
+                                                sb.Append("null");
+                                                sb.Append(",");
+                                                sb.Append(transitionsn_zero[0][1]);
+                                                sb.Append(",");
+                                                sb.Append(transitionsn_zero[0][2]);
+                                                sb.Append(",");
+                                                sb.AppendLine(transitionsn_zero[0][3]);
                                             }
 
                                             string[][] transitionsn = new string[tzh_timecntn][];

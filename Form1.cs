@@ -136,9 +136,7 @@ namespace neta
             }
             else
             {
-
                 format = Regex.Replace(format, "%PO", match => posix);
-
             }
 
             if (DateTime.TryParse(startbox.Text, out st))
@@ -258,26 +256,46 @@ namespace neta
                         }
                         else
                         {
-                            //みつからなかったらUTC
+                            //みつからなかったらUTCのバイナリとみなす
+                            if (tzData.Offsets.Count>=1 && tzData.Offsets[0] !=0)
+                            {
+                                // マッチさせたい文字群を指定
+                                string pattern = @"[dfFgGhtHKkmMsTyz:/]";
+                                tzst = Regex.Replace(tzst, pattern, match => "\\" + match.Value);
 
-                            string pattern = @"(%TZ|%z|%Z)";
-                            format = Regex.Replace(format, pattern, match => "\\" + match.Value);
+                                double uo = tzData.Offsets[0];
+                                string abb = tzData.Abbrs[0];
+                                string uoff = ToCustomFormat(uo, true).ToString();
+                                abb = Regex.Replace(abb, pattern, match => "\\" + match.Value);
 
-                            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("UTC");
+                                format = format.Replace("%TZ", tzst).Replace("%Z", abb).Replace("%z", uoff).Replace("zzz", uoff);
+                                string patternn = @"(?<!\\)[Kz!""#$'&%]"; // 「\K \z」を無視し、「Kz」のみマッチ !"#$'&%はダメ文字
+                                format = Regex.Replace(format, patternn, match => "");
+                                format = format.Replace("%TZ", tzst).Replace("%Z", abb).Replace("%z", uoff).Replace("zzz", uoff);
+                                current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(uo).ToString(format);
+                                start.Text = "開始時間:" + st.ToUniversalTime().AddHours(uo).ToString(format);
+                                end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uo).ToString(format);
+                            }
+                            else {
+                                //UTC処理
+                                string pattern = @"(%TZ|%z|%Z)";
+                                format = Regex.Replace(format, pattern, match => "");
 
-                            DateTimeOffset ddt = DateTime.SpecifyKind(dt, DateTimeKind.Local);
-                            DateTimeOffset sst = DateTime.SpecifyKind(st, DateTimeKind.Local);
-                            DateTimeOffset een = DateTime.SpecifyKind(en, DateTimeKind.Local);
+                                TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("UTC");
 
-                            string formatd = getoffset(ddt, format, tzi);
-                            string formats = getoffset(sst, format, tzi);
-                            string formate = getoffset(een, format, tzi);
+                                DateTimeOffset ddt = DateTime.SpecifyKind(dt, DateTimeKind.Local);
+                                DateTimeOffset sst = DateTime.SpecifyKind(st, DateTimeKind.Local);
+                                DateTimeOffset een = DateTime.SpecifyKind(en, DateTimeKind.Local);
+
+                                string formatd = getoffset(ddt, format, tzi);
+                                string formats = getoffset(sst, format, tzi);
+                                string formate = getoffset(een, format, tzi);
 
 
-                            current.Text = "現在時間:" + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
-                            start.Text = "開始時間:" + TimeZoneInfo.ConvertTime(sst, tzi).ToString(formats);
-                            end.Text = "終了時間:" + TimeZoneInfo.ConvertTime(een, tzi).ToString(formate);
-
+                                current.Text = "現在時間:" + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
+                                start.Text = "開始時間:" + TimeZoneInfo.ConvertTime(sst, tzi).ToString(formats);
+                                end.Text = "終了時間:" + TimeZoneInfo.ConvertTime(een, tzi).ToString(formate);
+                            }
                         }
 
                     }

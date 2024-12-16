@@ -574,8 +574,34 @@ namespace neta
                     js.Append(@"""Abbrs"":" + @"[3]");
                     bool filter = Properties.Settings.Default.usefiler;
                     int max = tzh_timecntn - 1;
-
                     string[][] transitionsn = new string[tzh_timecntn][];
+                    if (tzh_timecntn == 0) {
+                        int type = 0;
+                        string[][] transitionsn_zero = new string[1][];
+                        transitionsn_zero[0] = new string[4];
+                        transitionsn_zero[0][0] = "";
+                        transitionsn_zero[0][1] = Convert.ToString(local_time_types_gmtn[type]);
+                        transitionsn_zero[0][2] = Convert.ToString(local_time_types_isdstn[type]);
+
+                        byte[] tmp2 = new byte[20];
+                        Array.ConstrainedCopy(abbr2, local_time_types_abbrn[type], tmp2, 0, 10);
+                        char[] charArray = ByteArrayToCharArray(tmp2, Encoding.UTF8);
+                        transitionsn_zero[0][3] = TerminateAtNull(charArray);
+
+                        tr = tr + transitionsn_zero[0][0] + @",";
+                        of = of + Convert.ToString(Convert.ToDouble(local_time_types_gmtn[type]) / 3600) + @",";
+                        ab = ab + @"""" + transitionsn_zero[0][3] + @""",";
+
+
+                        sb.Append("null");
+                        sb.Append(",");
+                        sb.Append(transitionsn_zero[0][1]);
+                        sb.Append(",");
+                        sb.Append(Convert.ToString(Convert.ToDouble(local_time_types_gmtn[type]) / 3600));
+                        sb.Append(",");
+                        sb.AppendLine(transitionsn_zero[0][3]);
+                    }
+
                     for (int i = 0; i < tzh_timecntn; i++)
                     {
                         int type = transition_typesn[i];
@@ -780,47 +806,73 @@ namespace neta
                     string utct = testDateTime.ToUniversalTime().ToString();
 
 
+                    string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
+                    string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
+                    TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(Properties.Settings.Default.mstime);
+                    DateTimeOffset ddt = DateTime.SpecifyKind(testDateTime, DateTimeKind.Local);
+
+                    string pattern = @"(%TZ|%z|%Z|%PO)";
+                    string format_ms = Regex.Replace(format, pattern, match => "");
+
+
+                    var o1 = tzi.GetUtcOffset(ddt);
+                    string st = o1.ToString();
+
+                    string rrp = Regex.Replace("+" + st, ":\\d\\d$", "");
+                    string rp2 = Regex.Replace("+" + st, ":\\d\\d:\\d\\d$", "");
+                    rrp = Regex.Replace(rrp, "\\+\\-", "-");
+                    rp2 = Regex.Replace(rp2, "\\+\\-", "-");
+
+                    string tmp = tzi.StandardName;
+
+                    var DST = tzi.IsDaylightSavingTime(ddt);
+                    if (DST)
+                    {
+                        tmp = tzi.DaylightName;
+                    }
+
+                    string format_mstz = format_ms.Replace("zzz", rrp).Replace("zz", rp2).Replace("z", rp2).Replace("K", tmp);
+
+                    format_ms = format_ms.Replace("K", rp).Replace("zzz", rp).Replace("zz", Properties.Settings.Default.useutch).Replace("z", Properties.Settings.Default.useutch);
+
+                    string ms_utc = testDateTime.ToUniversalTime().AddHours(Properties.Settings.Default.useutcint).ToString(format_ms);
+                    string ms_tz = TimeZoneInfo.ConvertTime(ddt, tzi).ToString(format_mstz);
+
                     if (lastTransitionIdx >= 0)
                     {
                         double uo = tzData.Offsets[lastTransitionIdx];
                         string abb = tzData.Abbrs[lastTransitionIdx];
                         string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss" + abb);
 
+                        sb.AppendLine(finaltz);
+                        sb.AppendLine("日付パースのてすと");
+                        sb.Append("M$ local:"); //local utc tzdate
+                        sb.AppendLine(localt);
+                        sb.Append("M$ UTC master:"); //local utc tzdate
+                        sb.AppendLine(ms_utc);
+                        sb.Append("M$ timezone:"); //local utc tzdate
+                        sb.AppendLine(ms_tz);
+                        sb.Append("utc:"); // utc tzdate
+                        sb.AppendLine(utct);
+                        sb.Append("tzdata iso8601+zone:"); // utc tzdate
+                        sb.AppendLine(iso8601tz);
+                        sb.AppendLine($"//tzdata_info\r\nLast transition index: --");
+                        sb.AppendLine($"Timestamp: null");
+                        sb.AppendLine($"Offset: {tzData.Offsets[0]}");
+                        sb.AppendLine($"Abbreviation: {tzData.Abbrs[0]}");
+                    }
+                    //みつからなかったらUTCのバイナリとみなす
+                    else if (tzData.Offsets.Count >= 1 && tzData.Abbrs[0] != "")
+                    {
+                        // マッチさせたい文字群を指定
+                        string patterntz = @"[dfFgGhtHKkmMsTyz:/]";
+                        tzst = Regex.Replace(tzst, patterntz, match => "\\" + match.Value);
 
-                        string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
-                        string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
-
-
-                        TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(Properties.Settings.Default.mstime);
-                        DateTimeOffset ddt = DateTime.SpecifyKind(testDateTime, DateTimeKind.Local);
-
-                        string pattern = @"(%TZ|%z|%Z)";
-                        string format_ms = Regex.Replace(format, pattern, match => "");
-
-
-                        var o1 = tzi.GetUtcOffset(ddt);
-                        string st = o1.ToString();
-
-                        string rrp = Regex.Replace("+" + st, ":\\d\\d$", "");
-                        string rp2 = Regex.Replace("+" + st, ":\\d\\d:\\d\\d$", "");
-                        rrp = Regex.Replace(rrp, "\\+\\-", "-");
-                        rp2 = Regex.Replace(rp2, "\\+\\-", "-");
-
-                        string tmp = tzi.StandardName;
-
-                        var DST = tzi.IsDaylightSavingTime(ddt);
-                        if (DST)
-                        {
-                            tmp = tzi.DaylightName;
-                        }
-
-                        string format_mstz = format_ms.Replace("zzz", rrp).Replace("zz", rp2).Replace("z", rp2).Replace("K", tmp);
-
-                        format_ms = format_ms.Replace("K", rp).Replace("zzz", rp).Replace("zz", Properties.Settings.Default.useutch).Replace("z", Properties.Settings.Default.useutch);
-
-                        string ms_utc = testDateTime.ToUniversalTime().AddHours(Properties.Settings.Default.useutcint).ToString(format_ms);
-                        string ms_tz =TimeZoneInfo.ConvertTime(ddt, tzi).ToString(format_mstz);
-
+                        double uo = tzData.Offsets[0];
+                        string abb = tzData.Abbrs[0];
+                        //string uoff = ToCustomFormat(uo, true).ToString();
+                        // abb = Regex.Replace(abb, pattern, match => "\\" + match.Value);
+                        string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss" + abb);
 
                         sb.AppendLine(finaltz);
                         sb.AppendLine("日付パースのてすと");
@@ -835,15 +887,26 @@ namespace neta
                         sb.Append("tzdata iso8601+zone:"); // utc tzdate
                         sb.AppendLine(iso8601tz);
                         sb.AppendLine($"//tzdata_info\r\nLast transition index: {lastTransitionIdx}");
-                        sb.AppendLine($"Timestamp: {tzData.TransList[lastTransitionIdx]}");
-                        sb.AppendLine($"Offset: {tzData.Offsets[lastTransitionIdx]}");
-                        sb.AppendLine($"Abbreviation: {tzData.Abbrs[lastTransitionIdx]}");
+                        sb.AppendLine($"Timestamp: null");
+                        sb.AppendLine($"Offset: {tzData.Offsets[0]}");
+                        sb.AppendLine($"Abbreviation: {tzData.Abbrs[0]}");
                     }
                     else
                     {
                         string iso8601tz = testDateTime.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ssUTC");
+
                         sb.AppendLine("期間内に偏移ファイルがみつかりませんでした、暫定でUTCになります");
-                        sb.AppendLine("日付パースのてすと\r\nllocal utc tzdate:" + localt + "\r\n" + utct + "\r\n" + iso8601tz);
+                        sb.AppendLine("日付パースのてすと");
+                        sb.Append("M$ local:"); //local utc tzdate
+                        sb.AppendLine(localt);
+                        sb.Append("M$ UTC master:"); //local utc tzdate
+                        sb.AppendLine(ms_utc);
+                        sb.Append("M$ timezone:"); //local utc tzdate
+                        sb.AppendLine(ms_tz);
+                        sb.Append("utc:"); // utc tzdate
+                        sb.AppendLine(utct);
+                        sb.Append("tzdata iso8601+zone:"); // utc tzdate
+                        sb.AppendLine(iso8601tz);
                     }
                 }
                 else
