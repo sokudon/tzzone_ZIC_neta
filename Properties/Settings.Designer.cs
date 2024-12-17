@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/16")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/17")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -417,6 +417,102 @@ namespace neta.Properties {
             }
             set {
                 this["footerstring"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string freeevent {
+            get {
+                return ((string)(this["freeevent"]));
+            }
+            set {
+                this["freeevent"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string freest {
+            get {
+                return ((string)(this["freest"]));
+            }
+            set {
+                this["freest"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string freeend {
+            get {
+                return ((string)(this["freeend"]));
+            }
+            set {
+                this["freeend"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("メイリオ, 12pt, style=Bold")]
+        public global::System.Drawing.Font uifont {
+            get {
+                return ((global::System.Drawing.Font)(this["uifont"]));
+            }
+            set {
+                this["uifont"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Black")]
+        public global::System.Drawing.Color uicolor {
+            get {
+                return ((global::System.Drawing.Color)(this["uicolor"]));
+            }
+            set {
+                this["uicolor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Menu")]
+        public global::System.Drawing.Color bgcolor {
+            get {
+                return ((global::System.Drawing.Color)(this["bgcolor"]));
+            }
+            set {
+                this["bgcolor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool uihide {
+            get {
+                return ((bool)(this["uihide"]));
+            }
+            set {
+                this["uihide"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string system_tz {
+            get {
+                return ((string)(this["system_tz"]));
+            }
+            set {
+                this["system_tz"] = value;
             }
         }
     }

@@ -65,11 +65,13 @@
             クロマキー青 = new System.Windows.Forms.ToolStripMenuItem();
             クロマキー赤 = new System.Windows.Forms.ToolStripMenuItem();
             クロマキー緑 = new System.Windows.Forms.ToolStripMenuItem();
+            めにゅーの色に戻すToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             カラーキー今のメニューToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             カラーキーなしToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             文字白ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             文字黒ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             フォントToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            画像ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -98,6 +100,7 @@
             startbox.Size = new System.Drawing.Size(281, 27);
             startbox.TabIndex = 1;
             startbox.Text = "2020-12-16T06:00:00Z";
+            startbox.TextChanged += startbox_TextChanged;
             // 
             // endbox
             // 
@@ -109,6 +112,7 @@
             endbox.Size = new System.Drawing.Size(283, 27);
             endbox.TabIndex = 2;
             endbox.Text = "2020/12/17 21:00";
+            endbox.TextChanged += endbox_TextChanged;
             // 
             // elapsed
             // 
@@ -147,7 +151,7 @@
             panel1.Location = new System.Drawing.Point(36, 48);
             panel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             panel1.Name = "panel1";
-            panel1.Size = new System.Drawing.Size(576, 317);
+            panel1.Size = new System.Drawing.Size(576, 320);
             panel1.TabIndex = 6;
             // 
             // parcent
@@ -224,7 +228,7 @@
             button2.Name = "button2";
             button2.Size = new System.Drawing.Size(120, 47);
             button2.TabIndex = 7;
-            button2.Text = "ぐぐるから取得";
+            button2.Text = "JSON更新";
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
             // 
@@ -238,6 +242,7 @@
             ibemei.Size = new System.Drawing.Size(283, 27);
             ibemei.TabIndex = 8;
             ibemei.Text = "ibemei";
+            ibemei.TextChanged += ibemei_TextChanged;
             // 
             // panel2
             // 
@@ -283,13 +288,13 @@
             comboBox1.BackColor = System.Drawing.Color.White;
             comboBox1.ForeColor = System.Drawing.Color.Black;
             comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "シャニマス", "でれすて", "みりした", "プロセカ", "かすたむJS" });
+            comboBox1.Items.AddRange(new object[] { "学ます", "でれすて", "みりした", "シャニマス", "シャニソン", "ユメステ", "プロセカ", "プロセカグローバル", "プロセカ韓国", "かすたむJS", "フリー入力" });
             comboBox1.Location = new System.Drawing.Point(324, 23);
             comboBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new System.Drawing.Size(121, 28);
             comboBox1.TabIndex = 9;
-            comboBox1.Text = "シャニマス";
+            comboBox1.Text = "学ます";
             comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
             // 
             // timer1
@@ -299,6 +304,7 @@
             // 
             // menuStrip1
             // 
+            menuStrip1.BackColor = System.Drawing.SystemColors.Menu;
             menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { 時刻設定ToolStripMenuItem, 外部つーるへエクスポートToolStripMenuItem, バージョンToolStripMenuItem, netaToolStripMenuItem, 色の設定ToolStripMenuItem });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -382,7 +388,7 @@
             // 色の設定ToolStripMenuItem
             // 
             色の設定ToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
-            色の設定ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 下パネルを隠すToolStripMenuItem, 下パネルを表示ToolStripMenuItem, クロマキー青, クロマキー赤, クロマキー緑, カラーキー今のメニューToolStripMenuItem, カラーキーなしToolStripMenuItem, 文字白ToolStripMenuItem, 文字黒ToolStripMenuItem, フォントToolStripMenuItem });
+            色の設定ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 下パネルを隠すToolStripMenuItem, 下パネルを表示ToolStripMenuItem, クロマキー青, クロマキー赤, クロマキー緑, めにゅーの色に戻すToolStripMenuItem, カラーキー今のメニューToolStripMenuItem, カラーキーなしToolStripMenuItem, 文字白ToolStripMenuItem, 文字黒ToolStripMenuItem, フォントToolStripMenuItem, 画像ToolStripMenuItem });
             色の設定ToolStripMenuItem.ForeColor = System.Drawing.Color.Black;
             色の設定ToolStripMenuItem.Name = "色の設定ToolStripMenuItem";
             色の設定ToolStripMenuItem.Size = new System.Drawing.Size(80, 24);
@@ -423,6 +429,13 @@
             クロマキー緑.Text = "クロマキー緑";
             クロマキー緑.Click += クロマキー緑_Click;
             // 
+            // めにゅーの色に戻すToolStripMenuItem
+            // 
+            めにゅーの色に戻すToolStripMenuItem.Name = "めにゅーの色に戻すToolStripMenuItem";
+            めにゅーの色に戻すToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
+            めにゅーの色に戻すToolStripMenuItem.Text = "めにゅーの色に戻す";
+            めにゅーの色に戻すToolStripMenuItem.Click += めにゅーの色に戻すToolStripMenuItem_Click;
+            // 
             // カラーキー今のメニューToolStripMenuItem
             // 
             カラーキー今のメニューToolStripMenuItem.Name = "カラーキー今のメニューToolStripMenuItem";
@@ -457,6 +470,13 @@
             フォントToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
             フォントToolStripMenuItem.Text = "フォント";
             フォントToolStripMenuItem.Click += フォントToolStripMenuItem_Click;
+            // 
+            // 画像ToolStripMenuItem
+            // 
+            画像ToolStripMenuItem.Name = "画像ToolStripMenuItem";
+            画像ToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
+            画像ToolStripMenuItem.Text = "画像";
+            画像ToolStripMenuItem.Click += 画像ToolStripMenuItem_Click;
             // 
             // NETA_TIMER
             // 
@@ -529,6 +549,8 @@
         private System.Windows.Forms.ToolStripMenuItem 文字白ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 文字黒ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem フォントToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem めにゅーの色に戻すToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 画像ToolStripMenuItem;
     }
 }
 

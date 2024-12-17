@@ -25,6 +25,7 @@ using System.Text.Json;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Collections;
 using static System.Windows.Forms.AxHost;
+using System.Diagnostics.Metrics;
 
 
 namespace neta
@@ -165,7 +166,7 @@ namespace neta
                     string pattern = @"(%TZ|%z|%Z)";
                     format = Regex.Replace(format, pattern, match => "");
                     string patternn = @"(?<!\\)[!""#$'&%]"; // 「\K \z」を無視し、「Kz」のみマッチ !"#$'&%はダメ文字
-                    format = Regex.Replace(format, pattern, match => "");
+                    format = Regex.Replace(format, patternn, match => "");
                     format = Regex.Replace(format, "%PO", match => "");
                 }
                 else
@@ -648,18 +649,21 @@ namespace neta
                             TimeSpan utcOffset = TimeSpan.FromHours(localTimeOffseth);
                             // TotalHours で符号を判定
                             double totalHours = utcOffset.TotalHours; // 全体の時間（小数部分を含む）
+
                             string sign = totalHours >= 0 ? "+" : "-";
                             // HH と MM を取得
-                            int hours = (int)Math.Abs(totalHours); // 絶対値を取った整数部の時間
-                            double totalMinutes = Math.Abs(utcOffset.TotalMinutes % 60); // 分部分（絶対値）
+                            int hours = (int)Math.Abs(utcOffset.Hours); // 絶対値を取った整数部の時間
+                            int minutes = (int)Math.Abs(utcOffset.Minutes); // 絶対値を取った整数部の時間
+                            int seconds = (int)Math.Abs(utcOffset.Seconds); // 絶対値を取った整数部の時間
 
                             // フォーマット
-                            string formattedOffset = $"{sign}{hours:00}:{totalMinutes:00.00}";
+                            //string formattedOffset = $"{sign}{hours:00}:{totalMinutes:00.00}";
+                            string formattedOffset = $"{sign}{hours:00}:{minutes:00}:{seconds:00}";
 
                             try
                             {
                                 // HH:MM の形式に変換可能かどうかを判定
-                                if (utcOffset.Seconds == 0)
+                                if (utcOffset.TotalSeconds % 60 == 0)
                                 {
                                     // HH:MM 形式が可能
                                     DateTimeOffset dateTimeWithOffset = DateTimeOffset
@@ -777,7 +781,7 @@ namespace neta
             sb.AppendLine();
             sb.AppendLine();
             sb.AppendLine(mkjson);
-            Properties.Settings.Default.footerstring = footer;
+            Properties.Settings.Default.footerstring = footer.Replace("\n","");
 
             try
             {
@@ -796,20 +800,20 @@ namespace neta
                 Properties.Settings.Default.TZJSON = mkjson;
 
                 // TryParseを使って文字列をDateTimeに変換
-                if (DateTime.TryParse(tester, out testDateTime))
+                if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(tester, out testDateTime) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(tester, out testDateTime))
                 {
 
 
                     int lastTransitionIdx = tzTransitions.FindLastTransition(testDateTime);
 
-                    string localt = testDateTime.ToString();
+                    string localt = testDateTime.ToLocalTime().ToString();
                     string utct = testDateTime.ToUniversalTime().ToString();
 
 
                     string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
                     string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
                     TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(Properties.Settings.Default.mstime);
-                    DateTimeOffset ddt = DateTime.SpecifyKind(testDateTime, DateTimeKind.Local);
+                    DateTimeOffset ddt = DateTime.SpecifyKind(testDateTime.ToLocalTime(), DateTimeKind.Local);
 
                     string pattern = @"(%TZ|%z|%Z|%PO)";
                     string format_ms = Regex.Replace(format, pattern, match => "");
@@ -846,6 +850,8 @@ namespace neta
 
                         sb.AppendLine(finaltz);
                         sb.AppendLine("日付パースのてすと");
+                        sb.Append("入力: ");
+                        sb.AppendLine(tester);                       
                         sb.Append("M$ local:"); //local utc tzdate
                         sb.AppendLine(localt);
                         sb.Append("M$ UTC master:"); //local utc tzdate
@@ -871,11 +877,13 @@ namespace neta
                         double uo = tzData.Offsets[0];
                         string abb = tzData.Abbrs[0];
                         //string uoff = ToCustomFormat(uo, true).ToString();
-                        // abb = Regex.Replace(abb, pattern, match => "\\" + match.Value);
+                        abb = Regex.Replace(abb, patterntz, match => "\\" + match.Value);
                         string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss" + abb);
 
                         sb.AppendLine(finaltz);
                         sb.AppendLine("日付パースのてすと");
+                        sb.Append("入力: ");
+                        sb.AppendLine(tester);
                         sb.Append("M$ local:"); //local utc tzdate
                         sb.AppendLine(localt);
                         sb.Append("M$ UTC master:"); //local utc tzdate
@@ -897,6 +905,8 @@ namespace neta
 
                         sb.AppendLine("期間内に偏移ファイルがみつかりませんでした、暫定でUTCになります");
                         sb.AppendLine("日付パースのてすと");
+                        sb.Append("入力: ");
+                        sb.AppendLine(tester);
                         sb.Append("M$ local:"); //local utc tzdate
                         sb.AppendLine(localt);
                         sb.Append("M$ UTC master:"); //local utc tzdate
@@ -1123,12 +1133,15 @@ namespace neta
 
         private void textBox6_TextChanged(object sender, EventArgs e)
         {
-            DateTime d;
-            if (DateTime.TryParse(textBox6.Text, out d)) { 
+            string tester = textBox6.Text;
+            DateTime testDateTime;
+            if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(tester, out testDateTime) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(tester, out testDateTime)) { 
+
                 Properties.Settings.Default.datetester = textBox6.Text;
-            }
+        }
         }
 
+        //https://github.com/dotnet/corert/blob/master/src/System.Private.CoreLib/shared/System/TimeZoneInfo.Unix.cs m$財団のソース
         private readonly struct TZifHead
         {
             public const int Length = 44;

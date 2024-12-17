@@ -4,21 +4,14 @@ using System.Windows.Forms;
 using System.Net;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Diagnostics.Eventing.Reader;
 using Codeplex.Data;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using static neta.dtformat;
-using System.Web;
-using System.Text.Json;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using static System.Windows.Forms.DataFormats;
 using System.Runtime.Intrinsics.X86;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
+using Microsoft.Win32;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using TZPASER;
 
 namespace neta
 {
@@ -36,7 +29,7 @@ namespace neta
         {
         }
 
-        void SetFontRecursive(Control parent, Font font)
+        void SetFontRecursive(Control parent, System.Drawing.Font font)
         {
             foreach (Control control in parent.Controls)
             {
@@ -50,7 +43,7 @@ namespace neta
 
 
         string url = "https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec";
-        string[] game = { "shanimasu", "deresute", "mirsita", "proseka", "saisuta", "mirikr", "miricn", "sidem", "mobamasu" };
+        string[] game = { "mirikr", "deresute", "mirsita", "shanimasu", "saisuta", "miricn", "proseka", "mobamasu", "sidem" };
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -66,19 +59,26 @@ namespace neta
                 button3_Click(sender, e);
                 return;
             }
+            if (comboBox1.Text == "フリー入力")
+            {
+                return;
+            }
 
 
             try
             {
-                var url2 = url + "?game=" + game[selecter];
+                var url2 = url + "?game=all"; //+ game[selecter];
                 string text = wc.DownloadString(url2);
                 var obj = Codeplex.Data.DynamicJson.Parse(text);
+                string path = "/data/" + game[selecter] + "/name," +
+                    "/data/" + game[selecter] + "/start," +
+                    "/data/" + game[selecter] + "/end";
 
+                get_json_parse(url2, text, path, false);
 
-
-                ibemei.Text = obj.data.name;
-                startbox.Text = obj.data.start;
-                endbox.Text = obj.data.end;
+                //ibemei.Text = obj.data[game[selecter]].name;
+                //startbox.Text = obj.data[game[selecter]].start;
+                //endbox.Text = obj.data[game[selecter]].end;
 
 
                 Properties.Settings.Default.json = text;
@@ -99,6 +99,51 @@ namespace neta
             this.comboBox1.Text = Properties.Settings.Default.goog;
             this.progressBar1.Width = Properties.Settings.Default.barlen;
             this.parcent.Left = Properties.Settings.Default.parcent;
+
+
+            this.Font = Properties.Settings.Default.uifont;
+            this.ForeColor = Properties.Settings.Default.uicolor;
+            this.BackColor = Properties.Settings.Default.bgcolor;
+
+            this.eventname.BackColor = Properties.Settings.Default.bgcolor;
+            this.current.BackColor = Properties.Settings.Default.bgcolor;
+            this.panel1.BackColor = Properties.Settings.Default.bgcolor;
+
+            this.eventname.Font = Properties.Settings.Default.uifont;
+            this.current.Font = Properties.Settings.Default.uifont;
+            this.elapsed.Font = Properties.Settings.Default.uifont;
+
+            this.eventname.ForeColor = Properties.Settings.Default.uicolor;
+            this.current.ForeColor = Properties.Settings.Default.uicolor;
+            panel1.ForeColor = Properties.Settings.Default.uicolor;
+
+            this.panel2.Visible = Properties.Settings.Default.uihide;
+
+            Properties.Settings.Default.system_tz = TimeZoneInfo.Local.Id;
+
+            // using Microsoft.Win32;
+            // システム時間変更時のイベントハンドラを登録
+            SystemEvents.TimeChanged += new EventHandler(SystemEvents_TimeChanged);
+        }
+
+        // システム時間変更イベントハンドラ
+        private void SystemEvents_TimeChanged(object sender, EventArgs e)
+        {
+            //Console.WriteLine("OS のタイムゾーンが変更されました。");
+
+            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+            //OLD
+            //MessageBox.Show("現在時間：" + DateTime.Now.ToString() + localTimeZone.Id.ToString());
+
+            // キャッシュをクリアして、最新のタイムゾーンを取得
+            TimeZoneInfo.ClearCachedData();
+            localTimeZone = TimeZoneInfo.Local;
+
+            //Console.WriteLine($"現在のタイムゾーン: {localTimeZone.DisplayName}");
+            // 変更後のシステム時間をコンソールへ出力
+            Properties.Settings.Default.system_tz = localTimeZone.Id;
+            //NEW
+            //MessageBox.Show("現在時間：" + DateTime.Now.ToString()+ localTimeZone.ToString());
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -110,6 +155,9 @@ namespace neta
             Properties.Settings.Default.goog = this.comboBox1.Text;
 
             Properties.Settings.Default.Save();
+            // using Microsoft.Win32;
+            // イベントハンドラを削除（削除しないとメモリリークが発生する）
+            SystemEvents.TimeChanged -= new EventHandler(SystemEvents_TimeChanged);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -128,43 +176,43 @@ namespace neta
             DateTime en;//= DateTime.Parse(endbox.Text);
             if (!tz)
             {
-                string pattern = @"(%TZ|%z|%Z)";
+                string pattern = @"(%TZ|%z|%Z|%PO)";
                 format = Regex.Replace(format, pattern, match => "");
                 string patternn = @"(?<!\\)[!""#$'&%]"; // 「\K \z」を無視し、「Kz」のみマッチ !"#$'&%はダメ文字
-                format = Regex.Replace(format, pattern, match => "");
-                format = Regex.Replace(format, "%PO", match => "");
+                format = Regex.Replace(format, patternn, match => "");
             }
             else
             {
-                format = Regex.Replace(format, "%PO", match => posix);
+                string pattern = @"[dfFgGhtHKkmMsTyz:/]";
+                string po = Regex.Replace(posix, pattern, match => "\\" + match.Value);
+                format = Regex.Replace(format, "%PO", match => po);
             }
-
-            if (DateTime.TryParse(startbox.Text, out st))
+            if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(startbox.Text, out st) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(startbox.Text, out st))
             {
 
             }
             else
             {
 
-                start.Text = "invalid date(ex: 2020/12/18 21:00 or 2020-12-18T21:00:00+09:00)";
-                elapsed.Text = "--";
-                left.Text = "--";
-                duration.Text = "--";
+                current.Text = "invalid date(ex: supoort format";
+                elapsed.Text = "NOMARL: 2020/12/18 21:00  <-this convert Localtime OS denpending";
+                left.Text = "ISO8601: 2020-12-18T21:00:00+09:00";
+                duration.Text = "RFC2822: Sun, 10 Mar 2024 03:00:00 PDT)";
 
                 return;
             }
-            if (DateTime.TryParse(endbox.Text, out en))
+
+            if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(endbox.Text, out en) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(endbox.Text, out en))
             {
 
             }
             else
             {
 
-                end.Text = "invalid date(ex: 2020/12/18 21:00 or 2020-12-18T21:00:00+09:00)";
-                elapsed.Text = "--";
-
-                left.Text = "--";
-                duration.Text = "--";
+                current.Text = "invalid date(ex: supoort format";
+                elapsed.Text = "NOMARL: 2020/12/18 21:00  <-this convert Localtime OS denpending";
+                left.Text = "ISO8601: 2020-12-18T21:00:00+09:00";
+                duration.Text = "RFC2822: Sun, 10 Mar 2024 03:00:00 PDT)";
 
                 return;
             }
@@ -182,13 +230,13 @@ namespace neta
 
                 TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(Properties.Settings.Default.mstime);
 
-                DateTimeOffset ddt = DateTime.SpecifyKind(dt, DateTimeKind.Local);
-                DateTimeOffset sst = DateTime.SpecifyKind(st, DateTimeKind.Local);
-                DateTimeOffset een = DateTime.SpecifyKind(en, DateTimeKind.Local);
+                DateTimeOffset ddt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+                DateTimeOffset sst = DateTime.SpecifyKind(st, DateTimeKind.Utc);
+                DateTimeOffset een = DateTime.SpecifyKind(en, DateTimeKind.Utc);
 
-                string formatd = getoffset(ddt, format, tzi);
-                string formats = getoffset(sst, format, tzi);
-                string formate = getoffset(een, format, tzi);
+                string formatd = TZPASER.TimeZoneOffsetParser.getoffset(ddt, format, tzi);
+                string formats = TZPASER.TimeZoneOffsetParser.getoffset(sst, format, tzi);
+                string formate = TZPASER.TimeZoneOffsetParser.getoffset(een, format, tzi);
 
 
                 current.Text = "現在時間:" + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
@@ -229,35 +277,35 @@ namespace neta
 
                             double uo = tzData.Offsets[lastTransitionIdx];
                             string abb = tzData.Abbrs[lastTransitionIdx];
-                            string uoff = ToCustomFormat(uo, true).ToString();
+                            string uoff = TZPASER.TimeZoneOffsetParser.ToCustomFormat(uo, true).ToString();
                             abb = Regex.Replace(abb, pattern, match => "\\" + match.Value);
 
                             double uoc = tzData.Offsets[lastTransitionIdx_s];
                             string abbc = tzData.Abbrs[lastTransitionIdx_s];
-                            string uoffc = ToCustomFormat(uoc, true).ToString();
+                            string uoffc = TZPASER.TimeZoneOffsetParser.ToCustomFormat(uoc, true).ToString();
                             abbc = Regex.Replace(abbc, pattern, match => "\\" + match.Value);
 
                             double uoe = tzData.Offsets[lastTransitionIdx_d];
                             string abbe = tzData.Abbrs[lastTransitionIdx_d];
-                            string uoffe = ToCustomFormat(uoe, true).ToString();
+                            string uoffe = TZPASER.TimeZoneOffsetParser.ToCustomFormat(uoe, true).ToString();
                             abbe = Regex.Replace(abbe, pattern, match => "\\" + match.Value);
 
-                            format = format.Replace("%TZ", tzst).Replace("%Z", abb).Replace("%z", uoff).Replace("zzz", uoff);
+                            string formatc = format.Replace("%TZ", tzst).Replace("%Z", abb).Replace("%z", uoff).Replace("zzz", uoff);
                             string formats = format.Replace("%TZ", tzst).Replace("%Z", abbc).Replace("%z", uoffc).Replace("zzz", uoffc);
                             string formate = format.Replace("%TZ", tzst).Replace("%Z", abbe).Replace("%z", uoffe).Replace("zzz", uoffe);
                             string patternn = @"(?<!\\)[Kz!""#$'&%]"; // 「\K \z」を無視し、「Kz」のみマッチ !"#$'&%はダメ文字
-                            format = Regex.Replace(format, patternn, match => "");
+                            formatc = Regex.Replace(formatc, patternn, match => "");
                             formats = Regex.Replace(formats, patternn, match => "");
                             formate = Regex.Replace(formate, patternn, match => "");
 
-                            current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(uo).ToString(format);
+                            current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(uo).ToString(formatc);
                             start.Text = "開始時間:" + st.ToUniversalTime().AddHours(uoc).ToString(formats);
                             end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uoe).ToString(formate);
                         }
                         else
                         {
                             //みつからなかったらUTCのバイナリとみなす
-                            if (tzData.Offsets.Count>=1 && tzData.Offsets[0] !=0)
+                            if (tzData.Offsets.Count >= 1 && tzData.Abbrs[0] != "")
                             {
                                 // マッチさせたい文字群を指定
                                 string pattern = @"[dfFgGhtHKkmMsTyz:/]";
@@ -265,7 +313,7 @@ namespace neta
 
                                 double uo = tzData.Offsets[0];
                                 string abb = tzData.Abbrs[0];
-                                string uoff = ToCustomFormat(uo, true).ToString();
+                                string uoff = TZPASER.TimeZoneOffsetParser.ToCustomFormat(uo, true).ToString();
                                 abb = Regex.Replace(abb, pattern, match => "\\" + match.Value);
 
                                 format = format.Replace("%TZ", tzst).Replace("%Z", abb).Replace("%z", uoff).Replace("zzz", uoff);
@@ -276,20 +324,21 @@ namespace neta
                                 start.Text = "開始時間:" + st.ToUniversalTime().AddHours(uo).ToString(format);
                                 end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uo).ToString(format);
                             }
-                            else {
+                            else
+                            {
                                 //UTC処理
                                 string pattern = @"(%TZ|%z|%Z)";
                                 format = Regex.Replace(format, pattern, match => "");
 
                                 TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("UTC");
 
-                                DateTimeOffset ddt = DateTime.SpecifyKind(dt, DateTimeKind.Local);
-                                DateTimeOffset sst = DateTime.SpecifyKind(st, DateTimeKind.Local);
-                                DateTimeOffset een = DateTime.SpecifyKind(en, DateTimeKind.Local);
+                                DateTimeOffset ddt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+                                DateTimeOffset sst = DateTime.SpecifyKind(st, DateTimeKind.Utc);
+                                DateTimeOffset een = DateTime.SpecifyKind(en, DateTimeKind.Utc);
 
-                                string formatd = getoffset(ddt, format, tzi);
-                                string formats = getoffset(sst, format, tzi);
-                                string formate = getoffset(een, format, tzi);
+                                string formatd = TZPASER.TimeZoneOffsetParser.getoffset(ddt, format, tzi);
+                                string formats = TZPASER.TimeZoneOffsetParser.getoffset(sst, format, tzi);
+                                string formate = TZPASER.TimeZoneOffsetParser.getoffset(een, format, tzi);
 
 
                                 current.Text = "現在時間:" + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
@@ -302,7 +351,7 @@ namespace neta
                     catch (Exception ex)
                     {
                         current.Text = "例外発生";
-                        start.Text = "えらー:tzdbを変換したJSONエラーかTZDBを削りすぎてる可能性があります";
+                        start.Text = "えらー:tzdbを変換したJSONが空か以上があります";
                         end.Text = ex.ToString();
                     }
 
@@ -310,15 +359,18 @@ namespace neta
             }
             else
             {
-                current.Text = "現在時間:" + dt.ToString(format);
-                start.Text = "開始時間:" + st.ToString(format);
-                end.Text = "終了時間:" + en.ToString(format);
+
+                current.Text = "現在時間:" + dt.ToLocalTime().ToString(format);
+                start.Text = "開始時間:" + st.ToLocalTime().ToString(format);
+                end.Text = "終了時間:" + en.ToLocalTime().ToString(format);
             }
+
+            string L_format = Properties.Settings.Default.lefttimeformat;
 
             if (st < dt)
             {
                 TimeSpan elapsedSpan = dt - st;
-                elapsed.Text = "経過時間:" + getleft(elapsedSpan);
+                elapsed.Text = "経過時間:" + TZPASER.TimeZoneOffsetParser.getleft(elapsedSpan, L_format);
             }
             else
             {
@@ -330,7 +382,7 @@ namespace neta
             if (en > dt)
             {
                 TimeSpan leftSpan = en - dt;
-                left.Text = "残り時間:" + getleft(leftSpan);
+                left.Text = "残り時間:" + TZPASER.TimeZoneOffsetParser.getleft(leftSpan, L_format);
             }
             else
             {
@@ -339,7 +391,7 @@ namespace neta
 
             TimeSpan drationSpan = en - st;
 
-            duration.Text = "イベ期間:" + getleft(drationSpan);
+            duration.Text = "イベ期間:" + TZPASER.TimeZoneOffsetParser.getleft(drationSpan, L_format);
 
             double bar = (dt - st).TotalSeconds / (en - st).TotalSeconds * 100;
             bar = Math.Round(bar, 2, MidpointRounding.AwayFromZero);
@@ -357,91 +409,8 @@ namespace neta
 
         }
 
-        //https://chatgpt.com/c/675c1ac5-6f48-800f-b683-ae9745604c89
-        static string ToCustomFormat(double value, bool useColon)
-        {
-            // 符号を取得
-            string sign = value >= 0 ? "+" : "-";
-
-            // 絶対値を取得
-            double absValue = Math.Abs(value);
-
-            // 整数部と小数部を分ける
-            int hours = (int)Math.Floor(absValue);
-            int minutes = (int)Math.Round((absValue - hours) * 60);
-
-            // 時間が60分を超える場合の調整（丸め処理のため）
-            if (minutes == 60)
-            {
-                hours += 1;
-                minutes = 0;
-            }
-
-            // 書式を整える
-            if (useColon)
-            {
-                return $"{sign}{hours:D2}:{minutes:D2}";
-            }
-            else
-            {
-                return $"{sign}{hours:D2}{minutes:D2}";
-            }
-        }
-
-        private string getoffset(DateTimeOffset dt, string format, TimeZoneInfo tz)
-        {
-            var o1 = tz.GetUtcOffset(dt);
-            string st = o1.ToString();
-
-            string rp = Regex.Replace("+" + st, ":\\d\\d$", "");
-            string rp2 = Regex.Replace("+" + st, ":\\d\\d:\\d\\d$", "");
-            rp = Regex.Replace(rp, "\\+\\-", "-");
-            rp2 = Regex.Replace(rp2, "\\+\\-", "-");
-
-            string tmp = tz.StandardName;
-
-            var DST = tz.IsDaylightSavingTime(dt);
-            if (DST)
-            {
-                tmp = tz.DaylightName;
-            }
-
-            format = format.Replace("zzz", rp).Replace("zz", rp2).Replace("z", rp2).Replace("K", tmp);
 
 
-            return format;
-        }
-
-        private string getleft(TimeSpan tspan)
-        {
-            string leftformat = Properties.Settings.Default.lefttimeformat;
-
-            string dd = tspan.Days.ToString();
-            string hh = tspan.Hours.ToString("00");
-            string mm = tspan.Minutes.ToString("00");
-            string ss = tspan.Seconds.ToString("00");
-
-            string h = tspan.Hours.ToString("0");
-            string m = tspan.Minutes.ToString("0");
-            string s = tspan.Seconds.ToString("0");
-
-            string ds = tspan.TotalDays.ToString("0.000");
-            string hs = tspan.TotalHours.ToString("0.000");
-
-            string MM = tspan.TotalDays.ToString("#");
-            string HH = tspan.TotalHours.ToString("#");
-
-            string[] rp = { HH, MM, ds, hs, dd, hh, mm, ss, h, m, s };
-            string[] rpb = { "HH", "MM", "ds", "hs", "dd", "hh", "mm", "ss", "h", "m", "s" };
-
-            string left = leftformat;
-            for (var i = 0; i < rp.Length; i++)
-            {
-                left = left.Replace(rpb[i], rp[i]);
-            }
-
-            return left;
-        }
 
 
         private void button1_Click_1(object sender, EventArgs e)
@@ -530,7 +499,13 @@ namespace neta
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            if (comboBox1.Text == "フリー入力")
+            {
+                ibemei.Text = Properties.Settings.Default.freeevent;
+                startbox.Text = Properties.Settings.Default.freest;
+                endbox.Text = Properties.Settings.Default.freeend;
+                return;
+            }
 
             if (comboBox1.Text == "かすたむJS")
             {
@@ -540,30 +515,242 @@ namespace neta
 
             try
             {
-
-
+                var url2 = url + "?game=all"; //+ game[selecter];
+                string text = Properties.Settings.Default.json;
                 var selecter = comboBox1.SelectedIndex;
-                WebClient wc = new WebClient();
+                if (text == "")
+                {
+                    WebClient wc = new WebClient();
 
-                wc.Encoding = Encoding.UTF8;
-                var url2 = url + "?game=" + game[selecter];
-                string text = wc.DownloadString(url2);
+                    wc.Encoding = Encoding.UTF8;
+                    text = wc.DownloadString(url2);
+                    wc.Dispose();
+                    Properties.Settings.Default.json = text;
+                }
+
                 var obj = Codeplex.Data.DynamicJson.Parse(text);
+                string path = "/data/" + game[selecter] + "/name," +
+                    "/data/" + game[selecter] + "/start," +
+                    "/data/" + game[selecter] + "/end";
+
+                get_json_parse(url2, text, path, false);
+
+                //string text = Properties.Settings.Default.json;
+                //var selecter = comboBox1.SelectedIndex;
+                //var obj = Codeplex.Data.DynamicJson.Parse(text);
+
+                //if (text == "") { 
+                //WebClient wc = new WebClient();
+
+                //wc.Encoding = Encoding.UTF8;
+                //    var url2 = url + "?game=all"; //+ game[selecter];
+                //text = wc.DownloadString(url2);
+                //wc.Dispose();
+                //Properties.Settings.Default.json = text;
+                //}
 
 
 
-                ibemei.Text = obj.data.name;
-                startbox.Text = obj.data.start;
-                endbox.Text = obj.data.end;
+                //ibemei.Text = obj.data.name;
+                //startbox.Text = obj.data.start;
+                //endbox.Text = obj.data.end;
 
 
-                Properties.Settings.Default.json = text;
-                wc.Dispose();
 
             }
             catch (WebException exc)
             {
                 endbox.Text = exc.Message;
+            }
+        }
+
+        private void get_json_parse(string url, string text, string parseop, bool useweb_local)
+        {
+
+            WebClient wc = new WebClient();
+            wc.Encoding = Encoding.UTF8;
+            DateTime dt = DateTime.Now;
+            var errorPath = "";
+            var urlrg = "https?://[ -_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+$";
+
+            var m = Regex.Match(url, urlrg);
+            if (useweb_local)
+            {
+                if (m.Success)
+                {
+                    try
+                    {
+                        text = wc.DownloadString(url);
+                    }
+                    catch (WebException exc)
+                    {
+                        MessageBox.Show(exc.Message);
+                        return;
+                    }
+                }
+                else
+                {
+                    var path = url;
+                    if (File.Exists(path))
+                    {
+                        StreamReader sr = new StreamReader(path, Encoding.GetEncoding("UTF-8"));
+                        text = sr.ReadToEnd();
+                        sr.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show(path + "のファイルは存在しません");
+                        return;
+                    }
+
+                }
+            }
+
+            try
+            {
+                var obj = Codeplex.Data.DynamicJson.Parse(text);
+                var objOriginal = obj;
+                string[] parsePaths = parseop.Split(',');
+                string[] getValues = { "", "", "" };
+                bool end = false;
+
+                Regex regex = new Regex("\\[(\\d+)\\]");
+
+                if (string.IsNullOrWhiteSpace(text) || text == "[]" || text == "{}")
+                {
+                    MessageBox.Show("JSONが空または不正です。APIのURLを確認してください。");
+                    return;
+                }
+
+                for (var k = 0; k < parsePaths.Length; k++)
+                //for (var k = 0; k < 1; k++)
+                {
+                    // 現在のオブジェクトを元のオブジェクトにリセット
+                    obj = objOriginal;
+                    string[] pathSegments = parsePaths[k].Trim('/').Split('/');
+                    errorPath = parsePaths[k];
+                    end = false;
+
+                    // パスをたどるループ
+                    for (var i = 0; i < pathSegments.Length; i++)
+                    {
+                        try
+                        {
+                            // 配列の処理
+                            while (obj.IsArray)
+                            {
+                                // 配列の最初の要素がない場合は処理をスキップ
+                                if (!obj.IsDefined(0))
+                                {
+                                    obj = null;
+                                    break;
+                                }
+                                Match match = regex.Match(pathSegments[i]);
+                                while (match.Success)
+                                {
+                                    string matchedNumber = match.Value;
+                                    string p = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
+                                    int n = Convert.ToInt32(p);
+                                    obj = obj[n];
+                                    match = match.NextMatch();
+
+                                }
+                                if (i == pathSegments.Length - 1)
+                                {
+
+                                    getValues[k] = obj.ToString();
+                                    end = true;
+                                    break;
+                                }
+                                obj = obj[0];
+                            }
+                            if (end)
+                            {
+                                break;
+                            }
+
+                            // オブジェクトの処理
+                            if (obj != null && obj.IsObject)
+                            {
+                                Match matcho = regex.Match(pathSegments[i]);
+                                if (matcho.Success == false)
+                                {
+                                    // 途中の要素の場合
+                                    obj = obj[pathSegments[i].ToString()];
+                                    // 最後の要素の場合
+                                    if (i == pathSegments.Length - 1)
+                                    {
+                                        getValues[k] = obj.ToString();
+                                        break;
+                                    }
+
+                                }
+
+                                if (matcho.Success)
+                                {
+                                    string sepa_seg = regex.Replace(pathSegments[i], "");
+                                    obj = obj[sepa_seg];
+                                    string matchedNumber = matcho.Value;
+                                    string po = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
+                                    int no = Convert.ToInt32(po);
+                                    obj = obj[no];
+                                    i++;
+                                    matcho = matcho.NextMatch();
+                                    while (matcho.Success)
+                                    {
+                                        matchedNumber = matcho.Value;
+                                        string p = matchedNumber.ToString().Replace("[", "").Replace("]", ""); // 2番目の文字を取り出す
+                                        int n = Convert.ToInt32(p);
+                                        obj = obj[n];
+                                        matcho = matcho.NextMatch();
+
+                                    }
+                                    i--;
+                                    if (obj is DynamicJson) // または productDetails.GetType() == typeof(DynamicJson)
+                                    {
+                                        //Console.WriteLine("details はオブジェクトです");
+                                    }
+                                    else
+                                    {
+                                        //Console.WriteLine("details はオブジェクトではありません"); 
+                                        if (i == pathSegments.Length - 1)
+                                        {
+                                            getValues[k] = obj.ToString();
+                                            end = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (end)
+                                {
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                // オブジェクトが見つからない場合
+                                MessageBox.Show("objがみつかりません");
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // パスのどこかで例外が発生した場合
+                            MessageBox.Show($"{ex.Message} エラー場所:'{errorPath}' {pathSegments[i]} {obj}");
+                            break;
+                        }
+                    }
+                }
+
+                // 取得した値を設定
+                ibemei.Text = getValues[0] ?? "";
+                startbox.Text = getValues[1] ?? "";
+                endbox.Text = getValues[2] ?? "";
+                //comboBox1.Text = "かすたむJS";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"{ex.Message} エラー場所:'{errorPath}'");
             }
         }
 
@@ -744,11 +931,11 @@ namespace neta
                     }
                 }
 
+                comboBox1.Text = "かすたむJS";
                 // 取得した値を設定
                 ibemei.Text = getValues[0] ?? "";
                 startbox.Text = getValues[1] ?? "";
                 endbox.Text = getValues[2] ?? "";
-                comboBox1.Text = "かすたむJS";
             }
             catch (Exception ex)
             {
@@ -980,11 +1167,13 @@ namespace neta
         private void 下パネルを隠すToolStripMenuItem_Click(object sender, EventArgs e)
         {
             panel2.Visible = false;
+            Properties.Settings.Default.uihide = false;
         }
 
         private void 下パネルを表示ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             panel2.Visible = true;
+            Properties.Settings.Default.uihide = true;
         }
 
 
@@ -995,6 +1184,7 @@ namespace neta
             this.eventname.BackColor = Color.Blue;
             this.current.BackColor = Color.Blue;
             panel1.BackColor = Color.Blue;
+            Properties.Settings.Default.bgcolor = Color.Blue;
         }
 
         private void クロマキー赤_Click(object sender, EventArgs e)
@@ -1004,6 +1194,7 @@ namespace neta
             this.eventname.BackColor = Color.Red;
             this.current.BackColor = Color.Red;
             panel1.BackColor = Color.Red;
+            Properties.Settings.Default.bgcolor = Color.Red;
         }
 
         private void クロマキー緑_Click(object sender, EventArgs e)
@@ -1013,6 +1204,18 @@ namespace neta
             this.eventname.BackColor = Color.Green;
             this.current.BackColor = Color.Green;
             panel1.BackColor = Color.Green;
+            Properties.Settings.Default.bgcolor = Color.Green;
+        }
+
+
+        private void めにゅーの色に戻すToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            this.BackColor = this.menuStrip1.BackColor;
+            this.eventname.BackColor = this.menuStrip1.BackColor;
+            this.current.BackColor = this.menuStrip1.BackColor;
+            panel1.BackColor = this.menuStrip1.BackColor;
+            Properties.Settings.Default.bgcolor = this.menuStrip1.BackColor;
         }
 
         private void カラーキー今のメニューToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1038,6 +1241,7 @@ namespace neta
             this.eventname.ForeColor = Color.White;
             this.current.ForeColor = Color.White;
             panel1.ForeColor = Color.White;
+            Properties.Settings.Default.uicolor = Color.White;
         }
 
         private void 文字黒ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1047,6 +1251,7 @@ namespace neta
             this.eventname.ForeColor = Color.Black;
             this.current.ForeColor = Color.Black;
             panel1.ForeColor = Color.Black;
+            Properties.Settings.Default.uicolor = Color.Black;
         }
 
         private void フォントToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1087,14 +1292,175 @@ namespace neta
                 this.eventname.ForeColor = fd.Color;
                 this.current.ForeColor = fd.Color;
                 panel1.ForeColor = fd.Color;
+
+
+                Properties.Settings.Default.uifont = fd.Font;
+                Properties.Settings.Default.uicolor = fd.Color;
             }
         }
 
         private void progressBar1_Click(object sender, EventArgs e)
         {
+            progressBar1.BackColor = Color.White;
+        }
+
+        private void ibemei_TextChanged(object sender, EventArgs e)
+        {
+            string freeinput = comboBox1.Text;
+            if (freeinput == "フリー入力")
+            {
+
+                Properties.Settings.Default.freeevent = ibemei.Text;
+
+            }
+        }
+
+        private void startbox_TextChanged(object sender, EventArgs e)
+        {
+            string freeinput = comboBox1.Text;
+            if (freeinput == "フリー入力")
+            {
+                DateTime st;
+                if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(startbox.Text, out st) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(startbox.Text, out st))
+                {
+
+                    Properties.Settings.Default.freest = startbox.Text;
+                }
+            }
+        }
+
+        private void endbox_TextChanged(object sender, EventArgs e)
+        {
+            string freeinput = comboBox1.Text;
+            if (freeinput == "フリー入力")
+            {
+                DateTime en;
+                if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(endbox.Text, out en) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(endbox.Text, out en))
+                {
+
+                    Properties.Settings.Default.freeend = endbox.Text;
+                }
+            }
+        }
+
+        private void 画像ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+           
+
+            OpenFileDialog ofd = new OpenFileDialog();
+
+            //はじめに表示されるフォルダを指定する
+            //指定しない（空の文字列）の時は、現在のディレクトリが表示される
+            ofd.InitialDirectory = Properties.Settings.Default.lastfile;
+            //[ファイルの種類]に表示される選択肢を指定する
+            //指定しないとすべてのファイルが表示される
+            ofd.Filter = "pngファイル(*.png)|*.png|すべてのファイル(*.*)|*.*";
+            //[ファイルの種類]ではじめに選択されるものを指定する
+            //2番目の「すべてのファイル」が選択されているようにする
+            ofd.FilterIndex = 2;
+            //タイトルを設定する
+            ofd.Title = "開くpngファイルを選択してください";
+            //ダイアログボックスを閉じる前に現在のディレクトリを復元するようにする
+            ofd.RestoreDirectory = true;
+            //存在しないファイルの名前が指定されたとき警告を表示する
+            //デフォルトでTrueなので指定する必要はない
+            ofd.CheckFileExists = true;
+            //存在しないパスが指定されたとき警告を表示する
+            //デフォルトでTrueなので指定する必要はない
+            ofd.CheckPathExists = true;
+
+            //ダイアログを表示する
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+
+                panel1.BackgroundImage = null;
+                panel2.BackgroundImage = null;
+
+                string s  = ofd.FileName;
+                try
+                {
+                    // Image.FromFileを使って画像として読み込めるかチェック
+                    using (var img = Image.FromFile(s))
+                    {
+
+                        PictureBox pictureBox = new PictureBox();
+                        pictureBox.Dock = DockStyle.Fill; // フォーム全体に広げる
+                        pictureBox.Image = Image.FromFile(s);
+                        pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+
+                        panel1.Controls.Add(pictureBox);
+
+                        current.BackColor = Color.Green;
+
+                        
+
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+
 
         }
     }
 
+
+
+    //public class CustomTransparentPanel : Form
+    //{
+    //    private Panel panel1;
+    //    private MenuStrip mainMenu;
+
+    //    public CustomTransparentPanel()
+    //    {
+    //        InitializeComponent();
+    //    }
+
+    //    private void InitializeComponent()
+    //    {
+    //        // フォームの設定
+    //        this.Size = new Size(800, 600);
+    //        this.Text = "透過パネルの例";
+
+    //        // メインメニューの作成
+    //        mainMenu = new MenuStrip();
+    //        mainMenu.Text = "メインメニュー";
+
+    //        // パネル1の作成（透過）
+    //        panel1 = new Panel();
+    //        panel1.Location = new Point(50, 100);
+    //        panel1.Size = new Size(300, 200);
+    //        panel1.BackColor = Color.FromArgb(100, Color.Green); // 透過設定
+
+    //        // メニューの作成（透過なし）
+    //        MenuStrip menuStrip = new MenuStrip();
+    //        menuStrip.Items.Add(new ToolStripMenuItem("ファイル"));
+    //        menuStrip.Items.Add(new ToolStripMenuItem("編集"));
+
+    //        // コントロールの追加
+    //        this.Controls.Add(panel1);
+    //        this.Controls.Add(menuStrip);
+    //        this.MainMenuStrip = menuStrip;
+    //    }
+
+    //    // パネル1の透過メソッド
+    //    private void SetPanelTransparency()
+    //    {
+    //        // アルファ値を調整して透過度を設定
+    //        panel1.BackColor = Color.FromArgb(100, Color.Blue); // 透過率40%
+    //    }
+
+    //    // 透過度を動的に変更するメソッド
+    //    public void AdjustTransparency(int alphaValue)
+    //    {
+    //        // alphaValue: 0(完全透過)から255(不透明)の間の値
+    //        panel1.BackColor = Color.FromArgb(alphaValue, Color.Green);
+    //    }
+    //}
+
 }
-    
+

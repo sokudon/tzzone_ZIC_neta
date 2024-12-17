@@ -238,18 +238,21 @@ namespace neta
                                             TimeSpan utcOffset = TimeSpan.FromHours(localTimeOffseth);
                                             // TotalHours で符号を判定
                                             double totalHours = utcOffset.TotalHours; // 全体の時間（小数部分を含む）
+
                                             string sign = totalHours >= 0 ? "+" : "-";
                                             // HH と MM を取得
-                                            int hours = (int)Math.Abs(totalHours); // 絶対値を取った整数部の時間
-                                            double totalMinutes = Math.Abs(utcOffset.TotalMinutes % 60); // 分部分（絶対値）
+                                            int hours = (int)Math.Abs(utcOffset.Hours); // 絶対値を取った整数部の時間
+                                            int minutes = (int)Math.Abs(utcOffset.Minutes); // 絶対値を取った整数部の時間
+                                            int seconds = (int)Math.Abs(utcOffset.Seconds); // 絶対値を取った整数部の時間
 
                                             // フォーマット
-                                            string formattedOffset = $"{sign}{hours:00}:{totalMinutes:00.00}";
+                                            //string formattedOffset = $"{sign}{hours:00}:{totalMinutes:00.00}";
+                                            string formattedOffset = $"{sign}{hours:00}:{minutes:00}:{seconds:00}";
 
                                             try
                                             {
                                                 // HH:MM の形式に変換可能かどうかを判定
-                                                if (utcOffset.Seconds == 0)
+                                                if (utcOffset.TotalSeconds % 60 == 0)
                                                 {
                                                     // HH:MM 形式が可能
                                                     DateTimeOffset dateTimeWithOffset = DateTimeOffset
@@ -445,18 +448,21 @@ namespace neta
                                                     TimeSpan utcOffset = TimeSpan.FromHours(localTimeOffseth);
                                                     // TotalHours で符号を判定
                                                     double totalHours = utcOffset.TotalHours; // 全体の時間（小数部分を含む）
+
                                                     string sign = totalHours >= 0 ? "+" : "-";
                                                     // HH と MM を取得
-                                                    int hours = (int)Math.Abs(totalHours); // 絶対値を取った整数部の時間
-                                                    double totalMinutes = Math.Abs(utcOffset.TotalMinutes % 60); // 分部分（絶対値）
+                                                    int hours = (int)Math.Abs(utcOffset.Hours); // 絶対値を取った整数部の時間
+                                                    int minutes = (int)Math.Abs(utcOffset.Minutes); // 絶対値を取った整数部の時間
+                                                    int seconds = (int)Math.Abs(utcOffset.Seconds); // 絶対値を取った整数部の時間
 
                                                     // フォーマット
-                                                    string formattedOffset = $"{sign}{hours:00}:{totalMinutes:00.00}";
+                                                    //string formattedOffset = $"{sign}{hours:00}:{totalMinutes:00.00}";
+                                                    string formattedOffset = $"{sign}{hours:00}:{minutes:00}:{seconds:00}";
 
                                                     try
                                                     {
                                                         // HH:MM の形式に変換可能かどうかを判定
-                                                        if (utcOffset.Seconds == 0)
+                                                        if (utcOffset.TotalSeconds % 60 == 0)
                                                         {
                                                             // HH:MM 形式が可能
                                                             DateTimeOffset dateTimeWithOffset = DateTimeOffset

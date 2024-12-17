@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2024/12/16</Value>
+      <Value Profile="(Default)">2024/12/17</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -99,6 +99,30 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="footerstring" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="freeevent" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="freest" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="freeend" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="uifont" Type="System.Drawing.Font" Scope="User">
+      <Value Profile="(Default)">メイリオ, 12pt, style=Bold</Value>
+    </Setting>
+    <Setting Name="uicolor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Black</Value>
+    </Setting>
+    <Setting Name="bgcolor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Menu</Value>
+    </Setting>
+    <Setting Name="uihide" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="system_tz" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>
