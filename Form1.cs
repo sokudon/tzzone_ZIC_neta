@@ -369,6 +369,7 @@ namespace neta
 
             if (st < dt)
             {
+                dt = dt.ToUniversalTime();
                 TimeSpan elapsedSpan = dt - st;
                 elapsed.Text = "経過時間:" + TZPASER.TimeZoneOffsetParser.getleft(elapsedSpan, L_format);
             }
@@ -381,6 +382,8 @@ namespace neta
 
             if (en > dt)
             {
+                //   DateTime dt = DateTime.Now; stはUTCパース
+                dt = dt.ToUniversalTime();
                 TimeSpan leftSpan = en - dt;
                 left.Text = "残り時間:" + TZPASER.TimeZoneOffsetParser.getleft(leftSpan, L_format);
             }
