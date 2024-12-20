@@ -374,7 +374,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/14")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/20")]
         public string datetester {
             get {
                 return ((string)(this["datetester"]));

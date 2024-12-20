@@ -367,35 +367,38 @@ namespace neta
 
             string L_format = Properties.Settings.Default.lefttimeformat;
 
+            //   DateTime dt = DateTime.Now; stはUTCパース
+            dt = dt.ToUniversalTime();
             if (st < dt)
             {
-                dt = dt.ToUniversalTime();
                 TimeSpan elapsedSpan = dt - st;
                 elapsed.Text = "経過時間:" + TZPASER.TimeZoneOffsetParser.getleft(elapsedSpan, L_format);
+
+                if (en > dt)
+                {
+                    TimeSpan leftSpan = en - dt;
+                    left.Text = "残り時間:" + TZPASER.TimeZoneOffsetParser.getleft(leftSpan, L_format);
+                }
+                else
+                {
+                    left.Text = "残り時間:イベントはすでに終了しています";
+                }
+
             }
             else
             {
 
-                elapsed.Text = "イベントがまだ開始されてません";
+                elapsed.Text = "経過時間:イベントがまだ開始されてません";
+                left.Text = "残り時間:イベントがまだ開始されてません";
             }
-
-
-            if (en > dt)
-            {
-                //   DateTime dt = DateTime.Now; stはUTCパース
-                dt = dt.ToUniversalTime();
-                TimeSpan leftSpan = en - dt;
-                left.Text = "残り時間:" + TZPASER.TimeZoneOffsetParser.getleft(leftSpan, L_format);
-            }
-            else
-            {
-                left.Text = "イベントはすでに終了しています";
-            }
+           
 
             TimeSpan drationSpan = en - st;
 
             duration.Text = "イベ期間:" + TZPASER.TimeZoneOffsetParser.getleft(drationSpan, L_format);
 
+
+            //msbarだとst=en 零割例外が起きない
             double bar = (dt - st).TotalSeconds / (en - st).TotalSeconds * 100;
             bar = Math.Round(bar, 2, MidpointRounding.AwayFromZero);
             if (bar > 100)
