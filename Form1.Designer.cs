@@ -294,7 +294,7 @@
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new System.Drawing.Size(121, 28);
             comboBox1.TabIndex = 9;
-            comboBox1.Text = "学ます";
+            comboBox1.Text = "フリー入力";
             comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
             // 
             // timer1

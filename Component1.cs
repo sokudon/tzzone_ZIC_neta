@@ -10,7 +10,6 @@ using System.Drawing;
 
 
 //https://claude.ai/chat/5e3294c3-7dec-4e02-9be6-b82196e7bab1
-
 namespace TZPASER
 {
     public class TimeZoneOffsetParser
@@ -106,7 +105,7 @@ namespace TZPASER
             return format;
         }
 
-        //https://chatgpt.com/c/675c1ac5-6f48-800f-b683-ae9745604c89
+        //https://chatgpt.com/share/6767015f-f328-800f-825e-08cf1e3f0fff
         public static string ToCustomFormat(double value, bool useColon)
         {
             // 符号を取得
@@ -199,7 +198,7 @@ namespace TZPASER
 
     public class FastDateTimeParsing
     {
-        //https://chatgpt.com/c/6760cf68-e848-800f-aed6-b38389647855
+        //https://chatgpt.com/share/67662bc0-cbe0-800f-943a-2ff31135245b
         // 高速な日付パターンマッチング用の正規表現
         private static readonly Regex[] DatePatterns = {
     new Regex(@"^\d{4}[\-/]\d{1,2}[\-/]\d{1,2}$"), // YYYY-MM-DD
@@ -242,14 +241,24 @@ namespace TZPASER
             {
                 if (pattern.IsMatch(input))
                 {
-                    // TryParseExactで解析を試みる
-                    return DateTime.TryParseExact(
-                        input,
-                        formats,
-                        System.Globalization.CultureInfo.InvariantCulture,
-                        //DateTimeStyles.None,  localparsr
-                        System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
-                        out result);
+                    //TryParseExactで解析を試みる
+                    //Regex offset = new Regex(@"(Z|[\+\-]\d{2}:\d{2})$"); // ISO 8601
+                    //if (offset.IsMatch(input))
+                    //{
+                        return DateTime.TryParseExact(
+                            input,
+                            formats,
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal,//ローカル変換後 UTCに変換
+                            out result);
+                    //}
+                    ////ローカル時間に変換
+                    //return DateTime.TryParseExact(
+                    //input,
+                    //formats,
+                    //System.Globalization.CultureInfo.InvariantCulture,
+                    //DateTimeStyles.AssumeLocal,  //localparsr none=unspecked local=local
+                    //out result);
                 }
             }
 
@@ -327,15 +336,17 @@ namespace TZPASER
         //}
     }
 
-
+    //https://chatgpt.com/share/67662bc0-cbe0-800f-943a-2ff31135245b
     public class RFC2822DateTimeParser
     {
         // タイムゾーンマッピング
         private static readonly Dictionary<string, TimeSpan> TimeZoneOffsets = new Dictionary<string, TimeSpan>(StringComparer.OrdinalIgnoreCase)
     {
         // 主要なタイムゾーン
+        {"UT", TimeSpan.Zero},
         {"UTC", TimeSpan.Zero},
         {"GMT", TimeSpan.Zero},
+        {"Zulu", TimeSpan.Zero},
 
         // 米国タイムゾーン
         {"EST", TimeSpan.FromHours(-5)},  // 東部標準時
@@ -351,14 +362,76 @@ namespace TZPASER
         {"CEST", TimeSpan.FromHours(2)},  // 中央ヨーロッパ夏時間
         {"CET", TimeSpan.FromHours(1)},   // 中央ヨーロッパ時間
         {"JST", TimeSpan.FromHours(9)},   // 日本標準時
+        {"HKT", TimeSpan.FromHours(8)},   // 香港標準時　
+        {"KST", TimeSpan.FromHours(9)},   // 韓国標準時
+        //{"ACDT",TimeSpan.FromHours(+10.5)},
+		//{"ACST",TimeSpan.FromHours(9.5)},
+		//{"AEDT",TimeSpan.FromHours(+11)},
+		//{"AEST",TimeSpan.FromHours(+10)},
+		//{"AFT",TimeSpan.FromHours(4.5)},
+		//{"AKDT",TimeSpan.FromHours(-08)},
+		//{"AKST",TimeSpan.FromHours(-09)},
+		//{"ART",TimeSpan.FromHours(-03)},
+		//{"AWDT",TimeSpan.FromHours(9)},
+		//{"AWST",TimeSpan.FromHours(8)},
+		//{"BDT",TimeSpan.FromHours(6)},
+		//{"BNT",TimeSpan.FromHours(8)},
+		//{"BOT",TimeSpan.FromHours(-04)},
+		//{"BRT",TimeSpan.FromHours(-03)},
+		//{"BST",TimeSpan.FromHours(1)},
+		//{"BTT",TimeSpan.FromHours(6)},
+		//{"CAT",TimeSpan.FromHours(2)},
+		//{"CCT",TimeSpan.FromHours(6.5)},
+		//{"CDT",TimeSpan.FromHours(-04)},//キューバCDT
+		//{"CEST",TimeSpan.FromHours(2)},
+		//{"CET",TimeSpan.FromHours(1)},
+		//{"CLST",TimeSpan.FromHours(-03)},
+		//{"CLT",TimeSpan.FromHours(-04)},
+		//{"COT",TimeSpan.FromHours(-05)},
+		//{"CST",TimeSpan.FromHours(8)}, //中国CST cstはアメリカ中央と同じだから使えない
+		//{"CST",TimeSpan.FromHours(-05)},//キューバCST
+		//{"ChST",TimeSpan.FromHours(+10)},
+		//{"EAT",TimeSpan.FromHours(3)},
+		//{"ECT",TimeSpan.FromHours(-05)},
+		//{"EEST",TimeSpan.FromHours(3)},
+		//{"EET",TimeSpan.FromHours(2)},
+		//{"FJST",TimeSpan.FromHours(+13)},
+		//{"FJT",TimeSpan.FromHours(+12)},
+		//{"GST",TimeSpan.FromHours(4)},
+        //{"HDT",TimeSpan.FromHours(-9)},//ハワイ dst
+		//{"HST",TimeSpan.FromHours(-10)},//ハワイ
+		//{"ICT",TimeSpan.FromHours(7)},
+		//{"IDT",TimeSpan.FromHours(3)},
+		//{"IST",TimeSpan.FromHours(2)},//イスラエル　IST同じ
+		//{"IST",TimeSpan.FromHours(5.5)},//インド
+		//{"IRDT",TimeSpan.FromHours(4.5)},
+		//{"IRST",TimeSpan.FromHours(3.5)},
+		//{"MMT",TimeSpan.FromHours(6.5)},
+		//{"MYT",TimeSpan.FromHours(8)},
+		//{"NPT",TimeSpan.FromHours(5.75)},
+		//{"NZDT",TimeSpan.FromHours(+13)},
+		//{"NZST",TimeSpan.FromHours(+12)},
+		//{"PET",TimeSpan.FromHours(-05)},
+		//{"PHT",TimeSpan.FromHours(8)},
+		//{"PKT",TimeSpan.FromHours(5)},
+		//{"PST",TimeSpan.FromHours(8)},//マニラ
+		//{"PWT",TimeSpan.FromHours(9)},
+		//{"SST",TimeSpan.FromHours(-11)},
+		//{"UYT",TimeSpan.FromHours(-03)},
+		//{"WAT",TimeSpan.FromHours(1)},
+		//{"WEST",TimeSpan.FromHours(1)},
+		//{"WET",TimeSpan.FromHours(0)},
+		//{"WIB",TimeSpan.FromHours(7)},
+		//{"WIT",TimeSpan.FromHours(9)},
+		//{"WITA",TimeSpan.FromHours(8)}
     };
 
         // RFC2822形式の正規表現
         private static readonly Regex[] RFC2822Patterns = {
-        new Regex(@"^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{1,2}):(\d{1,2}):(\d{1,2}) ([+-]\d{4}|[A-Z]{2,3})$", RegexOptions.Compiled),
-        new Regex(@"^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{1,2}):(\d{1,2}) ([+-]\d{4}|[A-Z]{2,3})$", RegexOptions.Compiled),
-        new Regex(@"^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{1,2}) ([+-]\d{4}|[A-Z]{2,3})$", RegexOptions.Compiled),
-        new Regex(@"^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) ([+-]\d{4}|[A-Z]{2,3})$", RegexOptions.Compiled),
+        new Regex(@"^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{1,2}):(\d{1,2}):(\d{1,2}) ([+-]\d{4}|[A-Za-z]{2,4})$", RegexOptions.Compiled),
+        new Regex(@"^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{1,2}):(\d{1,2}) ([+-]\d{4}|[A-Za-z]{2,4})$", RegexOptions.Compiled),
+        new Regex(@"^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{1,2}) ([+-]\d{4}|[A-Za-z]{2,4})$", RegexOptions.Compiled),
+        new Regex(@"^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) ([+-]\d{4}|[A-Za-z]{2,4})$", RegexOptions.Compiled),
 
     };
 
@@ -382,6 +455,57 @@ namespace TZPASER
         "ddd, dd MMM yyyy zzz",         // 曜日 + タイムゾーン
         "dd MMM yyyy zzz"               // タイムゾーン
     };
+
+        //https://chatgpt.com/share/6767028c-2db4-800f-bae6-99f8625824d6　YMDHMZstのパース
+        public static bool YMDHMZ_to_ISO(string input, out DateTime result)
+        {
+            result = DateTime.MinValue;
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
+            Regex YMDZONE = new Regex(@"^(\d{4})[\-/](\d{1,2})[\-/](\d{1,2}) (\d{1,2}):(\d{1,2}) ?([A-Za-z]{2,4})$");// YYYY-MM-DD HH PST
+
+            var match = YMDZONE.Match(input);
+            if (match.Success)
+            { 
+                try
+                {
+                    // 日付コンポーネントの抽出
+                    int year = int.Parse(match.Groups[1].Value);
+                    int month = int.Parse(match.Groups[2].Value);
+                    int day = int.Parse(match.Groups[3].Value);
+
+                    int hour = int.Parse(match.Groups[4].Value);
+                    int minute = int.Parse(match.Groups[5].Value);
+
+                    string tzInfo = match.Groups[6].Value; 
+
+                    TimeSpan offset = ParseTimeZoneOffset(tzInfo);
+                    // オフセットを文字列形式に変換
+                    string offsetString = FormatOffset(offset);
+
+                    input = input.Replace(tzInfo, offsetString);
+
+
+                    string date = year.ToString("0000") + "-" + month.ToString("00") + "-" +
+                        day.ToString("00") + "T" + hour.ToString("00") + ":"
+                        + minute.ToString("00") + ":00" + offsetString;
+
+                    if (FastDateTimeParsing.TryParseFastDateTime(date, out result))
+                    {
+                        return true;
+                    }
+                }
+                catch (Exception ex) 
+                {
+                    Console.WriteLine(ex.ToString());
+                return false;
+                }
+            }
+
+            return false;
+        }
+
 
         /// <summary>
         /// RFC2822形式の日付文字列をDateTime型に変換
@@ -421,7 +545,7 @@ namespace TZPASER
                             second = int.Parse(match.Groups[6].Value);
                         }
 
-                Regex offsetrg = new Regex(@"([+-]\d{4}|[A-Z]{2,3})$");
+                        Regex offsetrg = new Regex(@"([+-]\d{4}|[A-Z]{2,3})$");
                         Match m = offsetrg.Match(input);
                         string tzInfo = m.Value; //match.Groups[7].Value;
 
@@ -445,7 +569,7 @@ namespace TZPASER
 
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.ToString());
+                        Console.WriteLine(ex.ToString());
                         return false;
                     }
                 }

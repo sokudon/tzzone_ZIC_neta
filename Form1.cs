@@ -187,8 +187,8 @@ namespace neta
                 string po = Regex.Replace(posix, pattern, match => "\\" + match.Value);
                 format = Regex.Replace(format, "%PO", match => po);
             }
-            if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(startbox.Text, out st) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(startbox.Text, out st))
-            {
+
+            if (TryParseDateTimeCutom(startbox.Text, out  st)) { 
 
             }
             else
@@ -201,8 +201,7 @@ namespace neta
 
                 return;
             }
-
-            if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(endbox.Text, out en) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(endbox.Text, out en))
+            if (TryParseDateTimeCutom(endbox.Text, out en))
             {
 
             }
@@ -220,9 +219,9 @@ namespace neta
             {
                 string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
                 format = format.Replace("K", rp).Replace("zzz", rp).Replace("zz", Properties.Settings.Default.useutch).Replace("z", Properties.Settings.Default.useutch);
-                current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(Properties.Settings.Default.useutcint).ToString(format);
-                start.Text = "開始時間:" + st.ToUniversalTime().AddHours(Properties.Settings.Default.useutcint).ToString(format);
-                end.Text = "終了時間:" + en.ToUniversalTime().AddHours(Properties.Settings.Default.useutcint).ToString(format);
+                current.Text = "現在時間:" + dt.AddHours(Properties.Settings.Default.useutcint).ToString(format);
+                start.Text = "開始時間:" + st.AddHours(Properties.Settings.Default.useutcint).ToString(format);
+                end.Text = "終了時間:" + en.AddHours(Properties.Settings.Default.useutcint).ToString(format);
 
             }
             else if (ms)
@@ -230,9 +229,9 @@ namespace neta
 
                 TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(Properties.Settings.Default.mstime);
 
-                DateTimeOffset ddt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
-                DateTimeOffset sst = DateTime.SpecifyKind(st, DateTimeKind.Utc);
-                DateTimeOffset een = DateTime.SpecifyKind(en, DateTimeKind.Utc);
+                DateTimeOffset ddt = DateTime.SpecifyKind(dt,dt.Kind);
+                DateTimeOffset sst = DateTime.SpecifyKind(st, st.Kind);
+                DateTimeOffset een = DateTime.SpecifyKind(en, en.Kind);
 
                 string formatd = TZPASER.TimeZoneOffsetParser.getoffset(ddt, format, tzi);
                 string formats = TZPASER.TimeZoneOffsetParser.getoffset(sst, format, tzi);
@@ -298,9 +297,9 @@ namespace neta
                             formats = Regex.Replace(formats, patternn, match => "");
                             formate = Regex.Replace(formate, patternn, match => "");
 
-                            current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(uo).ToString(formatc);
-                            start.Text = "開始時間:" + st.ToUniversalTime().AddHours(uoc).ToString(formats);
-                            end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uoe).ToString(formate);
+                            current.Text = "現在時間:" + dt.AddHours(uo).ToString(formatc);
+                            start.Text = "開始時間:" + st.AddHours(uoc).ToString(formats);
+                            end.Text = "終了時間:" + en.AddHours(uoe).ToString(formate);
                         }
                         else
                         {
@@ -332,9 +331,9 @@ namespace neta
 
                                 TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("UTC");
 
-                                DateTimeOffset ddt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
-                                DateTimeOffset sst = DateTime.SpecifyKind(st, DateTimeKind.Utc);
-                                DateTimeOffset een = DateTime.SpecifyKind(en, DateTimeKind.Utc);
+                                DateTimeOffset ddt = DateTime.SpecifyKind(dt.ToUniversalTime(), DateTimeKind.Utc);
+                                DateTimeOffset sst = DateTime.SpecifyKind(st.ToUniversalTime(), DateTimeKind.Utc);
+                                DateTimeOffset een = DateTime.SpecifyKind(en.ToUniversalTime(), DateTimeKind.Utc);
 
                                 string formatd = TZPASER.TimeZoneOffsetParser.getoffset(ddt, format, tzi);
                                 string formats = TZPASER.TimeZoneOffsetParser.getoffset(sst, format, tzi);
@@ -351,7 +350,7 @@ namespace neta
                     catch (Exception ex)
                     {
                         current.Text = "例外発生";
-                        start.Text = "えらー:tzdbを変換したJSONが空か以上があります";
+                        start.Text = "えらー:tzdbを変換したJSONが空か異常があります";
                         end.Text = ex.ToString();
                     }
 
@@ -359,7 +358,6 @@ namespace neta
             }
             else
             {
-
                 current.Text = "現在時間:" + dt.ToLocalTime().ToString(format);
                 start.Text = "開始時間:" + st.ToLocalTime().ToString(format);
                 end.Text = "終了時間:" + en.ToLocalTime().ToString(format);
@@ -367,8 +365,6 @@ namespace neta
 
             string L_format = Properties.Settings.Default.lefttimeformat;
 
-            //   DateTime dt = DateTime.Now; stはUTCパース
-            dt = dt.ToUniversalTime();
             if (st < dt)
             {
                 TimeSpan elapsedSpan = dt - st;
@@ -414,9 +410,6 @@ namespace neta
             progressBar1.Value = Convert.ToInt32(bar.ToString());
 
         }
-
-
-
 
 
         private void button1_Click_1(object sender, EventArgs e)
@@ -1182,8 +1175,6 @@ namespace neta
             Properties.Settings.Default.uihide = true;
         }
 
-
-
         private void クロマキー青_Click(object sender, EventArgs e)
         {
             this.BackColor = Color.Blue;
@@ -1315,9 +1306,7 @@ namespace neta
             string freeinput = comboBox1.Text;
             if (freeinput == "フリー入力")
             {
-
                 Properties.Settings.Default.freeevent = ibemei.Text;
-
             }
         }
 
@@ -1326,10 +1315,9 @@ namespace neta
             string freeinput = comboBox1.Text;
             if (freeinput == "フリー入力")
             {
-                DateTime st;
-                if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(startbox.Text, out st) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(startbox.Text, out st))
+                String input = startbox.Text;
+                if (TryParseDateTimeCutom(input, out DateTime dt))
                 {
-
                     Properties.Settings.Default.freest = startbox.Text;
                 }
             }
@@ -1340,13 +1328,24 @@ namespace neta
             string freeinput = comboBox1.Text;
             if (freeinput == "フリー入力")
             {
-                DateTime en;
-                if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(endbox.Text, out en) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(endbox.Text, out en))
-                {
+                String input = endbox.Text;
+                if (TryParseDateTimeCutom(input, out DateTime dt)){
 
                     Properties.Settings.Default.freeend = endbox.Text;
                 }
             }
+        }
+
+        public static bool TryParseDateTimeCutom(string input, out DateTime dt)
+        {
+            dt = DateTime.MinValue;
+            if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(input, out dt)
+                || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(input, out dt)
+                || TZPASER.RFC2822DateTimeParser.YMDHMZ_to_ISO(input, out dt))
+            {
+                return true;
+            } 
+        return false;
         }
 
         private void 画像ToolStripMenuItem_Click(object sender, EventArgs e)
