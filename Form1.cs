@@ -364,6 +364,8 @@ namespace neta
             }
 
             string L_format = Properties.Settings.Default.lefttimeformat;
+            //st enはUTCになっているのでutcに必ずする
+            dt = dt.ToUniversalTime();
 
             if (st < dt)
             {
