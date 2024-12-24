@@ -515,5 +515,28 @@ namespace neta.Properties {
                 this["system_tz"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string lastimagefile {
+            get {
+                return ((string)(this["lastimagefile"]));
+            }
+            set {
+                this["lastimagefile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Drawing.Color colorkey {
+            get {
+                return ((global::System.Drawing.Color)(this["colorkey"]));
+            }
+            set {
+                this["colorkey"] = value;
+            }
+        }
     }
 }

@@ -104,6 +104,7 @@ namespace neta
             this.Font = Properties.Settings.Default.uifont;
             this.ForeColor = Properties.Settings.Default.uicolor;
             this.BackColor = Properties.Settings.Default.bgcolor;
+            this.TransparencyKey = Properties.Settings.Default.colorkey;
 
             this.eventname.BackColor = Properties.Settings.Default.bgcolor;
             this.current.BackColor = Properties.Settings.Default.bgcolor;
@@ -120,6 +121,19 @@ namespace neta
             this.panel2.Visible = Properties.Settings.Default.uihide;
 
             Properties.Settings.Default.system_tz = TimeZoneInfo.Local.Id;
+
+            if (File.Exists(Properties.Settings.Default.lastimagefile)) { 
+            try
+            {
+                // 画像を直接パネルの背景として設定
+                panel1.BackgroundImage = Image.FromFile(Properties.Settings.Default.lastimagefile);
+                panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                current.BackColor = this.BackColor;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            } }
 
             // using Microsoft.Win32;
             // システム時間変更時のイベントハンドラを登録
@@ -188,7 +202,8 @@ namespace neta
                 format = Regex.Replace(format, "%PO", match => po);
             }
 
-            if (TryParseDateTimeCutom(startbox.Text, out  st)) { 
+            if (TryParseDateTimeCutom(startbox.Text, out st))
+            {
 
             }
             else
@@ -229,7 +244,7 @@ namespace neta
 
                 TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(Properties.Settings.Default.mstime);
 
-                DateTimeOffset ddt = DateTime.SpecifyKind(dt,dt.Kind);
+                DateTimeOffset ddt = DateTime.SpecifyKind(dt, dt.Kind);
                 DateTimeOffset sst = DateTime.SpecifyKind(st, st.Kind);
                 DateTimeOffset een = DateTime.SpecifyKind(en, en.Kind);
 
@@ -389,7 +404,7 @@ namespace neta
                 elapsed.Text = "経過時間:イベントがまだ開始されてません";
                 left.Text = "残り時間:イベントがまだ開始されてません";
             }
-           
+
 
             TimeSpan drationSpan = en - st;
 
@@ -1220,13 +1235,13 @@ namespace neta
         private void カラーキー今のメニューToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.TransparencyKey = this.BackColor;
+            Properties.Settings.Default.colorkey = this.TransparencyKey;
         }
 
         private void カラーキーなしToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //int alpha = 128;
-            //Color color = Color.FromArgb(alpha, 255, 0, 0);//R
             this.TransparencyKey = Color.Empty;
+            Properties.Settings.Default.colorkey= this.TransparencyKey;
         }
 
         private void parcent_Click(object sender, EventArgs e)
@@ -1331,7 +1346,8 @@ namespace neta
             if (freeinput == "フリー入力")
             {
                 String input = endbox.Text;
-                if (TryParseDateTimeCutom(input, out DateTime dt)){
+                if (TryParseDateTimeCutom(input, out DateTime dt))
+                {
 
                     Properties.Settings.Default.freeend = endbox.Text;
                 }
@@ -1346,14 +1362,14 @@ namespace neta
                 || TZPASER.RFC2822DateTimeParser.YMDHMZ_to_ISO(input, out dt))
             {
                 return true;
-            } 
-        return false;
+            }
+            return false;
         }
 
         private void 画像ToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-           
+
 
             OpenFileDialog ofd = new OpenFileDialog();
 
@@ -1381,29 +1397,20 @@ namespace neta
             if (ofd.ShowDialog() == DialogResult.OK)
             {
 
+
                 panel1.BackgroundImage = null;
                 panel2.BackgroundImage = null;
 
-                string s  = ofd.FileName;
+
+                string s = ofd.FileName;
                 try
                 {
-                    // Image.FromFileを使って画像として読み込めるかチェック
-                    using (var img = Image.FromFile(s))
-                    {
+                    // 画像を直接パネルの背景として設定
+                    panel1.BackgroundImage = Image.FromFile(s);
+                    panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                    current.BackColor = this.BackColor;
 
-                        PictureBox pictureBox = new PictureBox();
-                        pictureBox.Dock = DockStyle.Fill; // フォーム全体に広げる
-                        pictureBox.Image = Image.FromFile(s);
-                        pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
-
-                        panel1.Controls.Add(pictureBox);
-
-                        current.BackColor = Color.Green;
-
-                        
-
-
-                    }
+                    Properties.Settings.Default.lastimagefile = s;
                 }
                 catch (Exception ex)
                 {
@@ -1412,6 +1419,14 @@ namespace neta
             }
 
 
+        }
+
+        private void 画像なしToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            panel1.BackgroundImage = null;          // 背景画像を削除
+            panel1.BackColor = this.BackColor;
+            panel1.Invalidate();                    // 再描画をリクエスト
+            Properties.Settings.Default.lastimagefile = "";
         }
     }
 
