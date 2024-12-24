@@ -220,10 +220,10 @@ namespace TZPASER
         "yyyy-MM-ddTHH:mm",           // ISO 8601 basic
         "yyyy-MM-ddTHH:mm:ss",        // ISO 8601 時間のみ
         "yyyy-MM-ddTHH:mm:ssZ",       // ISO 8601 UTC (Z付き)
-        "yyyy-MM-ddTHH:mm:sszzz",     // ISO 8601 タイムゾーンオフセット付き (+09:00)
-        "yyyy-MM-ddTHH:mm:ss.fff", // ISO 8601 with milliseconds
         "yyyy-MM-ddTHH:mm:ssK", // ISO 8601 with timezone (Z or ±hh:mm)
-        "yyyy-MM-ddTHH:mm:ss.fffK", // ISO 8601 with milliseconds +Z
+        "yyyy-MM-ddTHH:mm:sszzz",     // ISO 8601 タイムゾーンオフセット付き (+09:00)
+        "yyyy-MM-ddTHH:mm:ss.FFFFFFF", // ISO 8601 with milliseconds
+        "yyyy-MM-ddTHH:mm:ss.FFFFFFFK", // ISO 8601 with milliseconds +Z
     };
 
         public static bool TryParseFastDateTime(string input, out DateTime result)
@@ -423,7 +423,7 @@ namespace TZPASER
 		//{"WET",TimeSpan.FromHours(0)},
 		//{"WIB",TimeSpan.FromHours(7)},
 		//{"WIT",TimeSpan.FromHours(9)},
-		//{"WITA",TimeSpan.FromHours(8)}
+		//{"WITA",TimeSpan.FromHours(8)} 
     };
 
         // RFC2822形式の正規表現
@@ -463,7 +463,17 @@ namespace TZPASER
             if (string.IsNullOrWhiteSpace(input))
                 return false;
 
-            Regex YMDZONE = new Regex(@"^(\d{4})[\-/](\d{1,2})[\-/](\d{1,2}) (\d{1,2}):(\d{1,2}) ?([A-Za-z]{2,4})$");// YYYY-MM-DD HH PST
+            Regex offsetrg = new Regex(@"([+-]\d{4}|[A-Z]{2,4})$");
+            Match m = offsetrg.Match(input);
+            string tzInfo = m.Value; 
+            TimeSpan offset = ParseTimeZoneOffset(tzInfo);
+            if (offset == TimeSpan.MinValue)
+            {
+                return false;
+            }
+
+            Regex YMDZONE = new Regex(@"^(\d{4})[\-/](\d{1,2})[\-/](\d{1,2})[ T](\d{1,2}):(\d{1,2})(?::\d{2}(?:\.\d+)?)? ?([A-Za-z]{2,4})$");
+            // YYYY-MM-DD HH PST
 
             var match = YMDZONE.Match(input);
             if (match.Success)
@@ -478,18 +488,22 @@ namespace TZPASER
                     int hour = int.Parse(match.Groups[4].Value);
                     int minute = int.Parse(match.Groups[5].Value);
 
-                    string tzInfo = match.Groups[6].Value; 
+                    Regex mirocsec = new Regex(@"\d{1,2}:\d{1,2}:(\d{2}\.?\d*)");
+                    string second = "00";
 
-                    TimeSpan offset = ParseTimeZoneOffset(tzInfo);
+                    var matchs = mirocsec.Match(input);
+                    if (matchs.Success)
+                    {
+                        second = matchs.Groups[1].Value;
+                    }
+
                     // オフセットを文字列形式に変換
                     string offsetString = FormatOffset(offset);
-
                     input = input.Replace(tzInfo, offsetString);
-
 
                     string date = year.ToString("0000") + "-" + month.ToString("00") + "-" +
                         day.ToString("00") + "T" + hour.ToString("00") + ":"
-                        + minute.ToString("00") + ":00" + offsetString;
+                        + minute.ToString("00") + ":" + second + offsetString;
 
                     if (FastDateTimeParsing.TryParseFastDateTime(date, out result))
                     {
@@ -516,6 +530,15 @@ namespace TZPASER
 
             if (string.IsNullOrWhiteSpace(input))
                 return false;
+
+            Regex offsetrg = new Regex(@"([+-]\d{4}|[A-Z]{2,4})$");
+            Match m = offsetrg.Match(input);
+            string tzInfo = m.Value; //match.Groups[7].Value;
+            TimeSpan offset = ParseTimeZoneOffset(tzInfo);
+            if (offset == TimeSpan.MinValue)
+            {
+                return false;
+            }
 
             foreach (var pattern in RFC2822Patterns)
             {
@@ -545,16 +568,9 @@ namespace TZPASER
                             second = int.Parse(match.Groups[6].Value);
                         }
 
-                        Regex offsetrg = new Regex(@"([+-]\d{4}|[A-Z]{2,3})$");
-                        Match m = offsetrg.Match(input);
-                        string tzInfo = m.Value; //match.Groups[7].Value;
-
-                        TimeSpan offset = ParseTimeZoneOffset(tzInfo);
                         // オフセットを文字列形式に変換
                         string offsetString = FormatOffset(offset);
-
                         input = input.Replace(tzInfo, offsetString);
-
 
                         string date = year.ToString("0000") + "-" + month.ToString("00") + "-" +
                             day.ToString("00") + "T" + hour.ToString("00") + ":"
@@ -612,8 +628,10 @@ namespace TZPASER
                 return new TimeSpan(hours, minutes, 0);
             }
 
+            //例外処理に変更
+            return TimeSpan.MinValue;
             // デフォルトはUTC
-            return TimeSpan.Zero;
+            //return TimeSpan.Zero;
         }
 
         //public static void Main()
