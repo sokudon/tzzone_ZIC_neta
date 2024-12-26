@@ -2,8 +2,6 @@
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using System.Text;
-using System.IO;
 
 namespace neta
 {

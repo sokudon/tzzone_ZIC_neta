@@ -30,6 +30,7 @@
         {
             label1 = new System.Windows.Forms.Label();
             panel1 = new System.Windows.Forms.Panel();
+            custom_local = new System.Windows.Forms.CheckBox();
             panel3 = new System.Windows.Forms.Panel();
             label5 = new System.Windows.Forms.Label();
             button2 = new System.Windows.Forms.Button();
@@ -78,6 +79,7 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(custom_local);
             panel1.Controls.Add(panel3);
             panel1.Controls.Add(panel2);
             panel1.Controls.Add(label4);
@@ -96,6 +98,17 @@
             panel1.Name = "panel1";
             panel1.Size = new System.Drawing.Size(403, 500);
             panel1.TabIndex = 1;
+            // 
+            // custom_local
+            // 
+            custom_local.AutoSize = true;
+            custom_local.Location = new System.Drawing.Point(231, 346);
+            custom_local.Name = "custom_local";
+            custom_local.Size = new System.Drawing.Size(158, 24);
+            custom_local.TabIndex = 27;
+            custom_local.Text = "時差なしにゾーン適用";
+            custom_local.UseVisualStyleBackColor = true;
+            custom_local.CheckedChanged += custom_local_CheckedChanged;
             // 
             // panel3
             // 
@@ -487,5 +500,6 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox textBox6;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.CheckBox custom_local;
     }
 }

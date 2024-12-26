@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2024/12/23</Value>
+      <Value Profile="(Default)">2024/12/26</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -130,6 +130,9 @@
     </Setting>
     <Setting Name="colorkey" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="local_chager" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

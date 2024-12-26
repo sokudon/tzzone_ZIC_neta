@@ -7,10 +7,7 @@ using System.Text.RegularExpressions;
 using Codeplex.Data;
 using static neta.dtformat;
 using System.Drawing;
-using static System.Windows.Forms.DataFormats;
-using System.Runtime.Intrinsics.X86;
 using Microsoft.Win32;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using TZPASER;
 
 namespace neta
@@ -22,8 +19,6 @@ namespace neta
             InitializeComponent();
 
         }
-
-
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -122,18 +117,20 @@ namespace neta
 
             Properties.Settings.Default.system_tz = TimeZoneInfo.Local.Id;
 
-            if (File.Exists(Properties.Settings.Default.lastimagefile)) { 
-            try
+            if (File.Exists(Properties.Settings.Default.lastimagefile))
             {
-                // 画像を直接パネルの背景として設定
-                panel1.BackgroundImage = Image.FromFile(Properties.Settings.Default.lastimagefile);
-                panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
-                current.BackColor = this.BackColor;
+                try
+                {
+                    // 画像を直接パネルの背景として設定
+                    panel1.BackgroundImage = Image.FromFile(Properties.Settings.Default.lastimagefile);
+                    panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                    current.BackColor = this.BackColor;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            } }
 
             // using Microsoft.Win32;
             // システム時間変更時のイベントハンドラを登録
@@ -1241,7 +1238,7 @@ namespace neta
         private void カラーキーなしToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.TransparencyKey = Color.Empty;
-            Properties.Settings.Default.colorkey= this.TransparencyKey;
+            Properties.Settings.Default.colorkey = this.TransparencyKey;
         }
 
         private void parcent_Click(object sender, EventArgs e)
@@ -1427,6 +1424,29 @@ namespace neta
             panel1.BackColor = this.BackColor;
             panel1.Invalidate();                    // 再描画をリクエスト
             Properties.Settings.Default.lastimagefile = "";
+        }
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
+        }
+
+        private void クリップへコピーToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string texter = "";
+            texter = eventname.Text + "\r\n"
+                 + current.Text + "\r\n"
+                 + elapsed.Text + "\r\n"
+                 + left.Text + "\r\n"
+                 + duration.Text + "\r\n"
+                 + start.Text + "\r\n"
+                 +end.Text + "\r\n";
+            Clipboard.SetText(texter);
         }
     }
 

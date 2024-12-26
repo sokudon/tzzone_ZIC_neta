@@ -1,32 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
 using System.Collections.ObjectModel;
-using System.Globalization;
-using neta.Properties;
 using System.Buffers.Binary;
-using System.Security.Cryptography;
-using static System.TimeZoneInfo;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Xml.Linq;
-using static System.Windows.Forms.DataFormats;
-using Codeplex.Data;
 using System.Text.Json;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Collections;
-using static System.Windows.Forms.AxHost;
-using System.Diagnostics.Metrics;
-using System.Diagnostics.Contracts;
+using TZPASER;
 
 
 namespace neta
@@ -66,6 +48,7 @@ namespace neta
             checkBox2.Checked = Properties.Settings.Default.usems;
             checkBox3.Checked = Properties.Settings.Default.usetz;
             checkBox4.Checked = Properties.Settings.Default.usefiler;
+             custom_local.Checked = Properties.Settings.Default.local_chager;
             comboBox1.Text = Properties.Settings.Default.useutczone;
             comboBox2.Text = Properties.Settings.Default.msstring;
             comboBox3.Text = Properties.Settings.Default.barlen.ToString();
@@ -158,7 +141,7 @@ namespace neta
             {
                 string format = textBox2.Text;
                 bool tz = checkBox3.Checked;
-            string posix = Properties.Settings.Default.footerstring;
+                string posix = Properties.Settings.Default.footerstring;
 
                 if (!tz)
                 {
@@ -479,6 +462,20 @@ namespace neta
             }
         }
 
+        private void custom_local_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.local_chager = custom_local.Checked;
+            if (custom_local.Checked)
+            {
+                checkBox2.Checked = false;
+                checkBox2.Enabled = false;
+            }
+            else
+            {
+                checkBox2.Enabled = true;
+            }
+            
+        }
 
         //ヘッダ処理だけMS仕様
         private static string TZif_ParseRaw(byte[] data)
@@ -633,7 +630,8 @@ namespace neta
                     bool filter = Properties.Settings.Default.usefiler;
                     int max = tzh_timecnt_next - 1;
                     string[][] transitions_next = new string[tzh_timecnt_next][];
-                    if (tzh_timecnt_next == 0) {
+                    if (tzh_timecnt_next == 0)
+                    {
                         int type = 0;
                         string[][] transitions_next_zero = new string[1][];
                         transitions_next_zero[0] = new string[4];
@@ -765,14 +763,15 @@ namespace neta
                                 sb.AppendLine(transitions_next[i][3]);
                             }
                         }
-                        else { 
-                        sb.Append(transitions_next[i][0]);
-                        sb.Append(",");
-                        sb.Append(transitions_next[i][1]);
-                        sb.Append(",");
-                        sb.Append(transitions_next[i][2]);
-                        sb.Append(",");
-                        sb.AppendLine(transitions_next[i][3]);
+                        else
+                        {
+                            sb.Append(transitions_next[i][0]);
+                            sb.Append(",");
+                            sb.Append(transitions_next[i][1]);
+                            sb.Append(",");
+                            sb.Append(transitions_next[i][2]);
+                            sb.Append(",");
+                            sb.AppendLine(transitions_next[i][3]);
                         }
 
                     }
@@ -790,12 +789,12 @@ namespace neta
                             tr = tr + transition_timesn[max].ToString() + @",";
                             of = of + transitions_next[max][1] + @",";
                             ab = ab + @"""" + transitions_next[max][3] + @""",";
-                            finaltz = Y_filter_st +"～"+ Y_filter_en +"年期間内にはゾーン情報存在しませんが、から配列回避のため最後のゾーン情報を追加しています(から配列＝UTCになるため)";
+                            finaltz = Y_filter_st + "～" + Y_filter_en + "年期間内にはゾーン情報存在しませんが、から配列回避のため最後のゾーン情報を追加しています(から配列＝UTCになるため)";
                         }
                     }
-                    if(filter)
+                    if (filter)
                     {
-                        finaltz = "カッティングしたゾーン情報になっています" +Y_filter_st + "～" + Y_filter_en + "年期間内のみ";
+                        finaltz = "カッティングしたゾーン情報になっています" + Y_filter_st + "～" + Y_filter_en + "年期間内のみ";
 
                     }
 
@@ -839,7 +838,7 @@ namespace neta
             sb.AppendLine();
             sb.AppendLine(mkjson);
             sb.AppendLine();
-            Properties.Settings.Default.footerstring = footer.Replace("\n","");
+            Properties.Settings.Default.footerstring = footer.Replace("\n", "");
 
             try
             {
@@ -860,7 +859,7 @@ namespace neta
 
                 if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(tester, out testDateTime) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(tester, out testDateTime))
                 {
-                    DateTimeOffset ddt= DateTime.SpecifyKind(testDateTime, testDateTime.Kind);
+                    DateTimeOffset ddt = DateTime.SpecifyKind(testDateTime, testDateTime.Kind);
                     DateTimeOffset ddt_l = ddt.ToLocalTime();
                     DateTimeOffset ddt_u = ddt.ToUniversalTime();
                     string ddt_local_offset = ddt_l.Offset.ToString();
@@ -888,7 +887,7 @@ namespace neta
                     rp2 = Regex.Replace(rp2, "\\+\\-", "-");
 
                     string tmp = tzi.StandardName;
-                    string tmp_l = localTimeZone.StandardName;                
+                    string tmp_l = localTimeZone.StandardName;
 
 
                     if (tzi.IsDaylightSavingTime((ddt_l)))
@@ -912,7 +911,7 @@ namespace neta
                         double uo = tzData.Offsets[lastTransitionIdx];
                         string uoff = TZPASER.TimeZoneOffsetParser.ToCustomFormat(uo, true).ToString();
                         string abb = tzData.Abbrs[lastTransitionIdx];
-                        string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss"+uoff +" "+abb);
+                        string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss" + uoff + " " + abb);
 
                         sb.AppendLine(finaltz);
                         sb.AppendLine();
@@ -1005,86 +1004,16 @@ namespace neta
                     sb.AppendLine("日付てすとのパースに失敗しました、正しい日付を入力してください");
                 }
             }
-            catch (Exception ex) { 
-            sb.AppendLine(ex.ToString());
+            catch (Exception ex)
+            {
+                sb.AppendLine(ex.ToString());
             }
 
             return sb.ToString();
 
         }
 
-        public class TimeZoneData
-        {
-            public string Zone { get; set; }
-            public List<long> TransList { get; set; }
-            public List<double> Offsets { get; set; }
-            public List<string> Abbrs { get; set; }
-        }
-
-        public class TimeZoneTransitions
-        {
-            private List<long> transList;
-            private List<double> offsets;
-            private List<string> abbrs;
-
-            public TimeZoneTransitions(List<long> transList, List<double> offsets, List<string> abbrs)
-            {
-                this.transList = transList ?? new List<long>();
-                this.offsets = offsets ?? new List<double>();
-                this.abbrs = abbrs ?? new List<string>();
-            }
-
-            public int FindLastTransition(DateTime dt, bool inUtc = false)
-            {
-                if (transList == null || transList.Count == 0)
-                {
-                    return -1; // No transitions available
-                }
-
-                // Convert DateTime to a Unix timestamp
-                long timestamp = DateTimeToUnixTimestamp(dt);
-
-                // Find the index where the timestamp would fit
-                //int idx = transList.BinarySearch(timestamp);
-                // if (idx < 0)     { idx = ~idx; // Adjust index if not found  }  
-                //これはMSのBinarySearchソースだが結果ちがうのでゾーンの入れ替わりのとき　PDT3:00 が　PST2:00になってしまう
-
-                int idx = BisectRight(transList, timestamp);
-
-
-                return idx - 1; // Return the index of the previous transition
-            }
-
-            //C#とpythonの2分検索はあるごがちがう
-            //https://chatgpt.com/share/6766a87b-9858-800f-9704-b9a92c033456
-            public static int BisectRight(List<long> list, long value)
-            {
-                int low = 0, high = list.Count;
-
-                while (low < high)
-                {
-                    int mid = (low + high) / 2;
-
-                    if (list[mid] > value)
-                    {
-                        high = mid;
-                    }
-                    else
-                    {
-                        low = mid + 1;
-                    }
-                }
-
-                return low;
-            }
-
-            private long DateTimeToUnixTimestamp(DateTime dt)
-            {
-                DateTime utcDateTime = dt.ToUniversalTime();
-                DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                return (long)(utcDateTime - unixEpoch).TotalSeconds;
-            }
-        }
+     
 
 
         static string TerminateAtNull(char[] charArray)
@@ -1254,7 +1183,6 @@ namespace neta
         // per TZif file standard
         private static long TZif_ToInt64(byte[] value, int startIndex)
             => BinaryPrimitives.ReadInt64BigEndian(value.AsSpan(startIndex));
-
 
     }
 }

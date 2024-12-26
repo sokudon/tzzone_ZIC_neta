@@ -1,17 +1,127 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
+using static neta.dtformat;
+using static System.Windows.Forms.DataFormats;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Drawing;
-
 
 //https://claude.ai/chat/5e3294c3-7dec-4e02-9be6-b82196e7bab1
 namespace TZPASER
 {
+    public class TimeZoneData
+    {
+        public string Zone { get; set; }
+        public List<long> TransList { get; set; }
+        public List<double> Offsets { get; set; }
+        public List<string> Abbrs { get; set; }
+    }
+
+    public class TimeZoneTransitions
+    {
+        private List<long> transList;
+        private List<double> offsets;
+        private List<string> abbrs;
+
+        public TimeZoneTransitions(List<long> transList, List<double> offsets, List<string> abbrs)
+        {
+            this.transList = transList ?? new List<long>();
+            this.offsets = offsets ?? new List<double>();
+            this.abbrs = abbrs ?? new List<string>();
+        }
+
+        public int FindLastTransition(DateTime dt, bool inUtc = false)
+        {
+            if (transList == null || transList.Count == 0)
+            {
+                return -1; // No transitions available
+            }
+
+            // Convert DateTime to a Unix timestamp
+            long timestamp = DateTimeToUnixTimestamp(dt);
+
+            // Find the index where the timestamp would fit
+            //int idx = transList.BinarySearch(timestamp);
+            // if (idx < 0)     { idx = ~idx; // Adjust index if not found  }  
+            //これはMSのBinarySearchソースだが結果ちがうのでゾーンの入れ替わりのとき　PDT3:00 が　PST2:00になってしまう
+
+            int idx = BisectRight(transList, timestamp);
+
+
+            return idx - 1; // Return the index of the previous transition
+        }
+
+        //C#とpythonの2分検索はあるごがちがう
+        //https://chatgpt.com/share/6766a87b-9858-800f-9704-b9a92c033456
+        public static int BisectRight(List<long> list, long value)
+        {
+            int low = 0, high = list.Count;
+
+            while (low < high)
+            {
+                int mid = (low + high) / 2;
+
+                if (list[mid] > value)
+                {
+                    high = mid;
+                }
+                else
+                {
+                    low = mid + 1;
+                }
+            }
+
+            return low;
+        }
+
+        public int FindLastTransition_with_offset(DateTime dt, bool inUtc = false)
+        {
+            if (transList == null || transList.Count == 0)
+            {
+                return -1; // No transitions available
+            }
+
+            // Convert DateTime to a Unix timestamp
+            long timestamp = DateTimeToUnixTimestamp(dt);
+
+            //utcパースとオフセットを連結させる　2024/03/10 3:00とかをゾーンパースする場合
+            int idx = BisectRight_w_offset(transList, offsets ,timestamp);
+
+
+            return idx - 1; // Return the index of the previous transition
+        }
+
+        //C#とpythonの2分検索はあるごがちがう
+        public static int BisectRight_w_offset(List<long> list, List<double> off, long value)
+        {
+            int low = 0, high = list.Count;
+
+            while (low < high)
+            {
+                int mid = (low + high) / 2;
+
+                if (list[mid] + Convert.ToInt64(off[mid])*3600 > value)
+                {
+                    high = mid;
+                }
+                else
+                {
+                    low = mid + 1;
+                }
+            }
+
+            return low;
+        }
+
+        private long DateTimeToUnixTimestamp(DateTime dt)
+        {
+            DateTime utcDateTime = dt.ToUniversalTime();
+            DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return (long)(utcDateTime - unixEpoch).TotalSeconds;
+        }
+    }
+
+
     public class TimeZoneOffsetParser
     {
         /// <summary>
@@ -52,6 +162,7 @@ namespace TZPASER
             // ISO 8601形式 (+/-)HH:mm:ss
             return $"{(offset < TimeSpan.Zero ? "-" : "+")}{Math.Abs(offset.Hours):D2}:{Math.Abs(offset.Minutes):D2}:{Math.Abs(offset.Seconds):D2}";
         }
+
 
         /// <summary>
         /// アフリカなどの特殊な時差を処理するサンプルメソッド
@@ -136,7 +247,7 @@ namespace TZPASER
             }
         }
 
-        public static string getleft(TimeSpan tspan,string leftformat)
+        public static string getleft(TimeSpan tspan, string leftformat)
         {
             //string leftformat = Properties.Settings.Default.lefttimeformat;
 
@@ -209,7 +320,7 @@ namespace TZPASER
     new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$") // ISO 8601
 };
 
-        private static string [] formats = new[]
+        private static string[] formats = new[]
                    {
          "yyyy-M-d",                   // YYYY-M-D (月・日が1桁でもOK)
         "yyyy/M/d",                   // YYYY/M/D
@@ -234,35 +345,112 @@ namespace TZPASER
                 return false;
 
             Regex rg = new Regex(@"/");
-            input = rg.Replace(input,"-");
+            input = rg.Replace(input, "-");
 
             // パターンマッチングで事前フィルタリング
             foreach (var pattern in DatePatterns)
             {
                 if (pattern.IsMatch(input))
                 {
-                    //TryParseExactで解析を試みる
-                    //Regex offset = new Regex(@"(Z|[\+\-]\d{2}:\d{2})$"); // ISO 8601
-                    //if (offset.IsMatch(input))
-                    //{
+                    string format = "yyyy-MM-ddTHH:mm:sszzz";
+                    Regex iso = new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$"); // ISO 8601
+                    if (iso.IsMatch(input) || !neta.Properties.Settings.Default.local_chager)
+                    {
                         return DateTime.TryParseExact(
+                               input,
+                               formats,
+                               CultureInfo.InvariantCulture,
+                               DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal,//ローカル変換後 UTCに変換
+                               out result);
+                    }
+
+                    bool utc = neta.Properties.Settings.Default.useutc;
+                    bool ms = neta.Properties.Settings.Default.usems;
+                    bool tz = neta.Properties.Settings.Default.usetz;
+
+                    DateTime.TryParseExact(
                             input,
                             formats,
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal,//ローカル変換後 UTCに変換
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
                             out result);
-                    //}
-                    ////ローカル時間に変換
-                    //return DateTime.TryParseExact(
-                    //input,
-                    //formats,
-                    //System.Globalization.CultureInfo.InvariantCulture,
-                    //DateTimeStyles.AssumeLocal,  //localparsr none=unspecked local=local
-                    //out result);
-                }
-            }
+                    DateTime dt = result;
+                    double uo = 0;
+
+                            if (utc)
+                            {
+                                uo = neta.Properties.Settings.Default.useutcint;
+                            }
+                            else if (ms)
+                             { 
+
+                                return false;
+
+                             }
+                            else if (tz)
+                            {
+
+                                string mkjson = neta.Properties.Settings.Default.TZJSON;
+                                // JSONパース
+                                if (mkjson != null && mkjson != "")
+                                {
+                                    try
+                                    {
+                                        TimeZoneData tzData = System.Text.Json.JsonSerializer.Deserialize<TimeZoneData>(mkjson);
+
+                                        // TimeZoneTransitionsインスタンスを作成
+                                        TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
+                                            tzData.TransList,
+                                            tzData.Offsets,
+                                            tzData.Abbrs
+                                        );
+
+                                int lastTransitionIdx = tzTransitions.FindLastTransition_with_offset(dt);
+
+                                        if (lastTransitionIdx >= 0)
+                                        {
+
+                                            uo = tzData.Offsets[lastTransitionIdx];
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine(ex.ToString());
+                                        return false;
+                                    }
+                                }
+                            }
+                            // 時間部分を取得
+                            int hours = (int)Math.Floor(uo);
+                            // 分部分を取得
+                            int minutes = (int)Math.Round((uo - hours) * 60);
+                            // HH:mm形式の文字列を生成
+                            string timeFormat = $"{(hours >= 0 ? "+" : "")}{hours:D2}:{Math.Abs(minutes):D2}";
+
+                        format = format.Replace("zzz", timeFormat);
+
+                        //ローカル時間に変換
+                        string date = dt.ToString(format);
+
+                        return DateTime.TryParseExact(
+                        date,
+                        formats,
+                        System.Globalization.CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal,//ローカル変換後 UTCに変換
+                        out result);
+                    }
+            } 
 
             return false;
+        }
+
+        static long ToUnixTimeSeconds(DateTime dt)
+        {
+            // エポック開始日時 (1970-01-01 00:00:00 UTC)
+            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            // 経過秒数を計算
+            return (long)(dt - epoch).TotalSeconds;
         }
 
         //// パフォーマンス比較メソッド
@@ -465,7 +653,7 @@ namespace TZPASER
 
             Regex offsetrg = new Regex(@"([+-]\d{4}|[A-Z]{2,4})$");
             Match m = offsetrg.Match(input);
-            string tzInfo = m.Value; 
+            string tzInfo = m.Value;
             TimeSpan offset = ParseTimeZoneOffset(tzInfo);
             if (offset == TimeSpan.MinValue)
             {
@@ -477,7 +665,7 @@ namespace TZPASER
 
             var match = YMDZONE.Match(input);
             if (match.Success)
-            { 
+            {
                 try
                 {
                     // 日付コンポーネントの抽出
@@ -510,10 +698,10 @@ namespace TZPASER
                         return true;
                     }
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
-                return false;
+                    return false;
                 }
             }
 
@@ -556,13 +744,14 @@ namespace TZPASER
                         int minute = 0;
                         int second = 0;
                         int rfcstring = match.Groups.Count;
-                        if (rfcstring >= 6) { 
+                        if (rfcstring >= 6)
+                        {
                             hour = int.Parse(match.Groups[4].Value);
                         }
                         if (rfcstring >= 7)
                         {
                             minute = int.Parse(match.Groups[5].Value);
-                    }
+                        }
                         if (rfcstring >= 8)
                         {
                             second = int.Parse(match.Groups[6].Value);

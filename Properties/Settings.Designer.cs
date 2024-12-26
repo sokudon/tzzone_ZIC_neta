@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/23")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/26")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -536,6 +536,18 @@ namespace neta.Properties {
             }
             set {
                 this["colorkey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool local_chager {
+            get {
+                return ((bool)(this["local_chager"]));
+            }
+            set {
+                this["local_chager"] = value;
             }
         }
     }
