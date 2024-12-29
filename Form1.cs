@@ -5,10 +5,12 @@ using System.Net;
 using System.IO;
 using System.Text.RegularExpressions;
 using Codeplex.Data;
-using static neta.dtformat;
-using System.Drawing;
 using Microsoft.Win32;
 using TZPASER;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace neta
 {
@@ -100,9 +102,6 @@ namespace neta
             this.ForeColor = Properties.Settings.Default.uicolor;
             this.BackColor = Properties.Settings.Default.bgcolor;
             this.TransparencyKey = Properties.Settings.Default.colorkey;
-
-            this.eventname.BackColor = Properties.Settings.Default.bgcolor;
-            this.current.BackColor = Properties.Settings.Default.bgcolor;
             this.panel1.BackColor = Properties.Settings.Default.bgcolor;
 
             this.eventname.Font = Properties.Settings.Default.uifont;
@@ -122,9 +121,8 @@ namespace neta
                 try
                 {
                     // 画像を直接パネルの背景として設定
-                    panel1.BackgroundImage = Image.FromFile(Properties.Settings.Default.lastimagefile);
+                    panel1.BackgroundImage = System.Drawing.Image.FromFile(Properties.Settings.Default.lastimagefile);
                     panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
-                    current.BackColor = this.BackColor;
                 }
                 catch (Exception ex)
                 {
@@ -183,7 +181,7 @@ namespace neta
             DateTime dt = DateTime.Now;
 
 
-            DateTime st;//= DateTime.Parse(startbox.Text);
+            DateTime st;//= DateTime.Parse(startbox.Text); 
             DateTime en;//= DateTime.Parse(endbox.Text);
             if (!tz)
             {
@@ -1189,42 +1187,461 @@ namespace neta
             Properties.Settings.Default.uihide = true;
         }
 
-        private void クロマキー青_Click(object sender, EventArgs e)
+        private void クロマキー設定_Click(object sender, EventArgs e)
         {
-            this.BackColor = Color.Blue;
-            this.eventname.BackColor = Color.Blue;
-            this.current.BackColor = Color.Blue;
-            panel1.BackColor = Color.Blue;
-            Properties.Settings.Default.bgcolor = Color.Blue;
+            ChromaKeyColorPicker picker = new ChromaKeyColorPicker(this);
+            picker.ColorApplied += (color) =>
+            {
+                panel1.BackColor = color;
+                this.BackColor = color;
+                Properties.Settings.Default.bgcolor = color;
+            };
+            picker.Show();  // モーダレス表示
         }
 
-        private void クロマキー赤_Click(object sender, EventArgs e)
+        public class CustomProgressBar : ProgressBar
         {
+            public Color BarColor { get; set; } = Color.Blue;
 
-            this.BackColor = Color.Red;
-            this.eventname.BackColor = Color.Red;
-            this.current.BackColor = Color.Red;
-            panel1.BackColor = Color.Red;
-            Properties.Settings.Default.bgcolor = Color.Red;
+            public CustomProgressBar()
+            {
+                // プログレスバーのダブルバッファリングを有効化
+                SetStyle(ControlStyles.UserPaint, true);
+            }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                // 背景を描画
+                Rectangle rect = this.ClientRectangle;
+                e.Graphics.FillRectangle(Brushes.White, rect);
+
+                // プログレスバーの塗りつぶし部分を描画
+                rect.Width = (int)(rect.Width * ((double)Value / Maximum));
+                e.Graphics.FillRectangle(new SolidBrush(BarColor), rect);
+
+                // 枠線を描画
+                e.Graphics.DrawRectangle(Pens.Black, 0, 0, this.Width - 1, this.Height - 1);
+            }
         }
 
-        private void クロマキー緑_Click(object sender, EventArgs e)
+
+        public class ChromaKeyColorPicker : Form
         {
+            private readonly Form parentForm;  // 親フォームの参照を保持
 
-            this.BackColor = Color.Green;
-            this.eventname.BackColor = Color.Green;
-            this.current.BackColor = Color.Green;
-            panel1.BackColor = Color.Green;
-            Properties.Settings.Default.bgcolor = Color.Green;
+            // コンストラクタで親フォームを受け取る
+            public ChromaKeyColorPicker(Form parent)
+            {
+                this.parentForm = parent;
+                InitializeComponents();
+                SetupEvents();
+            }
+
+            private Color selectedColor;
+            private TrackBar alphaTrackBar;
+            private ComboBox presetCombo;
+            private PictureBox colorPalette;
+            private Panel colorPreview;
+            private TrackBar[] rgbTrackBars;
+            private NumericUpDown[] rgbNumerics;
+            private PictureBox targetImagePreview;
+            private TextBox obsSettingsText;
+
+            // プリセット色の定義
+            private readonly Dictionary<string, Color> presetColors = new Dictionary<string, Color>
+    {
+            {"元の背景色", Properties.Settings.Default.bgcolor},
+        {"グリーン", Color.FromArgb(255, 0, 255, 0)},
+        {"ブルー", Color.FromArgb(255, 0, 0, 255)},
+        {"レッド", Color.FromArgb(255, 255, 0, 0)},
+        {"シアン", Color.FromArgb(255, 0, 255, 255)},
+        {"マゼンタ", Color.FromArgb(255, 255, 0, 255)},
+        {"ブライトパープル", Color.FromArgb(255, 180, 0, 255)}
+    };
+            // カラー変更イベントの定義
+            public event Action<Color> ColorApplied;
+
+            private void InitializeComponents()
+            {
+                this.Size = new System.Drawing.Size(800, 600);
+                this.Text = "クロマキー カラーピッカー";
+
+                // プリセットコンボボックス
+                presetCombo = new ComboBox
+                {
+                    Location = new System.Drawing.Point(20, 20),
+                    Size = new System.Drawing.Size(150, 25),
+                    DropDownStyle = ComboBoxStyle.DropDownList
+                };
+                presetCombo.Items.AddRange(presetColors.Keys.ToArray());
+                this.Controls.Add(presetCombo);
+
+                // カラープレビュー
+                colorPreview = new Panel
+                {
+                    Location = new System.Drawing.Point(20, 60),
+                    Size = new System.Drawing.Size(150, 150),
+                    BorderStyle = BorderStyle.FixedSingle
+                };
+                this.Controls.Add(colorPreview);
+
+
+
+                // RGB・アルファスライダーの設定
+                rgbTrackBars = new TrackBar[3];
+                rgbNumerics = new NumericUpDown[3];
+                string[] rgbLabels = { "R:", "G:", "B:" };
+
+                for (int i = 0; i < 3; i++)
+                {
+                    CreateColorControl(rgbLabels[i], 20, 230 + (i * 60), out rgbTrackBars[i], out rgbNumerics[i]);
+                }
+
+
+
+                // 画像分析セクション
+                GroupBox analysisGroup = new GroupBox
+                {
+                    Text = "クロマキー分析",
+                    Location = new System.Drawing.Point(400, 20),
+                    Size = new System.Drawing.Size(360, 500)
+                };
+                this.Controls.Add(analysisGroup);
+
+                Button applyButton = new Button
+                {
+                    Text = "カラー設定を適用",
+                    Location = new System.Drawing.Point(10, 30),
+                    Size = new System.Drawing.Size(100, 30),
+                    Parent = analysisGroup
+                };
+                applyButton.Click += (s, e) =>
+                {
+                    ColorApplied?.Invoke(selectedColor);
+                };
+
+                targetImagePreview = new PictureBox
+                {
+                    Location = new System.Drawing.Point(10, 70),
+                    Size = new System.Drawing.Size(340, 200),
+                    SizeMode = PictureBoxSizeMode.Zoom,
+                    BorderStyle = BorderStyle.FixedSingle,
+                    Parent = analysisGroup
+                };
+
+                obsSettingsText = new TextBox
+                {
+                    Location = new System.Drawing.Point(10, 280),
+                    Size = new System.Drawing.Size(340, 200),
+                    Multiline = true,
+                    ScrollBars = ScrollBars.Vertical,
+                    ReadOnly = true,
+                    Parent = analysisGroup
+                };
+
+               
+
+
+            }
+
+            private void SetupEvents()
+            {
+                presetCombo.SelectedIndexChanged += (s, e) =>
+                {
+                    if (presetCombo.SelectedItem != null)
+                    {
+                        var colorName = presetCombo.SelectedItem.ToString();
+                        if (presetColors.ContainsKey(colorName))
+                        {
+                            UpdateColor(presetColors[colorName]);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"指定の色 '{colorName}' がプリセットに見つかりません。");
+                        }
+                    }
+                };
+
+                presetCombo.SelectedItem = "元の背景色";
+                if (presetColors.ContainsKey("元の背景色"))
+                {
+                    UpdateColor(presetColors["元の背景色"]);
+                }
+
+
+                //https://claude.ai/chat/fd23135f-2e05-4ea2-843b-6f0998363871
+                // 画像分析イベント
+                targetImagePreview.Click += async (s, e) =>
+                {
+                    try
+                    {
+                        string img = Properties.Settings.Default.lastimagefile;
+                        if (File.Exists(img))
+                        {
+                            await LoadAndAnalyzeImage(img);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"エラー: {ex.Message}");
+                    }
+                };
+
+              
+            }
+
+            private async Task LoadAndAnalyzeImage(string imagePath)
+            {
+                try
+                {
+                    // 既存の画像を適切に破棄
+                    if (targetImagePreview.Image != null)
+                    {
+                        var oldImage = targetImagePreview.Image;
+                        targetImagePreview.Image = null;
+                        oldImage.Dispose();
+                    }
+
+                    // 画像をメモリにコピーして読み込み
+                    using (var stream = new MemoryStream(File.ReadAllBytes(imagePath)))
+                    {
+                        // 新しい画像のインスタンスを作成
+                        targetImagePreview.Image = new Bitmap(System.Drawing.Image.FromStream(stream));
+                    }
+
+                    await AnalyzeImage();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"画像の読み込みエラー: {ex.Message}");
+                }
+            }
+
+            // 2つの色の距離を計算
+            static double ColorDistance(Color color1, Color color2)
+            {
+                double bDiff = color1.B - color2.B;
+                double gDiff = color1.G - color2.G;
+                double rDiff = color1.R- color2.R;
+
+                return Math.Sqrt(bDiff * bDiff + gDiff * gDiff + rDiff * rDiff);
+            }
+
+
+            // 分析処理の修正
+            private async Task AnalyzeImage()
+            {
+                if (targetImagePreview.Image == null) return;
+
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        using (Bitmap bmp = new Bitmap(targetImagePreview.Image))
+                        {
+                            var (averageColor, colorRatios) = AnalyzeImageColors(bmp);
+
+                            StringBuilder analysisResult = new StringBuilder();
+                            analysisResult.AppendLine("【分析結果】");
+                            analysisResult.AppendLine($"画像サイズ: {bmp.Width}x{bmp.Height}");
+
+                            // 平均色の表示
+                            analysisResult.AppendLine($"\n平均色:");
+                            analysisResult.AppendLine($"R:{averageColor.R} G:{averageColor.G} B:{averageColor.B}");
+
+                            // 色の分布
+                            analysisResult.AppendLine("\n色の分布:");
+                            foreach (var ratio in colorRatios.OrderByDescending(r => r.Value))
+                            {
+                                if (ratio.Value > 1.0) // 1%以上の色のみ表示
+                                {
+                                    analysisResult.AppendLine($"{ratio.Key}: {ratio.Value:F1}%");
+                                }
+                            }
+
+                            // 距離をリストに格納
+                            List<(string Name, Color Color, double Distance)> distances = new List<(string, Color, double)>();
+                            foreach (var chromaColor in presetColors)
+                            {
+                                double distance = ColorDistance(averageColor, chromaColor.Value);
+                                distances.Add((chromaColor.Key + chromaColor.Value.Name, chromaColor.Value, distance));
+                            }
+
+                            // 距離を昇順にソート
+                            distances.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+
+                            // 結果を表示
+                            analysisResult.AppendLine("クロマキー候補色とのゆーくりっど距離 (昇順):");
+                            foreach (var entry in distances)
+                            {
+                                analysisResult.AppendLine($"- 色: {entry.Name}, 距離: {entry.Distance:F2}, RGB: ({entry.Color.R}, {entry.Color.G}, {entry.Color.B})");
+                            }
+
+                            this.Invoke((MethodInvoker)delegate
+                            {
+                                obsSettingsText.Text = analysisResult.ToString();
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            obsSettingsText.Text = $"分析エラー: {ex.Message}";
+                        });
+                    }
+                });
+            }
+
+            // 画像の色分析関数
+            private (Color averageColor, Dictionary<string, double> colorRatios) AnalyzeImageColors(Bitmap bmp)
+            {
+                long totalR = 0, totalG = 0, totalB = 0;
+                int totalPixels = bmp.Width * bmp.Height;
+                Dictionary<string, int> colorGroups = new Dictionary<string, int>
+    {
+        {"Red", 0},
+        {"Green", 0},
+        {"Blue", 0},
+        {"Magenta", 0},
+        {"Cyan", 0},
+        {"Yellow", 0},
+        {"White", 0},
+        {"Black", 0}
+    };
+
+                for (int x = 0; x < bmp.Width; x++)
+                {
+                    for (int y = 0; y < bmp.Height; y++)
+                    {
+                        Color pixel = bmp.GetPixel(x, y);
+                        totalR += pixel.R;
+                        totalG += pixel.G;
+                        totalB += pixel.B;
+
+                        // 色相による分類
+                        if (Math.Max(Math.Max(pixel.R, pixel.G), pixel.B) - Math.Min(Math.Min(pixel.R, pixel.G), pixel.B) < 30)
+                        {
+                            if (pixel.R > 200) colorGroups["White"]++;
+                            else if (pixel.R < 50) colorGroups["Black"]++;
+                        }
+                        else if (pixel.R > pixel.G && pixel.R > pixel.B) colorGroups["Red"]++;
+                        else if (pixel.G > pixel.R && pixel.G > pixel.B) colorGroups["Green"]++;
+                        else if (pixel.B > pixel.R && pixel.B > pixel.G) colorGroups["Blue"]++;
+                        else if (pixel.R > 200 && pixel.B > 200) colorGroups["Magenta"]++;
+                        else if (pixel.G > 200 && pixel.B > 200) colorGroups["Cyan"]++;
+                        else if (pixel.R > 200 && pixel.G > 200) colorGroups["Yellow"]++;
+                    }
+                }
+
+                // 平均色の計算
+                Color averageColor = Color.FromArgb(
+                    (int)(totalR / totalPixels),
+                    (int)(totalG / totalPixels),
+                    (int)(totalB / totalPixels)
+                );
+
+                // 色の割合を計算
+                Dictionary<string, double> colorRatios = colorGroups.ToDictionary(
+                    kv => kv.Key,
+                    kv => (double)kv.Value / totalPixels * 100
+                );
+
+                return (averageColor, colorRatios);
+            }
+
+
+            // UpdateColorメソッドの修正
+            private void UpdateColor(Color? newColor = null)
+            {
+                if (newColor.HasValue)
+                {
+                    selectedColor = newColor.Value;
+                    // RGB値を正しく設定
+                    rgbTrackBars[0].Value = newColor.Value.R;
+                    rgbTrackBars[1].Value = newColor.Value.G;
+                    rgbTrackBars[2].Value = newColor.Value.B;
+                    rgbNumerics[0].Value = newColor.Value.R;
+                    rgbNumerics[1].Value = newColor.Value.G;
+                    rgbNumerics[2].Value = newColor.Value.B;
+
+                }
+                else {
+                    selectedColor = Color.FromArgb(
+                   (int)rgbNumerics[0].Value,
+                    (int)rgbNumerics[1].Value,
+                    (int)rgbNumerics[2].Value
+                 );
+                }
+                targetImagePreview.BackColor = selectedColor;
+                colorPreview.BackColor = selectedColor;
+            }
+
+            // ColorControl_ValueChangedの修正
+            private void ColorControl_ValueChanged(object sender, EventArgs e)
+            {
+                if (sender is TrackBar trackBar)
+                {
+                    int index = Array.IndexOf(rgbTrackBars, trackBar);
+                    if (index >= 0)
+                    {
+                        rgbNumerics[index].Value = trackBar.Value;
+                    }
+                }
+                else if (sender is NumericUpDown numeric)
+                {
+                    int index = Array.IndexOf(rgbNumerics, numeric);
+                    if (index >= 0)
+                    {
+                        rgbTrackBars[index].Value = (int)numeric.Value;
+                    }
+                }
+                UpdateColor();
+            }
+
+            private TrackBar redTrackBar, greenTrackBar, blueTrackBar;
+            private NumericUpDown redNumeric, greenNumeric, blueNumeric;
+
+
+            private void CreateColorControl(string label, int x, int y,
+         out TrackBar trackBar, out NumericUpDown numeric)
+            {
+                Label lbl = new Label
+                {
+                    Text = label,
+                    Location = new System.Drawing.Point(x, y),
+                    Size = new System.Drawing.Size(30, 20)
+                };
+                this.Controls.Add(lbl);
+
+                trackBar = new TrackBar
+                {
+                    Location = new System.Drawing.Point(x + 30, y),
+                    Size = new System.Drawing.Size(150, 45),
+                    Minimum = 0,
+                    Maximum = 255
+                };
+                trackBar.ValueChanged += ColorControl_ValueChanged;
+                this.Controls.Add(trackBar);
+
+                numeric = new NumericUpDown
+                {
+                    Location = new System.Drawing.Point(x + 190, y),
+                    Size = new System.Drawing.Size(60, 20),
+                    Minimum = 0,
+                    Maximum = 255
+                };
+                numeric.ValueChanged += ColorControl_ValueChanged;
+                this.Controls.Add(numeric);
+            }
+
+
         }
-
 
         private void めにゅーの色に戻すToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
             this.BackColor = this.menuStrip1.BackColor;
-            this.eventname.BackColor = this.menuStrip1.BackColor;
-            this.current.BackColor = this.menuStrip1.BackColor;
             panel1.BackColor = this.menuStrip1.BackColor;
             Properties.Settings.Default.bgcolor = this.menuStrip1.BackColor;
         }
@@ -1403,9 +1820,8 @@ namespace neta
                 try
                 {
                     // 画像を直接パネルの背景として設定
-                    panel1.BackgroundImage = Image.FromFile(s);
+                    panel1.BackgroundImage = System.Drawing.Image.FromFile(s);
                     panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
-                    current.BackColor = this.BackColor;
 
                     Properties.Settings.Default.lastimagefile = s;
                 }
@@ -1445,8 +1861,38 @@ namespace neta
                  + left.Text + "\r\n"
                  + duration.Text + "\r\n"
                  + start.Text + "\r\n"
-                 +end.Text + "\r\n";
+                 + end.Text + "\r\n";
             Clipboard.SetText(texter);
+        }
+
+        //public void SetKeyingBackground(KeyingType type)
+        //{
+        //    switch (type)
+        //    {
+        //        case KeyingType.ChromaKey:
+        //            panel1.BackColor = Color.FromArgb(255, 0, 255, 0);  // 緑
+        //            break;
+        //        case KeyingType.ColorKey:
+        //            panel1.BackColor = Color.FromArgb(255, 255, 0, 255);  // マゼンタ
+        //            break;
+        //        case KeyingType.BlueScreen:
+        //            panel1.BackColor = Color.FromArgb(255, 0, 0, 255);  // 青
+        //            break;
+        //    }
+        //}
+
+        private void tanspaciy_rate()
+        {
+            // 方法1: BackColorにアルファ値を設定する
+            eventname.BackColor = Color.FromArgb(128, 255, 255, 255);  // 128が透明度（0-255）
+                                                                       // 255は完全不透明、0は完全透明
+
+            // 方法2: 前景色（文字色）を半透明にする
+            eventname.ForeColor = Color.FromArgb(128, 0, 0, 0);  // 黒い文字を半透明に
+
+            // 方法3: 背景と文字の両方を半透明にする例
+            eventname.BackColor = Color.FromArgb(128, 255, 255, 255);  // 背景を半透明の白に
+            eventname.ForeColor = Color.FromArgb(200, 0, 0, 0);        // 文字をやや透明な黒に
         }
     }
 
