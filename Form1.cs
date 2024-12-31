@@ -11,6 +11,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
+using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 
 namespace neta
 {
@@ -130,6 +133,18 @@ namespace neta
                 }
             }
 
+
+
+            if (Properties.Settings.Default.font_margn)
+            {
+                menu_align(0, true);
+            }
+            if (Properties.Settings.Default.barvisible == false)
+            {
+                バーの表示ToolStripMenuItem_Click(sender, e);
+            }
+
+
             // using Microsoft.Win32;
             // システム時間変更時のイベントハンドラを登録
             SystemEvents.TimeChanged += new EventHandler(SystemEvents_TimeChanged);
@@ -228,7 +243,7 @@ namespace neta
             if (utc)
             {
                 dt = dt.ToUniversalTime();
-               string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
+                string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
                 format = format.Replace("K", rp).Replace("zzz", rp).Replace("zz", Properties.Settings.Default.useutch).Replace("z", Properties.Settings.Default.useutch);
                 current.Text = "現在時間:" + dt.AddHours(Properties.Settings.Default.useutcint).ToString(format);
                 start.Text = "開始時間:" + st.AddHours(Properties.Settings.Default.useutcint).ToString(format);
@@ -1342,7 +1357,7 @@ namespace neta
                     Parent = analysisGroup
                 };
 
-               
+
 
 
             }
@@ -1390,7 +1405,7 @@ namespace neta
                     }
                 };
 
-              
+
             }
 
             private async Task LoadAndAnalyzeImage(string imagePath)
@@ -1425,7 +1440,7 @@ namespace neta
             {
                 double bDiff = color1.B - color2.B;
                 double gDiff = color1.G - color2.G;
-                double rDiff = color1.R- color2.R;
+                double rDiff = color1.R - color2.R;
 
                 return Math.Sqrt(bDiff * bDiff + gDiff * gDiff + rDiff * rDiff);
             }
@@ -1569,7 +1584,8 @@ namespace neta
                     rgbNumerics[2].Value = newColor.Value.B;
 
                 }
-                else {
+                else
+                {
                     selectedColor = Color.FromArgb(
                    (int)rgbNumerics[0].Value,
                     (int)rgbNumerics[1].Value,
@@ -1691,7 +1707,7 @@ namespace neta
             FontDialog fd = new FontDialog();
 
             //ユーザーが選択できるポイントサイズの最大値を設定する
-            fd.MaxSize = 15;
+            fd.MaxSize = 20;
             fd.MinSize = 10;
             //存在しないフォントやスタイルをユーザーが選択すると
             //エラーメッセージを表示する
@@ -1897,6 +1913,59 @@ namespace neta
             eventname.BackColor = Color.FromArgb(128, 255, 255, 255);  // 背景を半透明の白に
             eventname.ForeColor = Color.FromArgb(200, 0, 0, 0);        // 文字をやや透明な黒に
         }
+
+        private void menu_align(int y, bool fontsize)
+        {
+
+            int height = y;
+            int base_x = 4;
+            int base_y = 26;
+            // フォントサイズに基づいて高さを調整
+            if (fontsize)
+            {
+                height = TextRenderer.MeasureText("A", this.Font).Height;
+            }
+            eventname.Location = new Point(base_x, base_y);
+            current.Location = new Point(base_x, base_y + height);
+            elapsed.Location = new Point(base_x, base_y + height * 2);
+            left.Location = new Point(base_x, base_y + height * 3);
+            duration.Location = new Point(base_x, base_y + height * 4);
+            start.Location = new Point(base_x, base_y + height * 5);
+            end.Location = new Point(base_x, base_y + height * 6);
+
+            height = TextRenderer.MeasureText("A", this.Font).Height;
+            progressBar1.Location = new Point(base_x, end.Location.Y+height);
+            parcent.Location = new Point(parcent.Location.X, end.Location.Y + height);
+
+        }
+
+        private void メニューを詰めるToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+
+        }
+
+        private void バーの表示ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            progressBar1.Visible = !progressBar1.Visible;
+            parcent.Visible = !parcent.Visible;
+            Properties.Settings.Default.barvisible = progressBar1.Visible;
+        }
+
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            menu_align(0, true);
+            Properties.Settings.Default.font_margn = true;
+        }
+
+
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+
+            menu_align(50, false);
+            Properties.Settings.Default.font_margn = false;
+        }
+
     }
 
 

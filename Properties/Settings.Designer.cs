@@ -550,5 +550,29 @@ namespace neta.Properties {
                 this["local_chager"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool font_margn {
+            get {
+                return ((bool)(this["font_margn"]));
+            }
+            set {
+                this["font_margn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool barvisible {
+            get {
+                return ((bool)(this["barvisible"]));
+            }
+            set {
+                this["barvisible"] = value;
+            }
+        }
     }
 }

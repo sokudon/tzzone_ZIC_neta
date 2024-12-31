@@ -73,6 +73,10 @@
             フォントToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             画像ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             画像なしToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
+            バーの表示ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             panel1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             panel2.SuspendLayout();
@@ -412,7 +416,7 @@
             // 色の設定ToolStripMenuItem
             // 
             色の設定ToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
-            色の設定ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 下パネルを隠すToolStripMenuItem, 下パネルを表示ToolStripMenuItem, クロマキー設定, めにゅーの色に戻すToolStripMenuItem, カラーキー今のメニューToolStripMenuItem, カラーキーなしToolStripMenuItem, 文字白ToolStripMenuItem, 文字黒ToolStripMenuItem, フォントToolStripMenuItem, 画像ToolStripMenuItem, 画像なしToolStripMenuItem });
+            色の設定ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 下パネルを隠すToolStripMenuItem, 下パネルを表示ToolStripMenuItem, クロマキー設定, めにゅーの色に戻すToolStripMenuItem, カラーキー今のメニューToolStripMenuItem, カラーキーなしToolStripMenuItem, 文字白ToolStripMenuItem, 文字黒ToolStripMenuItem, フォントToolStripMenuItem, 画像ToolStripMenuItem, 画像なしToolStripMenuItem, toolStripMenuItem1, バーの表示ToolStripMenuItem });
             色の設定ToolStripMenuItem.ForeColor = System.Drawing.Color.Black;
             色の設定ToolStripMenuItem.Name = "色の設定ToolStripMenuItem";
             色の設定ToolStripMenuItem.Size = new System.Drawing.Size(80, 24);
@@ -495,6 +499,34 @@
             画像なしToolStripMenuItem.Text = "画像なし";
             画像なしToolStripMenuItem.Click += 画像なしToolStripMenuItem_Click;
             // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItem3, toolStripMenuItem5 });
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
+            toolStripMenuItem1.Text = "テキストを詰める";
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new System.Drawing.Size(231, 26);
+            toolStripMenuItem3.Text = "フォントサイズに合わせる";
+            toolStripMenuItem3.Click += toolStripMenuItem3_Click;
+            // 
+            // toolStripMenuItem5
+            // 
+            toolStripMenuItem5.Name = "toolStripMenuItem5";
+            toolStripMenuItem5.Size = new System.Drawing.Size(231, 26);
+            toolStripMenuItem5.Text = "50";
+            toolStripMenuItem5.Click += toolStripMenuItem5_Click;
+            // 
+            // バーの表示ToolStripMenuItem
+            // 
+            バーの表示ToolStripMenuItem.Name = "バーの表示ToolStripMenuItem";
+            バーの表示ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            バーの表示ToolStripMenuItem.Text = "バーの表示";
+            バーの表示ToolStripMenuItem.Click += バーの表示ToolStripMenuItem_Click;
+            // 
             // NETA_TIMER
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -570,6 +602,10 @@
         private System.Windows.Forms.ToolStripMenuItem 画像なしToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem クリップへコピーToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem バーの表示ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
     }
 }
 
