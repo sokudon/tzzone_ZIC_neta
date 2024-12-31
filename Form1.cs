@@ -227,7 +227,8 @@ namespace neta
             }
             if (utc)
             {
-                string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
+                dt = dt.ToUniversalTime();
+               string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
                 format = format.Replace("K", rp).Replace("zzz", rp).Replace("zz", Properties.Settings.Default.useutch).Replace("z", Properties.Settings.Default.useutch);
                 current.Text = "現在時間:" + dt.AddHours(Properties.Settings.Default.useutcint).ToString(format);
                 start.Text = "開始時間:" + st.AddHours(Properties.Settings.Default.useutcint).ToString(format);
@@ -271,6 +272,8 @@ namespace neta
                             tzData.Offsets,
                             tzData.Abbrs
                         );
+
+                        dt = dt.ToUniversalTime();
 
                         string tzst = (Properties.Settings.Default.usetzdatabin);
                         int lastTransitionIdx = tzTransitions.FindLastTransition(dt);

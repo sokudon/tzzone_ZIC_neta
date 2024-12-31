@@ -334,9 +334,7 @@ namespace neta
                 {
                     this.Width = this.Width + 450;
                 }
-                using (OpenFileDialog openFileDialog = new OpenFileDialog())
-                {
-
+               
                     string tzdata = Path.Combine(Properties.Settings.Default.lasttzdatapath_base_utc, Properties.Settings.Default.usetzdatabin);
                     if (File.Exists(tzdata))
                     {
@@ -349,7 +347,6 @@ namespace neta
                         textBox3.Text = tztxt;
                         return;
                     }
-                }
             }
             else
             {
@@ -474,7 +471,9 @@ namespace neta
             {
                 checkBox2.Enabled = true;
             }
-            
+
+            checkBox3_CheckedChanged(sender, e);
+
         }
 
         //ヘッダ処理だけMS仕様
@@ -867,6 +866,7 @@ namespace neta
                     string utct = ddt_u.ToString();
 
                     int lastTransitionIdx = tzTransitions.FindLastTransition(testDateTime);
+                    int lastTransitionIdx_w = tzTransitions.FindLastTransition_w(testDateTime);
 
                     string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
                     string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
@@ -905,8 +905,15 @@ namespace neta
                     string ms_utc = testDateTime.ToUniversalTime().AddHours(Properties.Settings.Default.useutcint).ToString(format_ms);
                     string ms_tz = TimeZoneInfo.ConvertTime(ddt_u, tzi).ToString(format_mstz);
 
-                    if (lastTransitionIdx >= 0)
+                    bool use_zoneparse = Properties.Settings.Default.local_chager;
+
+                    if ((!use_zoneparse && lastTransitionIdx >= 0) ||(use_zoneparse &&lastTransitionIdx_w >= 0))
                     {
+                        if (use_zoneparse)
+                        {
+                            lastTransitionIdx = lastTransitionIdx_w;
+                        }
+
                         string tran = tzData.TransList[lastTransitionIdx].ToString();
                         double uo = tzData.Offsets[lastTransitionIdx];
                         string uoff = TZPASER.TimeZoneOffsetParser.ToCustomFormat(uo, true).ToString();
