@@ -5,6 +5,11 @@ using System.Collections.Generic;
 using static neta.dtformat;
 using static System.Windows.Forms.DataFormats;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Reflection.Emit;
+using neta;
+using System.Windows.Forms;
+using NodaTime.Text;
+using NodaTime;
 
 //https://claude.ai/chat/5e3294c3-7dec-4e02-9be6-b82196e7bab1
 namespace TZPASER
@@ -15,6 +20,51 @@ namespace TZPASER
         public List<long> TransList { get; set; }
         public List<double> Offsets { get; set; }
         public List<string> Abbrs { get; set; }
+    }
+
+    public class nodaparser {
+        public static ZonedDateTime ParseDateTimeInTimeZone(string isoDateString, string timeZoneId)
+        {
+            // ISO 8601形式をパース
+            var pattern = LocalDateTimePattern.ExtendedIso;
+            var parseResult = pattern.Parse(isoDateString);
+
+            if (!parseResult.Success)
+            {
+                throw new FormatException($"Invalid ISO 8601 date format: {isoDateString}");
+            }
+
+            LocalDateTime localDateTime = parseResult.Value;
+
+            // タイムゾーンを取得
+            var timeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(timeZoneId);
+            if (timeZone == null)
+            {
+                throw new ArgumentException($"Invalid time zone ID: {timeZoneId}");
+            }
+
+            // タイムゾーンで解釈（エラーを避けるために Leniently を使用）
+            return localDateTime.InZoneLeniently(timeZone);
+        }
+
+        public static ZonedDateTime ConvertToTimeZone(DateTime utcDateTime, string timeZoneId)
+        {
+            var instant = Instant.FromDateTimeUtc(utcDateTime);
+            var timeZone = DateTimeZoneProviders.Tzdb[timeZoneId];
+            return instant.InZone(timeZone);
+        }
+
+        public static bool CheckTimeZoneExists(string timeZoneId)
+        {
+            var timeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(timeZoneId);
+
+            if (timeZone == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
     }
 
     public class TimeZoneTransitions
@@ -75,8 +125,7 @@ namespace TZPASER
         }
 
 
-
-
+        //zo-ne parse用
         public int FindLastTransition_w(DateTime dt, bool inUtc = false)
         {
             if (transList == null || transList.Count == 0)
@@ -87,19 +136,12 @@ namespace TZPASER
             // Convert DateTime to a Unix timestamp
             long timestamp = DateTimeToUnixTimestamp(dt);
 
-            // Find the index where the timestamp would fit
-            //int idx = transList.BinarySearch(timestamp);
-            // if (idx < 0)     { idx = ~idx; // Adjust index if not found  }  
-            //これはMSのBinarySearchソースだが結果ちがうのでゾーンの入れ替わりのとき　PDT3:00 が　PST2:00になってしまう
-
             int idx = BisectRight_w(transList, timestamp,offsets);
 
 
             return idx - 1; // Return the index of the previous transition
         }
 
-        //C#とpythonの2分検索はあるごがちがう
-        //https://chatgpt.com/share/6766a87b-9858-800f-9704-b9a92c033456
         public static int BisectRight_w(List<long> list, long value, List<double> offsets)
         {
             int low = 0, high = list.Count;
@@ -315,7 +357,8 @@ namespace TZPASER
     //        }
     //    }
 
-    public class FastDateTimeParsing
+
+        public class FastDateTimeParsing
     {
         //https://chatgpt.com/share/67662bc0-cbe0-800f-943a-2ff31135245b
         // 高速な日付パターンマッチング用の正規表現
@@ -363,11 +406,14 @@ namespace TZPASER
                     bool utc = neta.Properties.Settings.Default.useutc;
                     bool ms = neta.Properties.Settings.Default.usems;
                     bool tz = neta.Properties.Settings.Default.usetz;
+                    bool nd = neta.Properties.Settings.Default.usenoda;
+                    //bool use_ndzonep = neta.Properties.Settings.Default.nodausezoneparse;
                     bool use_zoneparse = neta.Properties.Settings.Default.local_chager;
 
                     string format = "yyyy-MM-ddTHH:mm:sszzz";
                     Regex iso = new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$"); // ISO 8601
-                    if (iso.IsMatch(input) || neta.Properties.Settings.Default.local_chager==false || (utc == false && ms == false && tz == false))
+                    if (iso.IsMatch(input)  || (use_zoneparse == false) ||　(utc == false && ms == false && tz == false && nd==false)
+                        )
                     {
                         return DateTime.TryParseExact(
                                input,
@@ -377,14 +423,14 @@ namespace TZPASER
                                out result);
                     }
 
-                    return zone_parser(input,out result, utc,ms,tz);
+                    return zone_parser(input,out result, utc,ms,tz,nd);
                 }
             } 
 
             return false;
         }
 
-        public static bool zone_parser(string input, out DateTime result,bool utc, bool ms, bool tz)
+        public static bool zone_parser(string input, out DateTime result,bool utc, bool ms, bool tz,bool nd)
         {
             string format = "yyyy-MM-ddTHH:mm:sszzz";
             DateTime.TryParseExact(
@@ -402,8 +448,56 @@ namespace TZPASER
             else if (ms)
             {
 
-                return false;
+                try
+                {
+                    // 日付文字列のパース
+                    if (!DateTime.TryParseExact(
+                        input,
+                        formats,
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.AssumeLocal,
+                        out result))
+                    {
+                        return false;
+                    }
 
+                    // タイムゾーン情報の取得
+                    TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(neta.Properties.Settings.Default.mstime);
+
+                    // ローカル時間から現地に変換
+                    DateTime pstDateTime = TimeZoneInfo.ConvertTimeFromUtc(result.ToUniversalTime(), timeZone);
+                    // UTCオフセットの計算
+                    TimeSpan offset = timeZone.GetUtcOffset(result);
+
+                    // DateTimeOffsetの作成
+                    DateTimeOffset dateTimeOffset = new DateTimeOffset(pstDateTime, offset);
+
+                    // オフセット時間を取得
+                    uo = dateTimeOffset.Offset.TotalHours;
+
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+
+            }
+            else if (nd)
+            {
+                string tznd = neta.Properties.Settings.Default.noddatz;
+                if (TZPASER.nodaparser.CheckTimeZoneExists(tznd))
+                {
+                    string dateString = result.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                    ZonedDateTime parsedDateTime = TZPASER.nodaparser.ParseDateTimeInTimeZone(dateString, tznd);
+                    TimeSpan zz= parsedDateTime.Offset.ToTimeSpan();
+                    uo = zz.TotalHours;
+
+                }
+                else
+                {
+                    return false;
+                }
             }
             else if (tz)
             {
@@ -423,7 +517,7 @@ namespace TZPASER
                             tzData.Abbrs
                         );
 
-                        //int lastTransitionIdx = tzTransitions.FindLastTransition(dt);
+                        //ゾーンパース使用時はtras+offsetになる
                         int lastTransitionIdx = tzTransitions.FindLastTransition_w(dt);
 
                         if (lastTransitionIdx >= 0)
@@ -431,7 +525,7 @@ namespace TZPASER
 
                             uo = tzData.Offsets[lastTransitionIdx];
                         }
-                        else if (tzData.Offsets.Count >= 1 && tzData.Abbrs[0] != "")
+                        else if (tzData.Offsets.Count >= 1 && tzData.Abbrs[0] != "")　//UTCバイナリの例外
                         {
                             uo = tzData.Offsets[0];
                         }
@@ -464,7 +558,7 @@ namespace TZPASER
         }
 
 
-            static long ToUnixTimeSeconds(DateTime dt)
+        static long ToUnixTimeSeconds(DateTime dt)
         {
             // エポック開始日時 (1970-01-01 00:00:00 UTC)
             DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);

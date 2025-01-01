@@ -1,3 +1,5 @@
+##https://colab.research.google.com/drive/1SxrJevNPBXMEJqRPc1ZlqsfTFH_rZ3gk?hl=ja#scrollTo=2nnZkeTHKtYo
+
 #https://colab.research.google.com/?hl=ja GOOGLE colabで貼り付けて　tzdatabaseの内容を表示 ＋　JSON化
 #tzdata自体はzone imfomation complier(ZIC) で作成されて　unix系だとman zdump で表示できる
 #pythonでdateutilの一部を改変してzdumpもどきともいう（）

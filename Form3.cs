@@ -48,12 +48,16 @@ namespace neta
             checkBox2.Checked = Properties.Settings.Default.usems;
             checkBox3.Checked = Properties.Settings.Default.usetz;
             checkBox4.Checked = Properties.Settings.Default.usefiler;
-             custom_local.Checked = Properties.Settings.Default.local_chager;
+            custom_local.Checked = Properties.Settings.Default.local_chager;
             comboBox1.Text = Properties.Settings.Default.useutczone;
             comboBox2.Text = Properties.Settings.Default.msstring;
             comboBox3.Text = Properties.Settings.Default.barlen.ToString();
             comboBox4.Text = Properties.Settings.Default.usetzdatabin;
             comboBox5.Text = Properties.Settings.Default.api;
+
+
+            checkBox5.Checked = Properties.Settings.Default.usenoda;
+            comboBox6.Text = Properties.Settings.Default.noddatz;
         }
 
 
@@ -334,19 +338,19 @@ namespace neta
                 {
                     this.Width = this.Width + 450;
                 }
-               
-                    string tzdata = Path.Combine(Properties.Settings.Default.lasttzdatapath_base_utc, Properties.Settings.Default.usetzdatabin);
-                    if (File.Exists(tzdata))
-                    {
-                        System.IO.FileStream fs = new FileStream(tzdata, FileMode.Open, FileAccess.Read);
-                        byte[] bs = new byte[fs.Length];
-                        fs.Read(bs, 0, bs.Length);
-                        fs.Close();
-                        string tztxt = TZif_ParseRaw(bs);
 
-                        textBox3.Text = tztxt;
-                        return;
-                    }
+                string tzdata = Path.Combine(Properties.Settings.Default.lasttzdatapath_base_utc, Properties.Settings.Default.usetzdatabin);
+                if (File.Exists(tzdata))
+                {
+                    System.IO.FileStream fs = new FileStream(tzdata, FileMode.Open, FileAccess.Read);
+                    byte[] bs = new byte[fs.Length];
+                    fs.Read(bs, 0, bs.Length);
+                    fs.Close();
+                    string tztxt = TZif_ParseRaw(bs);
+
+                    textBox3.Text = tztxt;
+                    return;
+                }
             }
             else
             {
@@ -462,16 +466,6 @@ namespace neta
         private void custom_local_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.local_chager = custom_local.Checked;
-            if (custom_local.Checked)
-            {
-                checkBox2.Checked = false;
-                checkBox2.Enabled = false;
-            }
-            else
-            {
-                checkBox2.Enabled = true;
-            }
-
             checkBox3_CheckedChanged(sender, e);
 
         }
@@ -907,7 +901,7 @@ namespace neta
 
                     bool use_zoneparse = Properties.Settings.Default.local_chager;
 
-                    if ((!use_zoneparse && lastTransitionIdx >= 0) ||(use_zoneparse &&lastTransitionIdx_w >= 0))
+                    if ((!use_zoneparse && lastTransitionIdx >= 0) || (use_zoneparse && lastTransitionIdx_w >= 0))
                     {
                         if (use_zoneparse)
                         {
@@ -1020,7 +1014,7 @@ namespace neta
 
         }
 
-     
+
 
 
         static string TerminateAtNull(char[] charArray)
@@ -1190,6 +1184,16 @@ namespace neta
         // per TZif file standard
         private static long TZif_ToInt64(byte[] value, int startIndex)
             => BinaryPrimitives.ReadInt64BigEndian(value.AsSpan(startIndex));
+
+        private void checkBox5_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.usenoda = checkBox5.Checked;
+        }
+
+        private void comboBox6_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.noddatz = comboBox6.Text;
+        }
 
     }
 }

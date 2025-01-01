@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2024/12/31</Value>
+      <Value Profile="(Default)">2025/01/02</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -139,6 +139,15 @@
     </Setting>
     <Setting Name="barvisible" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="usenoda" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="noddatz" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Asia/Tokyo</Value>
+    </Setting>
+    <Setting Name="nodausezoneparse" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

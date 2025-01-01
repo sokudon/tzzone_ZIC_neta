@@ -487,7 +487,7 @@ namespace neta
                                         }
                                     }
 
-                                    string crc32 = Crc32Algorithm.Compute(bs).ToString("X");
+                                    string crc32 = Crc32Algorithm.Compute(bs).ToString("X8");
                                     string hashsha;
                                     string hashmd;
 

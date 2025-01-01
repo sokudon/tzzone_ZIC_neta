@@ -11,9 +11,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
-using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
+
+using NodaTime;
+using NodaTime.Text;
+using NodaTime.Extensions;
+using static System.Windows.Forms.DataFormats;
+using System.Runtime.Intrinsics.X86;
 
 namespace neta
 {
@@ -93,10 +96,10 @@ namespace neta
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.comboBox1.Text = Properties.Settings.Default.goog;
             this.startbox.Text = Properties.Settings.Default.st;
             this.endbox.Text = Properties.Settings.Default.en;
             this.ibemei.Text = Properties.Settings.Default.ibe;
-            this.comboBox1.Text = Properties.Settings.Default.goog;
             this.progressBar1.Width = Properties.Settings.Default.barlen;
             this.parcent.Left = Properties.Settings.Default.parcent;
 
@@ -190,8 +193,10 @@ namespace neta
             bool utc = Properties.Settings.Default.useutc;
             bool ms = Properties.Settings.Default.usems;
             bool tz = Properties.Settings.Default.usetz;
+            bool noda = Properties.Settings.Default.usenoda;
             string posix = Properties.Settings.Default.footerstring;
             string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
+            label1.Text = "";
             eventname.Text = ibemei.Text;
             DateTime dt = DateTime.Now;
 
@@ -268,6 +273,32 @@ namespace neta
                 start.Text = "開始時間:" + TimeZoneInfo.ConvertTime(sst, tzi).ToString(formats);
                 end.Text = "終了時間:" + TimeZoneInfo.ConvertTime(een, tzi).ToString(formate);
 
+                bool isAmbiguouss = tzi.IsAmbiguousTime(TimeZoneInfo.ConvertTime(sst, tzi));
+                bool isAmbiguouse = tzi.IsAmbiguousTime(TimeZoneInfo.ConvertTime(een, tzi));
+                if (isAmbiguouss) { label1.Text += "startがあいまいな時間の範囲です。"; }
+                if (isAmbiguouse) { label1.Text += "endがあいまいな時間の範囲です。"; }
+
+            }
+            else if (noda)
+            {
+                string tznd = Properties.Settings.Default.noddatz;
+                if (TZPASER.nodaparser.CheckTimeZoneExists(tznd))
+                {
+
+                    // 2. UTC時刻を指定したタイムゾーンの現地時間に変換
+                    ZonedDateTime convertedTime = TZPASER.nodaparser.ConvertToTimeZone(dt.ToUniversalTime(), tznd);
+                    ZonedDateTime convertedTimes = TZPASER.nodaparser.ConvertToTimeZone(st, tznd);
+                    ZonedDateTime convertedTimee = TZPASER.nodaparser.ConvertToTimeZone(en, tznd);
+
+                    current.Text = "現在時間:" + convertedTime;
+                    start.Text = "開始時間:" + convertedTimes;
+                    end.Text = "終了時間:" + convertedTimee;
+                }
+                else {
+                    current.Text = "のだたいむが対応してないタイムゾーンです";
+                    start.Text = "error;";
+                    end.Text = "unsuppored timezone nodatime";
+                }
 
             }
             else if (tz)
@@ -328,6 +359,8 @@ namespace neta
                             current.Text = "現在時間:" + dt.AddHours(uo).ToString(formatc);
                             start.Text = "開始時間:" + st.AddHours(uoc).ToString(formats);
                             end.Text = "終了時間:" + en.AddHours(uoe).ToString(formate);
+
+
                         }
                         else
                         {

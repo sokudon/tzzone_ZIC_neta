@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2024/12/31")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/01/02")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -572,6 +572,42 @@ namespace neta.Properties {
             }
             set {
                 this["barvisible"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool usenoda {
+            get {
+                return ((bool)(this["usenoda"]));
+            }
+            set {
+                this["usenoda"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Asia/Tokyo")]
+        public string noddatz {
+            get {
+                return ((string)(this["noddatz"]));
+            }
+            set {
+                this["noddatz"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool nodausezoneparse {
+            get {
+                return ((bool)(this["nodausezoneparse"]));
+            }
+            set {
+                this["nodausezoneparse"] = value;
             }
         }
     }
