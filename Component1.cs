@@ -10,6 +10,7 @@ using neta;
 using System.Windows.Forms;
 using NodaTime.Text;
 using NodaTime;
+using System.IO;
 
 //https://claude.ai/chat/5e3294c3-7dec-4e02-9be6-b82196e7bab1
 namespace TZPASER
@@ -309,15 +310,19 @@ namespace TZPASER
             string h = tspan.Hours.ToString("0");
             string m = tspan.Minutes.ToString("0");
             string s = tspan.Seconds.ToString("0");
+            string ms = tspan.Milliseconds.ToString("000");
 
             string ds = tspan.TotalDays.ToString("0.000");
             string hs = tspan.TotalHours.ToString("0.000");
 
-            string MM = tspan.TotalDays.ToString("#");
+            string DD = tspan.TotalDays.ToString("#");
             string HH = tspan.TotalHours.ToString("#");
+            string MM = tspan.TotalMinutes.ToString("#");
+            string SS = tspan.TotalSeconds.ToString("#");
+            string MS = tspan.TotalMilliseconds.ToString("#");
 
-            string[] rp = { HH, MM, ds, hs, dd, hh, mm, ss, h, m, s };
-            string[] rpb = { "HH", "MM", "ds", "hs", "dd", "hh", "mm", "ss", "h", "m", "s" };
+            string[] rp = { HH, DD, MM,SS ,MS, ds, hs, dd, hh, mm, ss, ms, h, m, s};
+            string[] rpb = {"HH", "DD","MM","SS","MS", "ds", "hs", "dd", "hh", "mm", "ss", "ms" ,"h", "m", "s" };
 
             string left = leftformat;
             for (var i = 0; i < rp.Length; i++)
@@ -368,7 +373,7 @@ namespace TZPASER
     new Regex(@"^\d{4}[\-/]\d{1,2}[\-/]\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$"), // YYYY-MM-DD HH:mm:ss
     new Regex(@"^\d{4}[\-/]\d{1,2}[\-/]\d{1,2} \d{1,2}:\d{1,2}$"), // YYYY-MM-DD HH:mm
     new Regex(@"^\d{4}[\-/]\d{1,2}[\-/]\d{1,2} \d{1,2}$"), // YYYY-MM-DD HH
-    new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$") // ISO 8601
+    new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}((:?:\d{2})?(:?\.\d+)?)?(Z|[\+\-]\d{2}:\d{2})?$") // ISO 8601
 };
 
         private static string[] formats = new[]
@@ -407,8 +412,43 @@ namespace TZPASER
                     bool ms = neta.Properties.Settings.Default.usems;
                     bool tz = neta.Properties.Settings.Default.usetz;
                     bool nd = neta.Properties.Settings.Default.usenoda;
-                    //bool use_ndzonep = neta.Properties.Settings.Default.nodausezoneparse;
+                    //bool avoidinvaidambigous = neta.Properties.Settings.Default.shift_ambigous;
                     bool use_zoneparse = neta.Properties.Settings.Default.local_chager;
+
+                    //if (avoidinvaidambigous)
+                    //{ //４シフトしゅつりょくがずれるので意味はなかった（）
+                    //    Regex isoz = new Regex(@"^(\d{4})[\-/](\d{1,2})[\-/](\d{1,2})[ T](\d{1,2}):(\d{1,2})$"); // YYYY-MM-DD HH:mm
+                    //    var match = isoz.Match(input);
+                    //    if (match.Success)
+                    //    {
+                    //        try
+                    //        {
+                    //            int year = int.Parse(match.Groups[1].Value);
+                    //            int month = int.Parse(match.Groups[2].Value);
+                    //            int day = int.Parse(match.Groups[3].Value);
+
+                    //            int hour = int.Parse(match.Groups[4].Value);
+                    //            int minute = int.Parse(match.Groups[5].Value);
+
+                    //            string date = year.ToString("0000") + "-" + month.ToString("00") + "-" +
+                    //            day.ToString("00") + " 04:" + minute.ToString("00");
+                    //            DateTime.TryParseExact(
+                    //          date,
+                    //          formats,
+                    //          CultureInfo.InvariantCulture,
+                    //          DateTimeStyles.AssumeLocal,//ローカル変換後 UTCに変換
+                    //          out result);
+
+                    //            result = result.AddHours(-4 + hour);
+                    //            input = result.ToString("yyyy-MM-dd HH:mm");
+
+                    //        }
+                    //        catch (Exception ex)
+                    //        {
+
+                    //        }
+                    //    }
+                    //}
 
                     string format = "yyyy-MM-ddTHH:mm:sszzz";
                     Regex iso = new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$"); // ISO 8601

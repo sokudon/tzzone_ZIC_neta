@@ -36,12 +36,41 @@ namespace neta
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start(linkLabel1.Text);
+
+            string url = linkLabel1.Text;
+
+            try
+            {
+                // デフォルトブラウザでURLを開く
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true // 必須：デフォルトブラウザを使用する
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("エラーが発生しました: " + ex.Message);
+            }
         }
 
         private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start(linkLabel2.Text);
+            string url = linkLabel2.Text;
+
+            try
+            {
+                // デフォルトブラウザでURLを開く
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true // 必須：デフォルトブラウザを使用する
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("エラーが発生しました: " + ex.Message);
+            }
         }
 
         private void VER_Load(object sender, EventArgs e)

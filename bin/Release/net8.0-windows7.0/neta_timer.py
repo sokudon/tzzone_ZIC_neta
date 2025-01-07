@@ -11,9 +11,9 @@ buff.set('')
 Label(textvariable = buff).pack()
 
 
-ibe='[ユメステ]Jump！L0ve→L1ve!!(後編)'
-s = '2024-11-30T08:00:00Z'
-ss = '2024-12-08T13:00:00Z'
+ibe='invaid PST-PDT ambious'
+s = '2024-03-09T17:00:00Z'
+ss = '2024-11-02T16:00:00Z'
 timefm='%Y/%m/%d %H:%M:%S %Z'
 
 s=s.replace('Z', '+00:00')

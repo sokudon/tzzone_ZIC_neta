@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/01/02")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/01/07")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -241,8 +241,8 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://script.google.com/macros/s/AKfycbxAcB-2FLv5fR9Yc5ZSN5F7giGDnvAjduMvwRTLWB" +
-            "ai9faFSQaI4bol73klcLM-lsHbKg/exec?game=all")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_Mh" +
+            "LrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec")]
         public string api {
             get {
                 return ((string)(this["api"]));
@@ -518,7 +518,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("null")]
         public string lastimagefile {
             get {
                 return ((string)(this["lastimagefile"]));
@@ -601,13 +601,98 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool nodausezoneparse {
+        [global::System.Configuration.DefaultSettingValueAttribute("yyyy\'-\'MM\'-\'dd HH\':\'mm")]
+        public string nodaformat {
             get {
-                return ((bool)(this["nodausezoneparse"]));
+                return ((string)(this["nodaformat"]));
             }
             set {
-                this["nodausezoneparse"] = value;
+                this["nodaformat"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string tzDirectory_raw {
+            get {
+                return ((string)(this["tzDirectory_raw"]));
+            }
+            set {
+                this["tzDirectory_raw"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string apipath_raw {
+            get {
+                return ((string)(this["apipath_raw"]));
+            }
+            set {
+                this["apipath_raw"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool shift_ambigous {
+            get {
+                return ((bool)(this["shift_ambigous"]));
+            }
+            set {
+                this["shift_ambigous"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool change_baseurl {
+            get {
+                return ((bool)(this["change_baseurl"]));
+            }
+            set {
+                this["change_baseurl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_Mh" +
+            "LrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec")]
+        public string alt_baseurl {
+            get {
+                return ((string)(this["alt_baseurl"]));
+            }
+            set {
+                this["alt_baseurl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("mirikr,deresute,mirsita,shanimasu,saisuta,miricn,proseka,mobamasu,sidem")]
+        public string alt_basekey {
+            get {
+                return ((string)(this["alt_basekey"]));
+            }
+            set {
+                this["alt_basekey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool use_upui_chroma {
+            get {
+                return ((bool)(this["use_upui_chroma"]));
+            }
+            set {
+                this["use_upui_chroma"] = value;
             }
         }
     }

@@ -9,6 +9,10 @@ using System.Collections.ObjectModel;
 using System.Buffers.Binary;
 using System.Text.Json;
 using TZPASER;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Net.WebRequestMethods;
+using NodaTime.Text;
+using NodaTime;
 
 
 namespace neta
@@ -31,33 +35,43 @@ namespace neta
             {
                 if (z.DisplayName.IndexOf("廃止") < 0)
                 {
-                    comboBox2.Items.Add(z.DisplayName + " - " + z.Id);
+                    ms_timezone_items.Items.Add(z.DisplayName + " - " + z.Id);
                 }
             }
 
 
-            textBox1.Text = Properties.Settings.Default.lefttimeformat;
-            textBox2.Text = Properties.Settings.Default.datetimeformat;
-            textBox4.Text = Properties.Settings.Default.parse;
-            textBox5.Text = Properties.Settings.Default.lasttzdatapath;
-            textBox6.Text = Properties.Settings.Default.datetester;
-            comboBox7.Text = Properties.Settings.Default.stfilter;
-            comboBox8.Text = Properties.Settings.Default.enfilter;
+            elapst_left.Text = Properties.Settings.Default.lefttimeformat;
+            normal_dateformat.Text = Properties.Settings.Default.datetimeformat;
+            parse_target.Text = Properties.Settings.Default.parse;
+            tzbinary_dir.Text = Properties.Settings.Default.lasttzdatapath_base_utc;
+            parse_test.Text = Properties.Settings.Default.datetester;
+            y_start.Text = Properties.Settings.Default.stfilter;
+            y_end.Text = Properties.Settings.Default.enfilter;
 
-            checkBox1.Checked = Properties.Settings.Default.useutc;
-            checkBox2.Checked = Properties.Settings.Default.usems;
-            checkBox3.Checked = Properties.Settings.Default.usetz;
+            ms_utcoffset.Checked = Properties.Settings.Default.useutc;
+            ms_timezone.Checked = Properties.Settings.Default.usems;
+            tzbinary_timezone.Checked = Properties.Settings.Default.usetz;
             checkBox4.Checked = Properties.Settings.Default.usefiler;
             custom_local.Checked = Properties.Settings.Default.local_chager;
-            comboBox1.Text = Properties.Settings.Default.useutczone;
-            comboBox2.Text = Properties.Settings.Default.msstring;
-            comboBox3.Text = Properties.Settings.Default.barlen.ToString();
-            comboBox4.Text = Properties.Settings.Default.usetzdatabin;
-            comboBox5.Text = Properties.Settings.Default.api;
+            ms_utcoffset_items.Text = Properties.Settings.Default.useutczone;
+            ms_timezone_items.Text = Properties.Settings.Default.msstring;
+            bar_length.Text = Properties.Settings.Default.barlen.ToString();
 
 
-            checkBox5.Checked = Properties.Settings.Default.usenoda;
-            comboBox6.Text = Properties.Settings.Default.noddatz;
+            tzbinary_tzst.Text = Properties.Settings.Default.usetzdatabin;
+            custom_url_path.Text = Properties.Settings.Default.api;
+
+
+
+            noda_timezone.Checked = Properties.Settings.Default.usenoda;
+            noda_timezone_items.Text = Properties.Settings.Default.noddatz;
+
+            noda_dateformat.Text = Properties.Settings.Default.nodaformat;
+
+            panel6.Location = new System.Drawing.Point(5, panel6.Location.Y);
+
+
+            change_baseurl.Checked= Properties.Settings.Default.change_baseurl ;
         }
 
 
@@ -66,27 +80,31 @@ namespace neta
 
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
 
-            Properties.Settings.Default.lefttimeformat = textBox1.Text;
-        }
 
         private void dtformat_FormClosed(object sender, FormClosedEventArgs e)
         {
         }
 
+        private static void check_one()
+        {
+            var checkboxs = new List<CheckBox>();
+
+
+
+        }
+
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
 
-            Properties.Settings.Default.useutc = checkBox1.Checked;
+            Properties.Settings.Default.useutc = ms_utcoffset.Checked;
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            Properties.Settings.Default.useutczone = comboBox1.Text;
-            Properties.Settings.Default.useutcint = gettimeoffset(comboBox1.Text);
+            Properties.Settings.Default.useutczone = ms_utcoffset_items.Text;
+            Properties.Settings.Default.useutcint = gettimeoffset(ms_utcoffset_items.Text);
         }
 
         private double gettimeoffset(string dt)
@@ -108,13 +126,13 @@ namespace neta
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.usems = checkBox2.Checked;
+            Properties.Settings.Default.usems = ms_timezone.Checked;
         }
 
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            var m = Regex.Match(comboBox2.Text, " \\-.+");
+            var m = Regex.Match(ms_timezone_items.Text, " \\-.+");
             if (m.Success)
             {
                 string tm = m.Value.Replace(" -", "").Trim();
@@ -135,16 +153,15 @@ namespace neta
                 Properties.Settings.Default.mstime = "Tokyo Standard Time";
             }
 
-            Properties.Settings.Default.msstring = comboBox2.Text;
+            Properties.Settings.Default.msstring = ms_timezone_items.Text;
         }
-
-        private void textBox2_TextChanged(object sender, EventArgs e)
+        private void comboBox10_SelectedIndexChanged(object sender, EventArgs e)
         {
             DateTime st = DateTime.Now;
             try
             {
-                string format = textBox2.Text;
-                bool tz = checkBox3.Checked;
+                string format = normal_dateformat.Text;
+                bool tz = tzbinary_timezone.Checked;
                 string posix = Properties.Settings.Default.footerstring;
 
                 if (!tz)
@@ -164,7 +181,7 @@ namespace neta
 
                 st.ToString(format);
 
-                Properties.Settings.Default.datetimeformat = textBox2.Text;
+                Properties.Settings.Default.datetimeformat = normal_dateformat.Text;
             }
             catch (Exception ex)
             {
@@ -175,7 +192,7 @@ namespace neta
         private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            var m = Regex.Match(comboBox3.Text, "^\\d+");
+            var m = Regex.Match(bar_length.Text, "^\\d+");
             if (m.Success)
             {
                 var len = Convert.ToInt32(m.Value);
@@ -193,7 +210,7 @@ namespace neta
         private void comboBox3_TextChanged(object sender, EventArgs e)
         {
 
-            var m = Regex.Match(comboBox3.Text, "^\\d+");
+            var m = Regex.Match(bar_length.Text, "^\\d+");
             if (m.Success)
             {
                 var len = Convert.ToInt32(m.Value);
@@ -224,7 +241,7 @@ namespace neta
 
         private void textBox4_TextChanged(object sender, EventArgs e)
         {
-            var op = textBox4.Text.Split(',');
+            var op = parse_target.Text.Split(',');
             if (op.Length != 3)
             {
                 MessageBox.Show("/(パス名 イベ名),/(パス名 開始),/(パス名　終了) ,カンマ区切りの対象パスが３つ必要です");
@@ -239,14 +256,14 @@ namespace neta
 
                 if (m.Success && m1.Success && m2.Success)
                 {
-                    Properties.Settings.Default.parse = textBox4.Text;
+                    Properties.Settings.Default.parse = parse_target.Text;
                 }
             }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (File.Exists("Newtonsoft.Json.dll"))
+            if (System.IO.File.Exists("Newtonsoft.Json.dll"))
             {
 
             }
@@ -317,22 +334,22 @@ namespace neta
                     string filePath = Path.GetDirectoryName(openFileDialog.FileName);
 
                     Properties.Settings.Default.lasttzdatapath_base_utc = filePath;
-                    textBox5.Text = filePath;
+                    tzbinary_dir.Text = filePath;
                 }
             }
         }
 
         private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.usetzdatabin = comboBox4.Text;
+            Properties.Settings.Default.usetzdatabin = tzbinary_tzst.Text;
             checkBox3_CheckedChanged(sender, e);
         }
 
         private void checkBox3_CheckedChanged(object sender, EventArgs e)
         {
 
-            Properties.Settings.Default.usetz = checkBox3.Checked;
-            if (checkBox3.Checked == true)
+            Properties.Settings.Default.usetz = tzbinary_timezone.Checked;
+            if (tzbinary_timezone.Checked == true)
             {
                 if (this.Width < 500)
                 {
@@ -340,7 +357,7 @@ namespace neta
                 }
 
                 string tzdata = Path.Combine(Properties.Settings.Default.lasttzdatapath_base_utc, Properties.Settings.Default.usetzdatabin);
-                if (File.Exists(tzdata))
+                if (System.IO.File.Exists(tzdata))
                 {
                     System.IO.FileStream fs = new FileStream(tzdata, FileMode.Open, FileAccess.Read);
                     byte[] bs = new byte[fs.Length];
@@ -368,7 +385,7 @@ namespace neta
         {
             var url = "https?://[ -_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+$";
 
-            var m = Regex.Match(comboBox5.Text, url);
+            var m = Regex.Match(custom_url_path.Text, url);
             if (m.Success)
             {
                 Properties.Settings.Default.api = m.Value;
@@ -380,15 +397,17 @@ namespace neta
         {
             var url = "https?://[ -_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+$";
 
-            var m = Regex.Match(comboBox5.Text, url);
+            var m = Regex.Match(custom_url_path.Text, url);
             if (m.Success)
             {
+                Properties.Settings.Default.apipath_raw = noda_timezone.Text;
                 Properties.Settings.Default.api = m.Value;
             }
-            var path = Properties.Settings.Default.api.ToString();
-            if (File.Exists(path))
+            var path = Properties.Settings.Default.api;
+            string tzfile = get_normalize_path(custom_url_path.Text);
+            if (tzfile != "")
             {
-                Properties.Settings.Default.api = path;
+                Properties.Settings.Default.api = tzfile;
             }
         }
 
@@ -422,13 +441,106 @@ namespace neta
             {
                 Properties.Settings.Default.api = ofd.FileName;
                 Properties.Settings.Default.lastfile = Path.GetFileName(Path.GetDirectoryName(ofd.FileName));
-                comboBox5.Text = ofd.FileName;
+                custom_url_path.Text = ofd.FileName;
             }
+        }
+
+        private static string get_normalize_dir(string relativePath)
+        {
+            try
+            {
+                string fullPath = "";
+                //先頭が. ..のパス
+                Regex rp = new Regex(@"\.\.?/");
+                if (rp.IsMatch(relativePath))
+                {
+
+                    // 実行ディレクトリを取得
+                    string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+                    // 絶対パスを取得 (./, ../ を解決)
+                    fullPath = Path.GetFullPath(Path.Combine(baseDirectory, relativePath));
+                }
+                else
+                {
+
+                    fullPath = relativePath;
+                    Properties.Settings.Default.tzDirectory_raw = "";
+                }
+
+
+                // ファイルの存在を確認
+                if (Directory.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+                else
+                {
+                    return "";
+                }
+            }
+            catch (Exception ex)
+            {
+                // エラー処理
+                Console.WriteLine("エラーが発生しました:");
+                Console.WriteLine(ex.Message);
+            }
+
+            return "";
+        }
+
+        private static string get_normalize_path(string relativePath)
+        {
+            try
+            {
+                string fullPath = "";
+                //先頭が. ..のパス
+                Regex rp = new Regex(@"\.\.?/");
+                if (rp.IsMatch(relativePath))
+                {
+
+                    // 実行ディレクトリを取得
+                    string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+                    // 絶対パスを取得 (./, ../ を解決)
+                    fullPath = Path.GetFullPath(Path.Combine(baseDirectory, relativePath));
+                }
+                else
+                {
+
+                    fullPath = relativePath;
+                    Properties.Settings.Default.apipath_raw = "";
+                }
+
+
+                // ファイルの存在を確認
+                if (System.IO.File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+                else
+                {
+                    return "";
+                }
+            }
+            catch (Exception ex)
+            {
+                // エラー処理
+                Console.WriteLine("エラーが発生しました:");
+                Console.WriteLine(ex.Message);
+            }
+
+            return "";
         }
 
         private void textBox5_TextChanged(object sender, EventArgs e)
         {
+            string tzdir = get_normalize_dir(tzbinary_dir.Text);
+            if (tzdir != "")
+            {
+                Properties.Settings.Default.lasttzdatapath_base_utc = tzdir;
 
+            }
         }
 
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
@@ -440,26 +552,26 @@ namespace neta
         private void comboBox8_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            Properties.Settings.Default.enfilter = comboBox8.Text;
+            Properties.Settings.Default.enfilter = y_end.Text;
         }
 
         private void comboBox7_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            Properties.Settings.Default.stfilter = comboBox7.Text;
-            int st = Convert.ToInt32(comboBox7.Text);
-            int en = Convert.ToInt32(comboBox8.Text);
+            Properties.Settings.Default.stfilter = y_start.Text;
+            int st = Convert.ToInt32(y_start.Text);
+            int en = Convert.ToInt32(y_end.Text);
 
         }
 
         private void textBox6_TextChanged(object sender, EventArgs e)
         {
-            string tester = textBox6.Text;
+            string tester = parse_test.Text;
             DateTime testDateTime;
             if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(tester, out testDateTime) || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(tester, out testDateTime))
             {
 
-                Properties.Settings.Default.datetester = textBox6.Text;
+                Properties.Settings.Default.datetester = parse_test.Text;
             }
         }
 
@@ -899,6 +1011,36 @@ namespace neta
                     string ms_utc = testDateTime.ToUniversalTime().AddHours(Properties.Settings.Default.useutcint).ToString(format_ms);
                     string ms_tz = TimeZoneInfo.ConvertTime(ddt_u, tzi).ToString(format_mstz);
 
+                    string tznd = Properties.Settings.Default.noddatz;
+                    string timeStrings = "-----";
+                    if (TZPASER.nodaparser.CheckTimeZoneExists(tznd))
+                    {
+                        try
+                        {
+                            // 2. UTC時刻を指定したタイムゾーンの現地時間に変換
+                            ZonedDateTime convertedTimes = TZPASER.nodaparser.ConvertToTimeZone(testDateTime, tznd);
+
+                            var zonebcl = DateTimeZoneProviders.Bcl;
+                            var zonetzdb = DateTimeZoneProviders.Tzdb;
+
+                            var pattern_nd = Properties.Settings.Default.nodaformat;
+                            DateTimeZone zone = DateTimeZoneProviders.Tzdb[tznd]; // Specify your timezone
+                            ZonedDateTimePattern formatter = ZonedDateTimePattern.CreateWithInvariantCulture(pattern_nd, zonetzdb);
+
+                            timeStrings = formatter.Format(convertedTimes);
+
+                        }
+                        catch (Exception ex)
+                        {
+                            timeStrings += "nodatimeエラー" + ex.ToString();
+                        }
+                    }
+                    else {
+
+                        timeStrings += "nodatimeで未対応のタイムゾーンです";
+                    }
+
+
                     bool use_zoneparse = Properties.Settings.Default.local_chager;
 
                     if ((!use_zoneparse && lastTransitionIdx >= 0) || (use_zoneparse && lastTransitionIdx_w >= 0))
@@ -928,7 +1070,9 @@ namespace neta
                         sb.Append("M$ timezone:"); //local utc tzdate
                         sb.AppendLine(ms_tz);
                         sb.Append("utc:"); // utc tzdate
-                        sb.AppendLine(utct);
+                        sb.AppendLine(utct); 
+                        sb.Append("nodatime:"); // noda tzdate
+                        sb.AppendLine(timeStrings);
                         sb.Append("tzdata iso8601+zone:"); // utc tzdate
                         sb.AppendLine(iso8601tz);
                         sb.AppendLine();
@@ -966,6 +1110,8 @@ namespace neta
                         sb.AppendLine(ms_tz);
                         sb.Append("utc:"); // utc tzdate
                         sb.AppendLine(utct);
+                        sb.Append("nodatime:"); // noda tzdate
+                        sb.AppendLine(timeStrings);
                         sb.Append("tzdata iso8601+zone:"); // utc tzdate
                         sb.AppendLine(iso8601tz);
                         sb.AppendLine();
@@ -991,7 +1137,9 @@ namespace neta
                         sb.Append("M$ timezone:"); //local utc tzdate
                         sb.AppendLine(ms_tz);
                         sb.Append("utc:"); // utc tzdate
-                        sb.AppendLine(utct);
+                        sb.AppendLine(utct); 
+                        sb.Append("nodatime:"); // noda tzdate
+                        sb.AppendLine(timeStrings);
                         sb.Append("tzdata iso8601+zone:"); // utc tzdate
                         sb.AppendLine(iso8601tz);
                         sb.AppendLine();
@@ -1187,13 +1335,112 @@ namespace neta
 
         private void checkBox5_CheckedChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.usenoda = checkBox5.Checked;
+            Properties.Settings.Default.usenoda = noda_timezone.Checked;
+            if (noda_timezone.Checked)
+            {
+                panel6.Visible = true;
+            }
+            else
+            {
+
+                panel6.Visible = false;
+            }
         }
 
         private void comboBox6_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.noddatz = comboBox6.Text;
+            if (TZPASER.nodaparser.CheckTimeZoneExists(noda_timezone_items.Text))
+            {
+                Properties.Settings.Default.noddatz = noda_timezone_items.Text;
+            }
         }
 
+        private void checkBox6_CheckedChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.nodaformat = noda_dateformat.Text;
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string url = "https://learn.microsoft.com/ja-jp/dotnet/standard/base-types/custom-date-and-time-format-strings";
+
+            try
+            {
+                // デフォルトブラウザでURLを開く
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true // 必須：デフォルトブラウザを使用する
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("エラーが発生しました: " + ex.Message);
+            }
+
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox9_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.nodaformat = noda_dateformat.Text;
+        }
+
+        private void comboBox11_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.lefttimeformat = elapst_left.Text;
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string url = "https://nodatime.org/1.3.x/userguide/text";
+
+            try
+            {
+                // デフォルトブラウザでURLを開く
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true // 必須：デフォルトブラウザを使用する
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("エラーが発生しました: " + ex.Message);
+            }
+        }
+
+        private void checkBox6_CheckedChanged_1(object sender, EventArgs e)
+        {
+
+            //Properties.Settings.Default.shift_ambigous = checkBox6.Checked;
+        }
+
+        private void change_baseurl_CheckedChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.change_baseurl= change_baseurl.Checked;
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.alt_baseurl = baseurl_txt.Text;
+        }
+
+        private void baseurl_keyval_TextChanged(object sender, EventArgs e)
+        {
+            string[] keys = baseurl_keyval.Text.Split(",");
+            if (keys.Length == 10) {
+                Properties.Settings.Default.alt_basekey = baseurl_keyval.Text;
+            } 
+        }
     }
 }

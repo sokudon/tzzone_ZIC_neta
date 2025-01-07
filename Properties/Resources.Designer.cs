@@ -76,5 +76,15 @@ namespace neta.Properties {
                 return ResourceManager.GetString("ical", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap syougtu_kurinuki {
+            get {
+                object obj = ResourceManager.GetObject("syougtu_kurinuki", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

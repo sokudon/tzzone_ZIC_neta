@@ -31,6 +31,8 @@
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             panel1 = new System.Windows.Forms.Panel();
+            label7 = new System.Windows.Forms.Label();
+            linkLabel3 = new System.Windows.Forms.LinkLabel();
             button1 = new System.Windows.Forms.Button();
             label3 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
@@ -64,6 +66,8 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(label7);
+            panel1.Controls.Add(linkLabel3);
             panel1.Controls.Add(button1);
             panel1.Controls.Add(label3);
             panel1.Controls.Add(label6);
@@ -80,9 +84,27 @@
             panel1.TabIndex = 2;
             panel1.Paint += panel1_Paint;
             // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new System.Drawing.Point(7, 112);
+            label7.Name = "label7";
+            label7.Size = new System.Drawing.Size(61, 20);
+            label7.TabIndex = 11;
+            label7.Text = "bluesky:";
+            // 
+            // linkLabel3
+            // 
+            linkLabel3.AutoSize = true;
+            linkLabel3.Location = new System.Drawing.Point(69, 112);
+            linkLabel3.Name = "linkLabel3";
+            linkLabel3.Size = new System.Drawing.Size(353, 20);
+            linkLabel3.TabIndex = 10;
+            linkLabel3.TabStop = true;
+            linkLabel3.Text = "https://bsky.app/profile/super-strmdn127.bsky.social";
+            // 
             // button1
             // 
-            button1.Enabled = false;
             button1.Location = new System.Drawing.Point(303, 140);
             button1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             button1.Name = "button1";
@@ -115,7 +137,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point(9, 107);
+            label5.Location = new System.Drawing.Point(12, 83);
             label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label5.Name = "label5";
             label5.Size = new System.Drawing.Size(31, 20);
@@ -135,7 +157,7 @@
             // linkLabel2
             // 
             linkLabel2.AutoSize = true;
-            linkLabel2.Location = new System.Drawing.Point(47, 107);
+            linkLabel2.Location = new System.Drawing.Point(45, 83);
             linkLabel2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             linkLabel2.Name = "linkLabel2";
             linkLabel2.Size = new System.Drawing.Size(201, 20);
@@ -183,5 +205,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.LinkLabel linkLabel3;
     }
 }

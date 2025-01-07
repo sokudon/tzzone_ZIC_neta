@@ -11,12 +11,19 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-
+using System.Text.Json;
 using NodaTime;
 using NodaTime.Text;
 using NodaTime.Extensions;
 using static System.Windows.Forms.DataFormats;
 using System.Runtime.Intrinsics.X86;
+using neta.Properties;
+using System.Reflection.Metadata;
+using System.Web;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
+using System.Security.Policy;
+using System.Xml.Linq;
 
 namespace neta
 {
@@ -44,18 +51,79 @@ namespace neta
             }
         }
 
+        //https://claude.site/artifacts/b26eae91-aff9-456f-a13d-013a1cae2eb5
+        public async Task UpdateComboBox(string[] new_games, string new_url)
+        {
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    // 現在のコンボボックスの11番目と12番目の項目を保存
+                    var item11 = comboBox1.Items[game_maxlen];
+                    var item12 = comboBox1.Items[game_maxlen + 1];
 
-        string url = "https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec";
-        string[] game = { "mirikr", "deresute", "mirsita", "shanimasu", "saisuta", "miricn", "proseka", "mobamasu", "sidem" };
+                    if (new_games.Length != game_maxlen)
+                    {
+                        return;
+                    }
+
+                    // APIから全データを一度に取得
+                    var response = await client.GetAsync(new_url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        var json = JObject.Parse(jsonString);
+
+                        // 最初の10項目を更新
+                        for (int i = 0; i < game_maxlen; i++)
+                        {
+                            // ネストされたパスからnameを取得
+                            var name = json.SelectToken($"data.{new_games[i]}.name")?.ToString();
+                            if (!string.IsNullOrEmpty(name))
+                            {
+                                // 既存の項目を更新
+                                if (i < comboBox1.Items.Count)
+                                {
+                                    comboBox1.Items[i] = name;
+                                }
+
+                            }
+                        }
+
+                        // 11番目と12番目の項目を元に戻す
+                        if (comboBox1.Items.Count > game_maxlen)
+                        {
+                            comboBox1.Items[game_maxlen] = item11;
+                            comboBox1.Items[game_maxlen + 1] = item12;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show($"APIエラー: {response.StatusCode}", "エラー",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"エラーが発生しました: {ex.Message}", "エラー",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+
+        string url = "https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_MhLrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec";
+        string[] game = { "gakumasu", "deresute", "mirsita", "shanimasu", "syanison", "yumesute", "proseka", "proseka_kr", "proseka_los", "proseka_hk" };
+        string[] orig_games = { "学ます", "でれすて", "みりした", "シャニマス", "シャニソン", "ユメステ", "プロセカ", "プロセカグローバル", "プロセカ韓国", "プロセカ繁体" };
+        int game_maxlen = 10;
 
         private void button2_Click(object sender, EventArgs e)
         {
             WebClient wc = new WebClient();
 
             wc.Encoding = Encoding.UTF8;
-
-
             var selecter = comboBox1.SelectedIndex;
+            bool change_url = Properties.Settings.Default.change_baseurl;
 
             if (comboBox1.Text == "かすたむJS")
             {
@@ -67,21 +135,38 @@ namespace neta
                 return;
             }
 
+            var url2 = url;
+            string[] new_games = game;
+
+            if (change_url)
+            {
+                new_games = Properties.Settings.Default.alt_basekey.Split(",");
+                UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
+                url2 = Properties.Settings.Default.alt_baseurl;
+            }
+            else
+            {
+                for (int i = 0; i < game_maxlen; i++)
+                {
+                    comboBox1.Items[i] = orig_games[i];
+                }
+            }
+
+            if (selecter > game_maxlen)
+            {
+                return;
+            }
 
             try
             {
-                var url2 = url + "?game=all"; //+ game[selecter];
                 string text = wc.DownloadString(url2);
                 var obj = Codeplex.Data.DynamicJson.Parse(text);
-                string path = "/data/" + game[selecter] + "/name," +
-                    "/data/" + game[selecter] + "/start," +
-                    "/data/" + game[selecter] + "/end";
+                string path = "/data/" + new_games[selecter] + "/name," +
+                    "/data/" + new_games[selecter] + "/start," +
+                    "/data/" + new_games[selecter] + "/end";
 
                 get_json_parse(url2, text, path, false);
 
-                //ibemei.Text = obj.data[game[selecter]].name;
-                //startbox.Text = obj.data[game[selecter]].start;
-                //endbox.Text = obj.data[game[selecter]].end;
 
 
                 Properties.Settings.Default.json = text;
@@ -135,6 +220,20 @@ namespace neta
                     MessageBox.Show(ex.ToString());
                 }
             }
+            else if (Properties.Settings.Default.lastimagefile == "null")
+            {
+                try
+                {
+                    // 画像を直接パネルの背景として設定
+                    panel1.BackgroundImage = Resources.syougtu_kurinuki;
+                    panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+
+            }
 
 
 
@@ -145,6 +244,18 @@ namespace neta
             if (Properties.Settings.Default.barvisible == false)
             {
                 バーの表示ToolStripMenuItem_Click(sender, e);
+            }
+
+            if (Properties.Settings.Default.use_upui_chroma)
+            {
+                うえのいろToolStripMenuItem_Click(sender, e);
+            }
+
+
+            if (Properties.Settings.Default.change_baseurl)
+            {
+
+                button2_Click(sender, e);
             }
 
 
@@ -284,17 +395,40 @@ namespace neta
                 string tznd = Properties.Settings.Default.noddatz;
                 if (TZPASER.nodaparser.CheckTimeZoneExists(tznd))
                 {
+                    try
+                    {
+                        // 2. UTC時刻を指定したタイムゾーンの現地時間に変換
+                        ZonedDateTime convertedTime = TZPASER.nodaparser.ConvertToTimeZone(dt.ToUniversalTime(), tznd);
+                        ZonedDateTime convertedTimes = TZPASER.nodaparser.ConvertToTimeZone(st, tznd);
+                        ZonedDateTime convertedTimee = TZPASER.nodaparser.ConvertToTimeZone(en, tznd);
 
-                    // 2. UTC時刻を指定したタイムゾーンの現地時間に変換
-                    ZonedDateTime convertedTime = TZPASER.nodaparser.ConvertToTimeZone(dt.ToUniversalTime(), tznd);
-                    ZonedDateTime convertedTimes = TZPASER.nodaparser.ConvertToTimeZone(st, tznd);
-                    ZonedDateTime convertedTimee = TZPASER.nodaparser.ConvertToTimeZone(en, tznd);
+                        var zonebcl = DateTimeZoneProviders.Bcl;
+                        var zonetzdb = DateTimeZoneProviders.Tzdb;
 
-                    current.Text = "現在時間:" + convertedTime;
-                    start.Text = "開始時間:" + convertedTimes;
-                    end.Text = "終了時間:" + convertedTimee;
+                        var pattern = Properties.Settings.Default.nodaformat;
+                        DateTimeZone zone = DateTimeZoneProviders.Tzdb[tznd]; // Specify your timezone
+                        ZonedDateTimePattern formatter = ZonedDateTimePattern.CreateWithInvariantCulture(pattern, zonetzdb);
+
+                        // Format
+                        string timeString = formatter.Format(SystemClock.Instance.GetCurrentInstant().InZone(zone));
+                        string timeStrings = formatter.Format(convertedTimes);
+                        string timeStringe = formatter.Format(convertedTimee);
+
+
+                        current.Text = "現在時間:" + timeString;
+                        start.Text = "開始時間:" + timeStrings;
+                        end.Text = "終了時間:" + timeStringe;
+                    }
+                    catch (Exception ex)
+                    {
+                        current.Text = "フォーマットでふせいです" + ex.ToString();
+                        start.Text = "error;";
+                        end.Text = "unsuppored timezone nodatime";
+
+                    }
                 }
-                else {
+                else
+                {
                     current.Text = "のだたいむが対応してないタイムゾーンです";
                     start.Text = "error;";
                     end.Text = "unsuppored timezone nodatime";
@@ -577,7 +711,7 @@ namespace neta
 
             try
             {
-                var url2 = url + "?game=all"; //+ game[selecter];
+                var url2 = url;
                 string text = Properties.Settings.Default.json;
                 var selecter = comboBox1.SelectedIndex;
                 if (text == "")
@@ -589,6 +723,7 @@ namespace neta
                     wc.Dispose();
                     Properties.Settings.Default.json = text;
                 }
+                if (selecter > game_maxlen) { return; }
 
                 var obj = Codeplex.Data.DynamicJson.Parse(text);
                 string path = "/data/" + game[selecter] + "/name," +
@@ -596,28 +731,6 @@ namespace neta
                     "/data/" + game[selecter] + "/end";
 
                 get_json_parse(url2, text, path, false);
-
-                //string text = Properties.Settings.Default.json;
-                //var selecter = comboBox1.SelectedIndex;
-                //var obj = Codeplex.Data.DynamicJson.Parse(text);
-
-                //if (text == "") { 
-                //WebClient wc = new WebClient();
-
-                //wc.Encoding = Encoding.UTF8;
-                //    var url2 = url + "?game=all"; //+ game[selecter];
-                //text = wc.DownloadString(url2);
-                //wc.Dispose();
-                //Properties.Settings.Default.json = text;
-                //}
-
-
-
-                //ibemei.Text = obj.data.name;
-                //startbox.Text = obj.data.start;
-                //endbox.Text = obj.data.end;
-
-
 
             }
             catch (WebException exc)
@@ -1246,6 +1359,11 @@ namespace neta
                 panel1.BackColor = color;
                 this.BackColor = color;
                 Properties.Settings.Default.bgcolor = color;
+
+                if (Properties.Settings.Default.use_upui_chroma)
+                {
+                    うえのいろToolStripMenuItem_Click(sender, e);
+                }
             };
             picker.Show();  // モーダレス表示
         }
@@ -1886,6 +2004,15 @@ namespace neta
 
         }
 
+        private void でふぉるとにもどす正月みくToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            panel1.BackgroundImage = Resources.syougtu_kurinuki;          // 背景画像を削除
+            panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+            panel1.BackColor = this.BackColor;
+            panel1.Invalidate();                    // 再描画をリクエスト
+            Properties.Settings.Default.lastimagefile = "null";
+        }
+
         private void 画像なしToolStripMenuItem_Click(object sender, EventArgs e)
         {
             panel1.BackgroundImage = null;          // 背景画像を削除
@@ -1967,7 +2094,7 @@ namespace neta
             end.Location = new Point(base_x, base_y + height * 6);
 
             height = TextRenderer.MeasureText("A", this.Font).Height;
-            progressBar1.Location = new Point(base_x, end.Location.Y+height);
+            progressBar1.Location = new Point(base_x, end.Location.Y + height);
             parcent.Location = new Point(parcent.Location.X, end.Location.Y + height);
 
         }
@@ -1999,6 +2126,52 @@ namespace neta
             Properties.Settings.Default.font_margn = false;
         }
 
+        private void うえのいろToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            色の設定ToolStripMenuItem.BackColor = this.BackColor;
+            バージョンToolStripMenuItem.BackColor = this.BackColor;
+            netaToolStripMenuItem.BackColor = this.BackColor;
+            外部つーるへエクスポートToolStripMenuItem.BackColor = this.BackColor;
+            時刻設定ToolStripMenuItem.BackColor = this.BackColor;
+            menuStrip1.BackColor = this.BackColor;
+
+            色の設定ToolStripMenuItem.ForeColor = this.BackColor;
+            バージョンToolStripMenuItem.ForeColor = this.BackColor;
+            netaToolStripMenuItem.ForeColor = this.BackColor;
+            外部つーるへエクスポートToolStripMenuItem.ForeColor = this.BackColor;
+            時刻設定ToolStripMenuItem.ForeColor = this.BackColor;
+
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.AllowTransparency = true;
+            Properties.Settings.Default.use_upui_chroma = true;
+
+        }
+
+        private void もとに戻すToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            色の設定ToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
+            バージョンToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
+            netaToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
+            外部つーるへエクスポートToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
+            時刻設定ToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
+            色の設定ToolStripMenuItem.ForeColor = this.contextMenuStrip1.BackColor;
+            menuStrip1.BackColor = this.contextMenuStrip1.BackColor;
+
+            バージョンToolStripMenuItem.ForeColor = Color.Black;
+            netaToolStripMenuItem.ForeColor = Color.Black;
+            外部つーるへエクスポートToolStripMenuItem.ForeColor = Color.Black;
+            時刻設定ToolStripMenuItem.ForeColor = Color.Black;
+            色の設定ToolStripMenuItem.ForeColor = Color.Black;
+
+            this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            this.AllowTransparency = false;
+            Properties.Settings.Default.use_upui_chroma = false;
+        }
+
+        private void 終了ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 
 

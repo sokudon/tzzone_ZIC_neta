@@ -9,7 +9,7 @@
 --http://sokudon.s17.xrea.com/sekai-dere.html
 
 
---UI ENGLISH MODE view textline, 670
+--UI ENGLISH MODE view textline, 930
 --parameter https://github.com/sokudon/deresute/wiki/OBS-EVENT-DURATION-TIMER(luascript)
 
 --[[
@@ -290,7 +290,7 @@ function set_time_text()
 	bar=makebar(prog)
 	end
 	
-	local time_textq=string.gsub(time_text, "%%[EJKLNOPQfikloqsvZ]","")	 --フリーズ文字 %%[EJKLNOPQfikloqsvZ]
+	local time_textq=string.gsub(time_text, "%%[EJKLNOPQfikloqsvZ]","")	 --フリーズ文字 %%[EJKLNOPQfikloqsv]
 	text = string.gsub(text, "%%N", os.date(time_textq,os.time() ))
 	local time_textj="!".. string.gsub(time_textq, "%%z", "+0900")
 	local time_textu="!".. string.gsub(time_textq, "%%z", get_tzoffset(utc*3600))
@@ -316,7 +316,7 @@ function set_time_text()
 	text = string.gsub(text, "%%EJ",os.date(time_textj,ends+9*3600 ))
 	text = string.gsub(text, "%%E",os.date(time_textq,ends))
 	end
-	text=  string.gsub(text, "%%[EJKLNOPQfikloqsvZ]","")	 --フリーズ文字 %%[EJKLNOPQfikloqsvZ]
+	text=  string.gsub(text, "%%[EJKLNOPQfikloqsvZ]","")	 --フリーズ文字 %%[EJKLNOPQfikloqsv]
 	
 	text =os.date(text)
 	
@@ -1039,17 +1039,16 @@ end
 
 function script_defaults(settings)
 	obs.obs_data_set_default_double(settings, "UTC", 0)
-	obs.obs_data_set_default_string(settings, "start_text", "2024-09-30T15:00:00+09:00")
-	obs.obs_data_set_default_string(settings, "stop_text", "2024-10-09T21:00:00+09:00")
+	obs.obs_data_set_default_string(settings, "start_text", "2022-12-16T06:00:00Z")
+	obs.obs_data_set_default_string(settings, "stop_text", "2022-12-20T14:00:00Z")
 	obs.obs_data_set_default_string(settings, "mode", "Countdown")
 	obs.obs_data_set_default_string(settings, "a_mode", "Global (timer always active)")
-	obs.obs_data_set_default_string(settings, "format", "%d %hh:%mm:%ss(%dsD)")
-	obs.obs_data_set_default_string(settings, "title_text", "Fin[e]〜美しき終焉〜")
+	obs.obs_data_set_default_string(settings, "format", "%d %hh:%mm:%ss")
+	obs.obs_data_set_default_string(settings, "title_text", "プロダクションマッチフェスティバル THE FINAL")
 	obs.obs_data_set_default_string(settings, "time_text", "%Y-%m-%d(%a)%H:%M:%S(GMT%z)")
-	obs.obs_data_set_default_string(settings, "para_text", "日本時間%JST\n経過時間%K\n残り時間%L\nイベント時間%I\n%T%P％\n%Q")
-	obs.obs_data_set_default_string(settings, "end_text", "終了しました")
-	obs.obs_data_set_default_double(settings, "bar", 2)
-
+	obs.obs_data_set_default_string(settings, "para_text", "日本時間%JST%n経過時間%K%n残り時間%L%nイベント時間%I%n%T%P％%n%Q")
+	obs.obs_data_set_default_string(settings, "end_text", "タイマー停止中(開始前/終了)")
+	obs.obs_data_set_default_double(settings, "bar",2)
 
 end
 

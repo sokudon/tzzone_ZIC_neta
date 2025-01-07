@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/01/02</Value>
+      <Value Profile="(Default)">2025/01/07</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -57,7 +57,7 @@
       <Value Profile="(Default)">395</Value>
     </Setting>
     <Setting Name="api" Type="System.String" Scope="User">
-      <Value Profile="(Default)">https://script.google.com/macros/s/AKfycbxAcB-2FLv5fR9Yc5ZSN5F7giGDnvAjduMvwRTLWBai9faFSQaI4bol73klcLM-lsHbKg/exec?game=all</Value>
+      <Value Profile="(Default)">https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_MhLrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec</Value>
     </Setting>
     <Setting Name="parse" Type="System.String" Scope="User">
       <Value Profile="(Default)">/data/proseka/name,/data/proseka/start,/data/proseka/end</Value>
@@ -126,7 +126,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="lastimagefile" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">null</Value>
     </Setting>
     <Setting Name="colorkey" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)" />
@@ -146,7 +146,28 @@
     <Setting Name="noddatz" Type="System.String" Scope="User">
       <Value Profile="(Default)">Asia/Tokyo</Value>
     </Setting>
-    <Setting Name="nodausezoneparse" Type="System.Boolean" Scope="User">
+    <Setting Name="nodaformat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">yyyy'-'MM'-'dd HH':'mm</Value>
+    </Setting>
+    <Setting Name="tzDirectory_raw" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="apipath_raw" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="shift_ambigous" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="change_baseurl" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="alt_baseurl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_MhLrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec</Value>
+    </Setting>
+    <Setting Name="alt_basekey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">mirikr,deresute,mirsita,shanimasu,saisuta,miricn,proseka,mobamasu,sidem</Value>
+    </Setting>
+    <Setting Name="use_upui_chroma" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
