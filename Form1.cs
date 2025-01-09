@@ -32,7 +32,12 @@ namespace neta
         public NETA_TIMER()
         {
             InitializeComponent();
+            // ダブルバッファリングを有効化
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
 
+            this.SetStyle(ControlStyles.UserPaint, true);
+            this.UpdateStyles();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -181,18 +186,20 @@ namespace neta
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //https://chatgpt.com/share/677e10d5-018c-800f-9356-ac6a02a537e2 begin updateみたいな描写制御        
+            this_begin_update();
+
             this.comboBox1.Text = Properties.Settings.Default.goog;
             this.startbox.Text = Properties.Settings.Default.st;
             this.endbox.Text = Properties.Settings.Default.en;
             this.ibemei.Text = Properties.Settings.Default.ibe;
-            this.progressBar1.Width = Properties.Settings.Default.barlen;
             this.parcent.Left = Properties.Settings.Default.parcent;
 
+            this.progressBar1.Width = Properties.Settings.Default.barlen;
 
             this.Font = Properties.Settings.Default.uifont;
             this.ForeColor = Properties.Settings.Default.uicolor;
             this.BackColor = Properties.Settings.Default.bgcolor;
-            this.TransparencyKey = Properties.Settings.Default.colorkey;
             this.panel1.BackColor = Properties.Settings.Default.bgcolor;
 
             this.eventname.Font = Properties.Settings.Default.uifont;
@@ -246,6 +253,7 @@ namespace neta
                 バーの表示ToolStripMenuItem_Click(sender, e);
             }
 
+
             if (Properties.Settings.Default.use_upui_chroma)
             {
                 うえのいろToolStripMenuItem_Click(sender, e);
@@ -257,7 +265,9 @@ namespace neta
 
                 button2_Click(sender, e);
             }
+            this_end_update();
 
+            this.TransparencyKey = Properties.Settings.Default.colorkey;
 
             // using Microsoft.Win32;
             // システム時間変更時のイベントハンドラを登録
@@ -1953,13 +1963,11 @@ namespace neta
         private void 画像ToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-
-
             OpenFileDialog ofd = new OpenFileDialog();
 
             //はじめに表示されるフォルダを指定する
             //指定しない（空の文字列）の時は、現在のディレクトリが表示される
-            ofd.InitialDirectory = Properties.Settings.Default.lastfile;
+            ofd.InitialDirectory = Properties.Settings.Default.lastimagefile;
             //[ファイルの種類]に表示される選択肢を指定する
             //指定しないとすべてのファイルが表示される
             ofd.Filter = "pngファイル(*.png)|*.png|すべてのファイル(*.*)|*.*";
@@ -2044,22 +2052,6 @@ namespace neta
             Clipboard.SetText(texter);
         }
 
-        //public void SetKeyingBackground(KeyingType type)
-        //{
-        //    switch (type)
-        //    {
-        //        case KeyingType.ChromaKey:
-        //            panel1.BackColor = Color.FromArgb(255, 0, 255, 0);  // 緑
-        //            break;
-        //        case KeyingType.ColorKey:
-        //            panel1.BackColor = Color.FromArgb(255, 255, 0, 255);  // マゼンタ
-        //            break;
-        //        case KeyingType.BlueScreen:
-        //            panel1.BackColor = Color.FromArgb(255, 0, 0, 255);  // 青
-        //            break;
-        //    }
-        //}
-
         private void tanspaciy_rate()
         {
             // 方法1: BackColorにアルファ値を設定する
@@ -2085,6 +2077,7 @@ namespace neta
             {
                 height = TextRenderer.MeasureText("A", this.Font).Height;
             }
+            
             eventname.Location = new Point(base_x, base_y);
             current.Location = new Point(base_x, base_y + height);
             elapsed.Location = new Point(base_x, base_y + height * 2);
@@ -2126,46 +2119,81 @@ namespace neta
             Properties.Settings.Default.font_margn = false;
         }
 
+        private void this_begin_update()
+        {
+            this.SuspendLayout(); // レイアウト更新を一時停止
+            panel1.SuspendLayout(); 
+           
+
+        }
+        private void this_end_update()
+        {
+            this.ResumeLayout(false); // レイアウト更新を再開
+            panel1.ResumeLayout(false); // レイアウト更新を再開
+
+            panel1.Invalidate(); // 必要な部分だけを再描画
+
+        }
+
         private void うえのいろToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            色の設定ToolStripMenuItem.BackColor = this.BackColor;
-            バージョンToolStripMenuItem.BackColor = this.BackColor;
-            netaToolStripMenuItem.BackColor = this.BackColor;
-            外部つーるへエクスポートToolStripMenuItem.BackColor = this.BackColor;
-            時刻設定ToolStripMenuItem.BackColor = this.BackColor;
+
+            this_begin_update();
+
+            // 背景色と文字色の設定
+            ToolStripMenuItem[] menuItems = {
+              色の設定ToolStripMenuItem,
+             バージョンToolStripMenuItem,
+             netaToolStripMenuItem,
+             外部つーるへエクスポートToolStripMenuItem,
+                時刻設定ToolStripMenuItem
+            };
+
+            foreach (var item in menuItems)
+            {
+                item.BackColor = this.BackColor;
+                item.ForeColor = this.BackColor;
+            }
+
             menuStrip1.BackColor = this.BackColor;
 
-            色の設定ToolStripMenuItem.ForeColor = this.BackColor;
-            バージョンToolStripMenuItem.ForeColor = this.BackColor;
-            netaToolStripMenuItem.ForeColor = this.BackColor;
-            外部つーるへエクスポートToolStripMenuItem.ForeColor = this.BackColor;
-            時刻設定ToolStripMenuItem.ForeColor = this.BackColor;
-
+            // フォーム設定の変更
             this.FormBorderStyle = FormBorderStyle.None;
             this.AllowTransparency = true;
             Properties.Settings.Default.use_upui_chroma = true;
+
+            this_end_update();
+
 
         }
 
         private void もとに戻すToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            色の設定ToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
-            バージョンToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
-            netaToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
-            外部つーるへエクスポートToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
-            時刻設定ToolStripMenuItem.BackColor = this.contextMenuStrip1.BackColor;
-            色の設定ToolStripMenuItem.ForeColor = this.contextMenuStrip1.BackColor;
+            this_begin_update();
+
+            ToolStripMenuItem[] menuItems = {
+        色の設定ToolStripMenuItem,
+        バージョンToolStripMenuItem,
+        netaToolStripMenuItem,
+        外部つーるへエクスポートToolStripMenuItem,
+        時刻設定ToolStripMenuItem
+    };
+
+            foreach (var item in menuItems)
+            {
+                item.BackColor = this.contextMenuStrip1.BackColor;
+                item.ForeColor = Color.Black;
+            }
+
             menuStrip1.BackColor = this.contextMenuStrip1.BackColor;
 
-            バージョンToolStripMenuItem.ForeColor = Color.Black;
-            netaToolStripMenuItem.ForeColor = Color.Black;
-            外部つーるへエクスポートToolStripMenuItem.ForeColor = Color.Black;
-            時刻設定ToolStripMenuItem.ForeColor = Color.Black;
-            色の設定ToolStripMenuItem.ForeColor = Color.Black;
-
+            // フォームのプロパティ変更
             this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
             this.AllowTransparency = false;
             Properties.Settings.Default.use_upui_chroma = false;
+
+            this_end_update();
+
         }
 
         private void 終了ToolStripMenuItem_Click(object sender, EventArgs e)

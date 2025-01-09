@@ -85,7 +85,6 @@
             もとに戻すToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             バージョンToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             終了ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             panel1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             panel2.SuspendLayout();
@@ -177,27 +176,27 @@
             contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { クリップへコピーToolStripMenuItem, toolStripMenuItem6, toolStripMenuItem4 });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new System.Drawing.Size(211, 104);
+            contextMenuStrip1.Size = new System.Drawing.Size(173, 76);
             contextMenuStrip1.Opening += contextMenuStrip1_Opening;
             // 
             // クリップへコピーToolStripMenuItem
             // 
             クリップへコピーToolStripMenuItem.Name = "クリップへコピーToolStripMenuItem";
-            クリップへコピーToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+            クリップへコピーToolStripMenuItem.Size = new System.Drawing.Size(172, 24);
             クリップへコピーToolStripMenuItem.Text = "クリップへコピー";
             クリップへコピーToolStripMenuItem.Click += クリップへコピーToolStripMenuItem_Click;
             // 
             // toolStripMenuItem6
             // 
             toolStripMenuItem6.Name = "toolStripMenuItem6";
-            toolStripMenuItem6.Size = new System.Drawing.Size(210, 24);
+            toolStripMenuItem6.Size = new System.Drawing.Size(172, 24);
             toolStripMenuItem6.Text = "カラーキーなし";
             toolStripMenuItem6.Click += カラーキーなしToolStripMenuItem_Click;
             // 
             // toolStripMenuItem4
             // 
             toolStripMenuItem4.Name = "toolStripMenuItem4";
-            toolStripMenuItem4.Size = new System.Drawing.Size(210, 24);
+            toolStripMenuItem4.Size = new System.Drawing.Size(172, 24);
             toolStripMenuItem4.Text = "うえをもとに戻す";
             toolStripMenuItem4.Click += もとに戻すToolStripMenuItem_Click;
             // 
@@ -365,7 +364,7 @@
             // 
             menuStrip1.BackColor = System.Drawing.SystemColors.Menu;
             menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { 時刻設定ToolStripMenuItem, 外部つーるへエクスポートToolStripMenuItem, netaToolStripMenuItem, 色の設定ToolStripMenuItem, バージョンToolStripMenuItem, toolStripMenuItem2 });
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { 時刻設定ToolStripMenuItem, 外部つーるへエクスポートToolStripMenuItem, netaToolStripMenuItem, 色の設定ToolStripMenuItem, バージョンToolStripMenuItem });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new System.Windows.Forms.Padding(6, 3, 0, 3);
@@ -591,14 +590,9 @@
             // 終了ToolStripMenuItem
             // 
             終了ToolStripMenuItem.Name = "終了ToolStripMenuItem";
-            終了ToolStripMenuItem.Size = new System.Drawing.Size(155, 26);
+            終了ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             終了ToolStripMenuItem.Text = "アプリ終了";
             終了ToolStripMenuItem.Click += 終了ToolStripMenuItem_Click;
-            // 
-            // toolStripMenuItem2
-            // 
-            toolStripMenuItem2.Name = "toolStripMenuItem2";
-            toolStripMenuItem2.Size = new System.Drawing.Size(14, 24);
             // 
             // NETA_TIMER
             // 
@@ -686,7 +680,6 @@
         private System.Windows.Forms.ToolStripMenuItem うえのいろToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem もとに戻すToolStripMenuItem;
         private System.Windows.Forms.ToolStripContainer toolStripContainer1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem 終了ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem6;
