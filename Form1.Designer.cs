@@ -48,6 +48,7 @@
             button2 = new System.Windows.Forms.Button();
             ibemei = new System.Windows.Forms.TextBox();
             panel2 = new System.Windows.Forms.Panel();
+            label2 = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             button3 = new System.Windows.Forms.Button();
             button1 = new System.Windows.Forms.Button();
@@ -295,6 +296,7 @@
             // 
             // panel2
             // 
+            panel2.Controls.Add(label2);
             panel2.Controls.Add(label1);
             panel2.Controls.Add(button3);
             panel2.Controls.Add(button1);
@@ -309,9 +311,19 @@
             panel2.Size = new System.Drawing.Size(576, 167);
             panel2.TabIndex = 9;
             // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new System.Drawing.Point(15, 136);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(0, 20);
+            label2.TabIndex = 13;
+            label2.Click += label2_Click;
+            // 
             // label1
             // 
             label1.AutoSize = true;
+            label1.BackColor = System.Drawing.Color.Transparent;
             label1.Location = new System.Drawing.Point(16, 136);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(0, 20);
@@ -590,7 +602,7 @@
             // 終了ToolStripMenuItem
             // 
             終了ToolStripMenuItem.Name = "終了ToolStripMenuItem";
-            終了ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            終了ToolStripMenuItem.Size = new System.Drawing.Size(155, 26);
             終了ToolStripMenuItem.Text = "アプリ終了";
             終了ToolStripMenuItem.Click += 終了ToolStripMenuItem_Click;
             // 
@@ -683,6 +695,7 @@
         private System.Windows.Forms.ToolStripMenuItem 終了ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem6;
+        private System.Windows.Forms.Label label2;
     }
 }
 

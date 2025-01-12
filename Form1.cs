@@ -317,10 +317,11 @@ namespace neta
             bool noda = Properties.Settings.Default.usenoda;
             string posix = Properties.Settings.Default.footerstring;
             string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
-            label1.Text = "";
+            string mode = "";
             eventname.Text = ibemei.Text;
             DateTime dt = DateTime.Now;
 
+            this_begin_update();
 
             DateTime st;//= DateTime.Parse(startbox.Text); 
             DateTime en;//= DateTime.Parse(endbox.Text);
@@ -375,6 +376,7 @@ namespace neta
                 start.Text = "開始時間:" + st.AddHours(Properties.Settings.Default.useutcint).ToString(format);
                 end.Text = "終了時間:" + en.AddHours(Properties.Settings.Default.useutcint).ToString(format);
 
+                mode = "UTC Master;" + rp;
             }
             else if (ms)
             {
@@ -396,8 +398,9 @@ namespace neta
 
                 bool isAmbiguouss = tzi.IsAmbiguousTime(TimeZoneInfo.ConvertTime(sst, tzi));
                 bool isAmbiguouse = tzi.IsAmbiguousTime(TimeZoneInfo.ConvertTime(een, tzi));
-                if (isAmbiguouss) { label1.Text += "startがあいまいな時間の範囲です。"; }
-                if (isAmbiguouse) { label1.Text += "endがあいまいな時間の範囲です。"; }
+                mode = "Microsoft Timezone:"+ Properties.Settings.Default.mstime;
+                if (isAmbiguouss) { mode += "startがあいまいな時間の範囲です。"; }
+                if (isAmbiguouse) { mode += "endがあいまいな時間の範囲です。"; }
 
             }
             else if (noda)
@@ -428,6 +431,9 @@ namespace neta
                         current.Text = "現在時間:" + timeString;
                         start.Text = "開始時間:" + timeStrings;
                         end.Text = "終了時間:" + timeStringe;
+
+
+                        mode = "Nodatime Timezone:"+ zone;
                     }
                     catch (Exception ex)
                     {
@@ -504,6 +510,7 @@ namespace neta
                             start.Text = "開始時間:" + st.AddHours(uoc).ToString(formats);
                             end.Text = "終了時間:" + en.AddHours(uoe).ToString(formate);
 
+                            mode = "TZif binay BisectR:" + Properties.Settings.Default.usetzdatabin;
 
                         }
                         else
@@ -527,6 +534,9 @@ namespace neta
                                 current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(uo).ToString(format);
                                 start.Text = "開始時間:" + st.ToUniversalTime().AddHours(uo).ToString(format);
                                 end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uo).ToString(format);
+
+
+                                mode = "TZif binay BisectR:" + tzst;
                             }
                             else
                             {
@@ -566,6 +576,8 @@ namespace neta
                 current.Text = "現在時間:" + dt.ToLocalTime().ToString(format);
                 start.Text = "開始時間:" + st.ToLocalTime().ToString(format);
                 end.Text = "終了時間:" + en.ToLocalTime().ToString(format);
+
+                mode = "Local Timezone";
             }
 
             string L_format = Properties.Settings.Default.lefttimeformat;
@@ -616,6 +628,9 @@ namespace neta
             bar = Math.Floor(bar);
             progressBar1.Value = Convert.ToInt32(bar.ToString());
 
+            label1.Text = mode;
+
+            this_end_update();
         }
 
 
@@ -2077,7 +2092,7 @@ namespace neta
             {
                 height = TextRenderer.MeasureText("A", this.Font).Height;
             }
-            
+
             eventname.Location = new Point(base_x, base_y);
             current.Location = new Point(base_x, base_y + height);
             elapsed.Location = new Point(base_x, base_y + height * 2);
@@ -2122,16 +2137,19 @@ namespace neta
         private void this_begin_update()
         {
             this.SuspendLayout(); // レイアウト更新を一時停止
-            panel1.SuspendLayout(); 
-           
+            panel1.SuspendLayout();
+            panel2.SuspendLayout();
+
 
         }
         private void this_end_update()
         {
             this.ResumeLayout(false); // レイアウト更新を再開
             panel1.ResumeLayout(false); // レイアウト更新を再開
+            panel2.ResumeLayout(false); // レイアウト更新を再開
 
             panel1.Invalidate(); // 必要な部分だけを再描画
+            panel2.Invalidate(); // 必要な部分だけを再描画
 
         }
 
@@ -2199,6 +2217,11 @@ namespace neta
         private void 終了ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 
