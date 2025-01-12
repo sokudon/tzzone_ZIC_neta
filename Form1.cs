@@ -321,7 +321,6 @@ namespace neta
             eventname.Text = ibemei.Text;
             DateTime dt = DateTime.Now;
 
-            this_begin_update();
 
             DateTime st;//= DateTime.Parse(startbox.Text); 
             DateTime en;//= DateTime.Parse(endbox.Text);
@@ -630,7 +629,6 @@ namespace neta
 
             label1.Text = mode;
 
-            this_end_update();
         }
 
 
