@@ -13,9 +13,8 @@
           "Microsoft.CSharp": "4.7.0",
           "Microsoft.CodeAnalysis.FxCopAnalyzers": "3.3.2",
           "Newtonsoft.Json": "13.0.3",
-          "NodaTime": "3.2.0",
-          "OpenCvSharp4.runtime.win": "4.10.0.20241108",
-          "System.Drawing.Common": "9.0.0"
+          "NodaTime": "3.2.1",
+          "System.Drawing.Common": "9.0.1"
         },
         "runtime": {
           "neta.dll": {}
@@ -47,11 +46,11 @@
       "Microsoft.NetCore.Analyzers/3.3.2": {},
       "Microsoft.NETCore.Platforms/1.1.0": {},
       "Microsoft.NetFramework.Analyzers/3.3.2": {},
-      "Microsoft.Win32.SystemEvents/9.0.0": {
+      "Microsoft.Win32.SystemEvents/9.0.1": {
         "runtime": {
           "lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.24.52809"
+            "fileVersion": "9.0.124.61010"
           }
         },
         "runtimeTargets": {
@@ -59,7 +58,7 @@
             "rid": "win",
             "assetType": "runtime",
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.24.52809"
+            "fileVersion": "9.0.124.61010"
           }
         }
       },
@@ -76,50 +75,26 @@
           }
         }
       },
-      "NodaTime/3.2.0": {
+      "NodaTime/3.2.1": {
         "runtime": {
           "lib/net8.0/NodaTime.dll": {
-            "assemblyVersion": "3.2.0.0",
-            "fileVersion": "3.2.0.0"
+            "assemblyVersion": "3.2.1.0",
+            "fileVersion": "3.2.1.0"
           }
         }
       },
-      "OpenCvSharp4.runtime.win/4.10.0.20241108": {
-        "runtimeTargets": {
-          "runtimes/win-x64/native/OpenCvSharpExtern.dll": {
-            "rid": "win-x64",
-            "assetType": "native",
-            "fileVersion": "0.0.0.0"
-          },
-          "runtimes/win-x64/native/opencv_videoio_ffmpeg4100_64.dll": {
-            "rid": "win-x64",
-            "assetType": "native",
-            "fileVersion": "2024.5.0.0"
-          },
-          "runtimes/win-x86/native/OpenCvSharpExtern.dll": {
-            "rid": "win-x86",
-            "assetType": "native",
-            "fileVersion": "0.0.0.0"
-          },
-          "runtimes/win-x86/native/opencv_videoio_ffmpeg4100.dll": {
-            "rid": "win-x86",
-            "assetType": "native",
-            "fileVersion": "2024.5.0.0"
-          }
-        }
-      },
-      "System.Drawing.Common/9.0.0": {
+      "System.Drawing.Common/9.0.1": {
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "9.0.0"
+          "Microsoft.Win32.SystemEvents": "9.0.1"
         },
         "runtime": {
           "lib/net8.0/System.Drawing.Common.dll": {
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.24.52901"
+            "fileVersion": "9.0.124.61006"
           },
           "lib/net8.0/System.Private.Windows.Core.dll": {
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.24.52901"
+            "fileVersion": "9.0.124.61006"
           }
         }
       }
@@ -194,12 +169,12 @@
       "path": "microsoft.netframework.analyzers/3.3.2",
       "hashPath": "microsoft.netframework.analyzers.3.3.2.nupkg.sha512"
     },
-    "Microsoft.Win32.SystemEvents/9.0.0": {
+    "Microsoft.Win32.SystemEvents/9.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-z8FfGIaoeALdD+KF44A2uP8PZIQQtDGiXsOLuN8nohbKhkyKt7zGaZb+fKiCxTuBqG22Q7myIAioSWaIcOOrOw==",
-      "path": "microsoft.win32.systemevents/9.0.0",
-      "hashPath": "microsoft.win32.systemevents.9.0.0.nupkg.sha512"
+      "sha512": "sha512-OxjcwJqBW/5A1111+vL9d+5KYTvOzeCTJY9zHZ0kpQI4wX075p6L7inHPSYuf0MGakVjUvaShvw9e9pfbInU2Q==",
+      "path": "microsoft.win32.systemevents/9.0.1",
+      "hashPath": "microsoft.win32.systemevents.9.0.1.nupkg.sha512"
     },
     "NETStandard.Library/2.0.0": {
       "type": "package",
@@ -215,26 +190,19 @@
       "path": "newtonsoft.json/13.0.3",
       "hashPath": "newtonsoft.json.13.0.3.nupkg.sha512"
     },
-    "NodaTime/3.2.0": {
+    "NodaTime/3.2.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-yoRA3jEJn8NM0/rQm78zuDNPA3DonNSZdsorMUj+dltc1D+/Lc5h9YXGqbEEZozMGr37lAoYkcSM/KjTVqD0ow==",
-      "path": "nodatime/3.2.0",
-      "hashPath": "nodatime.3.2.0.nupkg.sha512"
+      "sha512": "sha512-D1aHhUfPQUxU2nfDCVuSLahpp0xCYZTmj/KNH3mSK/tStJYcx9HO9aJ0qbOP3hzjGPV/DXOqY2AHe27Nt4xs4g==",
+      "path": "nodatime/3.2.1",
+      "hashPath": "nodatime.3.2.1.nupkg.sha512"
     },
-    "OpenCvSharp4.runtime.win/4.10.0.20241108": {
+    "System.Drawing.Common/9.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-0ae2dwel83tqKlAs45D3KYncoJHRzj1ArEESa6wz7FS3tYu37JDIb5yoMIZPzlkx3Gx2S1BjUrClfXbBHmVh5g==",
-      "path": "opencvsharp4.runtime.win/4.10.0.20241108",
-      "hashPath": "opencvsharp4.runtime.win.4.10.0.20241108.nupkg.sha512"
-    },
-    "System.Drawing.Common/9.0.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-uoozjI3+dlgKh2onFJcz8aNLh6TRCPlLSh8Dbuljc8CdvqXrxHOVysJlrHvlsOCqceqGBR1wrMPxlnzzhynktw==",
-      "path": "system.drawing.common/9.0.0",
-      "hashPath": "system.drawing.common.9.0.0.nupkg.sha512"
+      "sha512": "sha512-TTPkCqSMyMaG8BXlBKYTTJFtLV0SvjjsvgUN598hYgHaX/5B7tdUc2JhQF9vwrYmlzxId+gwFnKYuxQ2XsSz2g==",
+      "path": "system.drawing.common/9.0.1",
+      "hashPath": "system.drawing.common.9.0.1.nupkg.sha512"
     }
   }
 }

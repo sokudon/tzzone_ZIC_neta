@@ -41,11 +41,12 @@ namespace neta
             {
 
                 OpenFileDialog ofd = new OpenFileDialog();
+                ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lasttzdatapath);
+                ofd.Title = "unix usr/share/tzinfoやpython pytz dateutilのtzdatabaseフォルダのバイナリふぁいるを選択してください";
+
                 //ダイアログを表示する
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    ofd.InitialDirectory = Properties.Settings.Default.lasttzdatapath;
-                    ofd.Title = "unix usr/share/tzinfoやpython pytz dateutilのtzdatabaseフォルダのバイナリふぁいるを選択してください";
                     //python dateutil一部をC#ぽくしただけのもの 下にgoogle colabでうごくやつも貼っとく 
                     //zicバイナリの情報　https://tex2e.github.io/rfc-translater/html/rfc8536.html
                     string tzdata = ofd.FileName;// "Tokyo";

@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/01/13")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/01/21")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -693,6 +693,294 @@ namespace neta.Properties {
             }
             set {
                 this["use_upui_chroma"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool image_Stretch {
+            get {
+                return ((bool)(this["image_Stretch"]));
+            }
+            set {
+                this["image_Stretch"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int wrong_encoder_in {
+            get {
+                return ((int)(this["wrong_encoder_in"]));
+            }
+            set {
+                this["wrong_encoder_in"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int wrong_encoder_out {
+            get {
+                return ((int)(this["wrong_encoder_out"]));
+            }
+            set {
+                this["wrong_encoder_out"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int w_in_idx {
+            get {
+                return ((int)(this["w_in_idx"]));
+            }
+            set {
+                this["w_in_idx"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int w_out_idx {
+            get {
+                return ((int)(this["w_out_idx"]));
+            }
+            set {
+                this["w_out_idx"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string base_lastfile {
+            get {
+                return ((string)(this["base_lastfile"]));
+            }
+            set {
+                this["base_lastfile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("現在時間:")]
+        public string custom_curr {
+            get {
+                return ((string)(this["custom_curr"]));
+            }
+            set {
+                this["custom_curr"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("経過時間:")]
+        public string custom_elapsed {
+            get {
+                return ((string)(this["custom_elapsed"]));
+            }
+            set {
+                this["custom_elapsed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("残り時間:")]
+        public string custom_left {
+            get {
+                return ((string)(this["custom_left"]));
+            }
+            set {
+                this["custom_left"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("イベ期間:")]
+        public string custom_span {
+            get {
+                return ((string)(this["custom_span"]));
+            }
+            set {
+                this["custom_span"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("開始時間:")]
+        public string custom_start {
+            get {
+                return ((string)(this["custom_start"]));
+            }
+            set {
+                this["custom_start"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("終了時間:")]
+        public string custom_end {
+            get {
+                return ((string)(this["custom_end"]));
+            }
+            set {
+                this["custom_end"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("があいまいな時間の範囲です")]
+        public string custom_ambigous {
+            get {
+                return ((string)(this["custom_ambigous"]));
+            }
+            set {
+                this["custom_ambigous"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("イベントはすでに終了しています")]
+        public string custom_finished {
+            get {
+                return ((string)(this["custom_finished"]));
+            }
+            set {
+                this["custom_finished"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("イベントがまだ開始されてません")]
+        public string custom_not_start {
+            get {
+                return ((string)(this["custom_not_start"]));
+            }
+            set {
+                this["custom_not_start"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool noda_strict {
+            get {
+                return ((bool)(this["noda_strict"]));
+            }
+            set {
+                this["noda_strict"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string noda_strict_error {
+            get {
+                return ((string)(this["noda_strict_error"]));
+            }
+            set {
+                this["noda_strict_error"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool display_curr {
+            get {
+                return ((bool)(this["display_curr"]));
+            }
+            set {
+                this["display_curr"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool display_elapsed {
+            get {
+                return ((bool)(this["display_elapsed"]));
+            }
+            set {
+                this["display_elapsed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool display_left {
+            get {
+                return ((bool)(this["display_left"]));
+            }
+            set {
+                this["display_left"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool display_span {
+            get {
+                return ((bool)(this["display_span"]));
+            }
+            set {
+                this["display_span"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool display_start {
+            get {
+                return ((bool)(this["display_start"]));
+            }
+            set {
+                this["display_start"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool display_end {
+            get {
+                return ((bool)(this["display_end"]));
+            }
+            set {
+                this["display_end"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("現在時刻,経過時間,残り時間,イベ期間,開始時間,終了時間")]
+        public string display_order {
+            get {
+                return ((string)(this["display_order"]));
+            }
+            set {
+                this["display_order"] = value;
             }
         }
     }

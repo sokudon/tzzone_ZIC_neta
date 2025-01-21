@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using NodaTime.Text;
 using NodaTime;
 using System.IO;
+using System.Security.Policy;
 
 //https://claude.ai/chat/5e3294c3-7dec-4e02-9be6-b82196e7bab1
 namespace TZPASER
@@ -26,6 +27,7 @@ namespace TZPASER
     public class nodaparser {
         public static ZonedDateTime ParseDateTimeInTimeZone(string isoDateString, string timeZoneId)
         {
+            neta.Properties.Settings.Default.noda_strict_error = "";
             // ISO 8601形式をパース
             var pattern = LocalDateTimePattern.ExtendedIso;
             var parseResult = pattern.Parse(isoDateString);
@@ -44,17 +46,43 @@ namespace TZPASER
                 throw new ArgumentException($"Invalid time zone ID: {timeZoneId}");
             }
 
-            // タイムゾーンで解釈（エラーを避けるために Leniently を使用）
-            return localDateTime.InZoneLeniently(timeZone);
+            if (neta.Properties.Settings.Default.noda_strict == false)
+            {
+                // タイムゾーンで解釈（エラーを避けるために Leniently を使用）
+                return localDateTime.InZoneLeniently(timeZone);
+            }
+            try
+            {
+                return localDateTime.InZoneStrictly(timeZone);
+            }
+            catch (Exception ex)
+            {
+                {
+                    neta.Properties.Settings.Default.noda_strict_error = ex.ToString();
+                }
+            }
+
+
+            parseResult = pattern.Parse("1970-01-01T00:00:00");
+            LocalDateTime mimtime = parseResult.Value;
+            return mimtime.InZoneLeniently(timeZone);
         }
 
         public static ZonedDateTime ConvertToTimeZone(DateTime utcDateTime, string timeZoneId)
         {
             var instant = Instant.FromDateTimeUtc(utcDateTime);
             var timeZone = DateTimeZoneProviders.Tzdb[timeZoneId];
+            if (neta.Properties.Settings.Default.noda_strict == false)
+            {
+                var local = instant.InZone(timeZone).LocalDateTime;
+                return local.InZoneLeniently(timeZone);
+            }
+
             return instant.InZone(timeZone);
+
         }
 
+        
         public static bool CheckTimeZoneExists(string timeZoneId)
         {
             var timeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(timeZoneId);
@@ -412,43 +440,8 @@ namespace TZPASER
                     bool ms = neta.Properties.Settings.Default.usems;
                     bool tz = neta.Properties.Settings.Default.usetz;
                     bool nd = neta.Properties.Settings.Default.usenoda;
-                    //bool avoidinvaidambigous = neta.Properties.Settings.Default.shift_ambigous;
                     bool use_zoneparse = neta.Properties.Settings.Default.local_chager;
 
-                    //if (avoidinvaidambigous)
-                    //{ //４シフトしゅつりょくがずれるので意味はなかった（）
-                    //    Regex isoz = new Regex(@"^(\d{4})[\-/](\d{1,2})[\-/](\d{1,2})[ T](\d{1,2}):(\d{1,2})$"); // YYYY-MM-DD HH:mm
-                    //    var match = isoz.Match(input);
-                    //    if (match.Success)
-                    //    {
-                    //        try
-                    //        {
-                    //            int year = int.Parse(match.Groups[1].Value);
-                    //            int month = int.Parse(match.Groups[2].Value);
-                    //            int day = int.Parse(match.Groups[3].Value);
-
-                    //            int hour = int.Parse(match.Groups[4].Value);
-                    //            int minute = int.Parse(match.Groups[5].Value);
-
-                    //            string date = year.ToString("0000") + "-" + month.ToString("00") + "-" +
-                    //            day.ToString("00") + " 04:" + minute.ToString("00");
-                    //            DateTime.TryParseExact(
-                    //          date,
-                    //          formats,
-                    //          CultureInfo.InvariantCulture,
-                    //          DateTimeStyles.AssumeLocal,//ローカル変換後 UTCに変換
-                    //          out result);
-
-                    //            result = result.AddHours(-4 + hour);
-                    //            input = result.ToString("yyyy-MM-dd HH:mm");
-
-                    //        }
-                    //        catch (Exception ex)
-                    //        {
-
-                    //        }
-                    //    }
-                    //}
 
                     string format = "yyyy-MM-ddTHH:mm:sszzz";
                     Regex iso = new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$"); // ISO 8601
@@ -533,6 +526,11 @@ namespace TZPASER
                     TimeSpan zz= parsedDateTime.Offset.ToTimeSpan();
                     uo = zz.TotalHours;
 
+
+                    if (parsedDateTime.ToString().Contains("1970-01-01T00:00:00"))
+                    {
+                                                return false;
+                    }
                 }
                 else
                 {

@@ -13,6 +13,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Net.WebRequestMethods;
 using NodaTime.Text;
 using NodaTime;
+using System.Security.Cryptography;
 
 
 namespace neta
@@ -66,12 +67,15 @@ namespace neta
             noda_timezone.Checked = Properties.Settings.Default.usenoda;
             noda_timezone_items.Text = Properties.Settings.Default.noddatz;
 
-            noda_dateformat.Text = Properties.Settings.Default.nodaformat;
+            noda_dateformat.Text = Properties.Settings.Default.nodaformat; 
+            
+            
+            invaid_ambigous.Checked = Properties.Settings.Default.noda_strict;
 
             panel6.Location = new System.Drawing.Point(5, panel6.Location.Y);
 
 
-            change_baseurl.Checked= Properties.Settings.Default.change_baseurl ;
+            change_baseurl.Checked = Properties.Settings.Default.change_baseurl;
         }
 
 
@@ -418,7 +422,7 @@ namespace neta
 
             //はじめに表示されるフォルダを指定する
             //指定しない（空の文字列）の時は、現在のディレクトリが表示される
-            ofd.InitialDirectory = Properties.Settings.Default.lastfile;
+            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lastfile);
             //[ファイルの種類]に表示される選択肢を指定する
             //指定しないとすべてのファイルが表示される
             ofd.Filter = "jsonファイル(*.json)|*.json|すべてのファイル(*.*)|*.*";
@@ -1035,7 +1039,8 @@ namespace neta
                             timeStrings += "nodatimeエラー" + ex.ToString();
                         }
                     }
-                    else {
+                    else
+                    {
 
                         timeStrings += "nodatimeで未対応のタイムゾーンです";
                     }
@@ -1070,7 +1075,7 @@ namespace neta
                         sb.Append("M$ timezone:"); //local utc tzdate
                         sb.AppendLine(ms_tz);
                         sb.Append("utc:"); // utc tzdate
-                        sb.AppendLine(utct); 
+                        sb.AppendLine(utct);
                         sb.Append("nodatime:"); // noda tzdate
                         sb.AppendLine(timeStrings);
                         sb.Append("tzdata iso8601+zone:"); // utc tzdate
@@ -1137,7 +1142,7 @@ namespace neta
                         sb.Append("M$ timezone:"); //local utc tzdate
                         sb.AppendLine(ms_tz);
                         sb.Append("utc:"); // utc tzdate
-                        sb.AppendLine(utct); 
+                        sb.AppendLine(utct);
                         sb.Append("nodatime:"); // noda tzdate
                         sb.AppendLine(timeStrings);
                         sb.Append("tzdata iso8601+zone:"); // utc tzdate
@@ -1426,21 +1431,68 @@ namespace neta
         private void change_baseurl_CheckedChanged(object sender, EventArgs e)
         {
 
-            Properties.Settings.Default.change_baseurl= change_baseurl.Checked;
+            Properties.Settings.Default.change_baseurl = change_baseurl.Checked;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
+            var url = "https?://[ -_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+$";
 
-            Properties.Settings.Default.alt_baseurl = baseurl_txt.Text;
+            var m = Regex.Match(baseurl_txt.Text, url);
+            if (m.Success)
+            {
+                Properties.Settings.Default.alt_baseurl = m.Value;
+            }
         }
 
         private void baseurl_keyval_TextChanged(object sender, EventArgs e)
         {
             string[] keys = baseurl_keyval.Text.Split(",");
-            if (keys.Length == 10) {
+            if (keys.Length == 10)
+            {
                 Properties.Settings.Default.alt_basekey = baseurl_keyval.Text;
-            } 
+            }
+        }
+
+        private void button2_Click_2(object sender, EventArgs e)
+        {
+
+
+            OpenFileDialog ofd = new OpenFileDialog();
+
+            //はじめに表示されるフォルダを指定する
+            //指定しない（空の文字列）の時は、現在のディレクトリが表示される
+            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lastfile);
+            //[ファイルの種類]に表示される選択肢を指定する
+            //指定しないとすべてのファイルが表示される
+            ofd.Filter = "jsonファイル(*.json)|*.json|すべてのファイル(*.*)|*.*";
+            //[ファイルの種類]ではじめに選択されるものを指定する
+            //2番目の「すべてのファイル」が選択されているようにする
+            ofd.FilterIndex = 2;
+            //タイトルを設定する
+            ofd.Title = "開くjsonファイルを選択してください";
+            //ダイアログボックスを閉じる前に現在のディレクトリを復元するようにする
+            ofd.RestoreDirectory = true;
+            //存在しないファイルの名前が指定されたとき警告を表示する
+            //デフォルトでTrueなので指定する必要はない
+            ofd.CheckFileExists = true;
+            //存在しないパスが指定されたとき警告を表示する
+            //デフォルトでTrueなので指定する必要はない
+            ofd.CheckPathExists = true;
+
+            //ダイアログを表示する
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                Properties.Settings.Default.alt_baseurl = ofd.FileName;
+                Properties.Settings.Default.base_lastfile = Path.GetFileName(Path.GetDirectoryName(ofd.FileName));
+                custom_url_path.Text = ofd.FileName;
+            }
+        }
+
+        private void invaid_ambigous_CheckedChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.noda_strict = invaid_ambigous.Checked;
         }
     }
 }

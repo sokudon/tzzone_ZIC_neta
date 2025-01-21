@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/01/13</Value>
+      <Value Profile="(Default)">2025/01/21</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -169,6 +169,78 @@
     </Setting>
     <Setting Name="use_upui_chroma" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="image_Stretch" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="wrong_encoder_in" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="wrong_encoder_out" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="w_in_idx" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="w_out_idx" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="base_lastfile" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="custom_curr" Type="System.String" Scope="User">
+      <Value Profile="(Default)">現在時間:</Value>
+    </Setting>
+    <Setting Name="custom_elapsed" Type="System.String" Scope="User">
+      <Value Profile="(Default)">経過時間:</Value>
+    </Setting>
+    <Setting Name="custom_left" Type="System.String" Scope="User">
+      <Value Profile="(Default)">残り時間:</Value>
+    </Setting>
+    <Setting Name="custom_span" Type="System.String" Scope="User">
+      <Value Profile="(Default)">イベ期間:</Value>
+    </Setting>
+    <Setting Name="custom_start" Type="System.String" Scope="User">
+      <Value Profile="(Default)">開始時間:</Value>
+    </Setting>
+    <Setting Name="custom_end" Type="System.String" Scope="User">
+      <Value Profile="(Default)">終了時間:</Value>
+    </Setting>
+    <Setting Name="custom_ambigous" Type="System.String" Scope="User">
+      <Value Profile="(Default)">があいまいな時間の範囲です</Value>
+    </Setting>
+    <Setting Name="custom_finished" Type="System.String" Scope="User">
+      <Value Profile="(Default)">イベントはすでに終了しています</Value>
+    </Setting>
+    <Setting Name="custom_not_start" Type="System.String" Scope="User">
+      <Value Profile="(Default)">イベントがまだ開始されてません</Value>
+    </Setting>
+    <Setting Name="noda_strict" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="noda_strict_error" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="display_curr" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="display_elapsed" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="display_left" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="display_span" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="display_start" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="display_end" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="display_order" Type="System.String" Scope="User">
+      <Value Profile="(Default)">現在時刻,経過時間,残り時間,イベ期間,開始時間,終了時間</Value>
     </Setting>
   </Settings>
 </SettingsFile>

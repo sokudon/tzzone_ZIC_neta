@@ -31,6 +31,7 @@
             label1 = new System.Windows.Forms.Label();
             panel1 = new System.Windows.Forms.Panel();
             panel4 = new System.Windows.Forms.Panel();
+            invaid_ambigous = new System.Windows.Forms.CheckBox();
             custom_local = new System.Windows.Forms.CheckBox();
             noda_timezone_items = new System.Windows.Forms.ComboBox();
             noda_timezone = new System.Windows.Forms.CheckBox();
@@ -56,6 +57,7 @@
             bar_length = new System.Windows.Forms.ComboBox();
             label4 = new System.Windows.Forms.Label();
             panel2 = new System.Windows.Forms.Panel();
+            button2 = new System.Windows.Forms.Button();
             label2 = new System.Windows.Forms.Label();
             change_baseurl = new System.Windows.Forms.CheckBox();
             baseurl_keyval = new System.Windows.Forms.TextBox();
@@ -109,6 +111,7 @@
             // 
             // panel4
             // 
+            panel4.Controls.Add(invaid_ambigous);
             panel4.Controls.Add(custom_local);
             panel4.Controls.Add(noda_timezone_items);
             panel4.Controls.Add(noda_timezone);
@@ -122,6 +125,17 @@
             panel4.Name = "panel4";
             panel4.Size = new System.Drawing.Size(380, 268);
             panel4.TabIndex = 26;
+            // 
+            // invaid_ambigous
+            // 
+            invaid_ambigous.AutoSize = true;
+            invaid_ambigous.Location = new System.Drawing.Point(172, 157);
+            invaid_ambigous.Name = "invaid_ambigous";
+            invaid_ambigous.Size = new System.Drawing.Size(61, 24);
+            invaid_ambigous.TabIndex = 29;
+            invaid_ambigous.Text = "厳格";
+            invaid_ambigous.UseVisualStyleBackColor = true;
+            invaid_ambigous.CheckedChanged += invaid_ambigous_CheckedChanged;
             // 
             // custom_local
             // 
@@ -152,9 +166,9 @@
             noda_timezone.AutoSize = true;
             noda_timezone.Location = new System.Drawing.Point(8, 157);
             noda_timezone.Name = "noda_timezone";
-            noda_timezone.Size = new System.Drawing.Size(198, 24);
+            noda_timezone.Size = new System.Drawing.Size(168, 24);
             noda_timezone.TabIndex = 27;
-            noda_timezone.Text = "のだたいむ(夏時間修正あり)";
+            noda_timezone.Text = "のだたいむ(夏修正あり)";
             noda_timezone.UseVisualStyleBackColor = true;
             noda_timezone.CheckedChanged += checkBox5_CheckedChanged;
             // 
@@ -315,7 +329,7 @@
             // 
             panel6.Controls.Add(linkLabel2);
             panel6.Controls.Add(noda_dateformat);
-            panel6.Location = new System.Drawing.Point(230, 62);
+            panel6.Location = new System.Drawing.Point(157, 57);
             panel6.Name = "panel6";
             panel6.Size = new System.Drawing.Size(339, 37);
             panel6.TabIndex = 11;
@@ -402,6 +416,7 @@
             // 
             // panel2
             // 
+            panel2.Controls.Add(button2);
             panel2.Controls.Add(label2);
             panel2.Controls.Add(change_baseurl);
             panel2.Controls.Add(baseurl_keyval);
@@ -418,6 +433,17 @@
             panel2.Name = "panel2";
             panel2.Size = new System.Drawing.Size(368, 147);
             panel2.TabIndex = 20;
+            // 
+            // button2
+            // 
+            button2.Location = new System.Drawing.Point(211, 36);
+            button2.Name = "button2";
+            button2.Size = new System.Drawing.Size(28, 29);
+            button2.TabIndex = 28;
+            button2.Text = "...";
+            button2.UseVisualStyleBackColor = true;
+            button2.Visible = false;
+            button2.Click += button2_Click_2;
             // 
             // label2
             // 
@@ -450,7 +476,7 @@
             // 
             // baseurl_txt
             // 
-            baseurl_txt.Location = new System.Drawing.Point(141, 37);
+            baseurl_txt.Location = new System.Drawing.Point(122, 37);
             baseurl_txt.Name = "baseurl_txt";
             baseurl_txt.Size = new System.Drawing.Size(83, 27);
             baseurl_txt.TabIndex = 24;
@@ -501,7 +527,7 @@
             // 
             custom_url_path.FormattingEnabled = true;
             custom_url_path.ImeMode = System.Windows.Forms.ImeMode.On;
-            custom_url_path.Items.AddRange(new object[] { "JSONサンプル{} https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_MhLrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec", "JSONサンプル[] https://script.google.com/macros/s/AKfycbyW31ZFRACSjXccnna6ZfYOJaIZj1LMJa-fg9tKVmfW01acsc2sJP2HR6CJa7rpt2xA/exec", "旧ぐぐるのパラメーター対応版()このあぷりのでふぉ　https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec?game=all", "テストケース多重ねすと　https://script.google.com/macros/s/AKfycbwhsv6LlhTmFM0CIc7vlXrNhMMQ9II23HxuTIfWYUSTyNRewsOJAm-des6xI2uhWYKN/exec", "さしゅうあいまも含んだやつ()これだけあった()　https://script.google.com/macros/s/AKfycbyVRqHhnG40A5RSAyIe9nX4kypbQ4_67hqXHCErEnKv3ZwoycmtUo-492jfq3Hy4rCxEw/exec", "...でのファイル読み込みいちおうローカルファイルも対応している" });
+            custom_url_path.Items.AddRange(new object[] { "JSONサンプル{} https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_MhLrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec", "JSONサンプル[] https://script.google.com/macros/s/AKfycbw27NVH4JZWekqFZIXiNsZ08e3S2MxL6sFW01rZpBFLIVEIK1VAPkiMffpCE46r6ZRL/exec", "旧ぐぐるのパラメーター対応版()このあぷりのでふぉ　https://script.google.com/macros/s/AKfycbxiN0USvNN0hQyO5b3Ep_oJy_qQxCRAlT4NU954QXKYZ6GrGyzsBnhi8RgMHLZHct-QJg/exec?game=all", "テストケース多重ねすと　https://script.google.com/macros/s/AKfycbwhsv6LlhTmFM0CIc7vlXrNhMMQ9II23HxuTIfWYUSTyNRewsOJAm-des6xI2uhWYKN/exec", "さしゅうあいまも含んだやつ()これだけあった()　https://script.google.com/macros/s/AKfycbyVRqHhnG40A5RSAyIe9nX4kypbQ4_67hqXHCErEnKv3ZwoycmtUo-492jfq3Hy4rCxEw/exec", "...でのファイル読み込みいちおうローカルファイルも対応している" });
             custom_url_path.Location = new System.Drawing.Point(124, 74);
             custom_url_path.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             custom_url_path.Name = "custom_url_path";
@@ -706,5 +732,7 @@
         private System.Windows.Forms.TextBox baseurl_keyval;
         private System.Windows.Forms.CheckBox change_baseurl;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.CheckBox invaid_ambigous;
     }
 }

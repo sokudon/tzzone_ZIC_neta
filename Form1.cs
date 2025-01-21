@@ -24,6 +24,8 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using System.Security.Policy;
 using System.Xml.Linq;
+using System.Text.Unicode;
+
 
 namespace neta
 {
@@ -38,6 +40,9 @@ namespace neta
 
             this.SetStyle(ControlStyles.UserPaint, true);
             this.UpdateStyles();
+
+
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -164,7 +169,14 @@ namespace neta
 
             try
             {
-                string text = wc.DownloadString(url2);
+                string text = "";
+
+                text = wc.DownloadString(url2);
+                if (text == null || text == "")
+                {
+                    endbox.Text = "baseurlの接続に失敗しました";
+                    return;
+                }
                 var obj = Codeplex.Data.DynamicJson.Parse(text);
                 string path = "/data/" + new_games[selecter] + "/name," +
                     "/data/" + new_games[selecter] + "/start," +
@@ -211,6 +223,8 @@ namespace neta
             panel1.ForeColor = Properties.Settings.Default.uicolor;
 
             this.panel2.Visible = Properties.Settings.Default.uihide;
+            ぱねる１似合わせるToolStripMenuItem.Checked = Properties.Settings.Default.image_Stretch;
+
 
             Properties.Settings.Default.system_tz = TimeZoneInfo.Local.Id;
 
@@ -318,9 +332,37 @@ namespace neta
             string posix = Properties.Settings.Default.footerstring;
             string format = Properties.Settings.Default.datetimeformat;//"yyyy/MM/dd HH:mm:ss'(GMT'zzz')'";
             string mode = "";
-            eventname.Text = ibemei.Text;
             DateTime dt = DateTime.Now;
+            error.Text = "";
 
+            string current_tmp = "";
+            string start_tmp = "";
+            string end_tmp = "";
+            string elapsed_tmp = "";
+            string left_tmp = "";
+            string duration_tmp = "";
+
+            string current_c = Properties.Settings.Default.custom_curr;
+            string elapsed_c = Properties.Settings.Default.custom_elapsed;
+            string left_c = Properties.Settings.Default.custom_left;
+            string duration_c = Properties.Settings.Default.custom_span;
+            string start_c = Properties.Settings.Default.custom_start;
+            string end_c = Properties.Settings.Default.custom_end;
+            string ambigous_c = Properties.Settings.Default.custom_ambigous;
+            string has_end_c = Properties.Settings.Default.custom_finished;
+            string not_start_c = Properties.Settings.Default.custom_not_start;
+            string noda_strict_error = Properties.Settings.Default.noda_strict_error;
+
+
+
+
+            // インデックス0の項目のチェック状態を取得
+            bool d_curr = Properties.Settings.Default.display_curr;
+            bool d_el = Properties.Settings.Default.display_elapsed;
+            bool d_lf = Properties.Settings.Default.display_left;
+            bool d_sp = Properties.Settings.Default.display_span;
+            bool d_st = Properties.Settings.Default.display_start;
+            bool d_en = Properties.Settings.Default.display_end;
 
             DateTime st;//= DateTime.Parse(startbox.Text); 
             DateTime en;//= DateTime.Parse(endbox.Text);
@@ -345,10 +387,15 @@ namespace neta
             else
             {
 
-                current.Text = "invalid date(ex: supoort format";
-                elapsed.Text = "NOMARL: 2020/12/18 21:00  <-this convert Localtime OS denpending";
-                left.Text = "ISO8601: 2020-12-18T21:00:00+09:00";
-                duration.Text = "RFC2822: Sun, 10 Mar 2024 03:00:00 PDT)";
+                error.Text += "invalid date(ex: supoort format";
+                error.Text += "NOMARL: 2020/12/18 21:00  <-this convert Localtime OS denpending";
+                error.Text += "ISO8601: 2020-12-18T21:00:00+09:00";
+                error.Text += "RFC2822: Sun, 10 Mar 2024 03:00:00 PDT)";
+                if (noda_strict_error != "")
+                {
+
+                    error.Text += noda_strict_error;
+                }
 
                 return;
             }
@@ -359,10 +406,15 @@ namespace neta
             else
             {
 
-                current.Text = "invalid date(ex: supoort format";
-                elapsed.Text = "NOMARL: 2020/12/18 21:00  <-this convert Localtime OS denpending";
-                left.Text = "ISO8601: 2020-12-18T21:00:00+09:00";
-                duration.Text = "RFC2822: Sun, 10 Mar 2024 03:00:00 PDT)";
+                error.Text += "invalid date(ex: supoort format";
+                error.Text += "NOMARL: 2020/12/18 21:00  <-this convert Localtime OS denpending";
+                error.Text += "ISO8601: 2020-12-18T21:00:00+09:00";
+                error.Text += "RFC2822: Sun, 10 Mar 2024 03:00:00 PDT)";
+                if (noda_strict_error != "")
+                {
+
+                    error.Text += noda_strict_error;
+                }
 
                 return;
             }
@@ -371,9 +423,9 @@ namespace neta
                 dt = dt.ToUniversalTime();
                 string rp = Properties.Settings.Default.useutch + ":" + Properties.Settings.Default.useutcm;
                 format = format.Replace("K", rp).Replace("zzz", rp).Replace("zz", Properties.Settings.Default.useutch).Replace("z", Properties.Settings.Default.useutch);
-                current.Text = "現在時間:" + dt.AddHours(Properties.Settings.Default.useutcint).ToString(format);
-                start.Text = "開始時間:" + st.AddHours(Properties.Settings.Default.useutcint).ToString(format);
-                end.Text = "終了時間:" + en.AddHours(Properties.Settings.Default.useutcint).ToString(format);
+                current_tmp = current_c + dt.AddHours(Properties.Settings.Default.useutcint).ToString(format);
+                start_tmp = start_c + st.AddHours(Properties.Settings.Default.useutcint).ToString(format);
+                end_tmp = end_c + en.AddHours(Properties.Settings.Default.useutcint).ToString(format);
 
                 mode = "UTC Master;" + rp;
             }
@@ -391,15 +443,15 @@ namespace neta
                 string formate = TZPASER.TimeZoneOffsetParser.getoffset(een, format, tzi);
 
 
-                current.Text = "現在時間:" + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
-                start.Text = "開始時間:" + TimeZoneInfo.ConvertTime(sst, tzi).ToString(formats);
-                end.Text = "終了時間:" + TimeZoneInfo.ConvertTime(een, tzi).ToString(formate);
+                current_tmp = current_c + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
+                start_tmp = start_c + TimeZoneInfo.ConvertTime(sst, tzi).ToString(formats);
+                end_tmp = end_c + TimeZoneInfo.ConvertTime(een, tzi).ToString(formate);
 
                 bool isAmbiguouss = tzi.IsAmbiguousTime(TimeZoneInfo.ConvertTime(sst, tzi));
                 bool isAmbiguouse = tzi.IsAmbiguousTime(TimeZoneInfo.ConvertTime(een, tzi));
-                mode = "Microsoft Timezone:"+ Properties.Settings.Default.mstime;
-                if (isAmbiguouss) { mode += "startがあいまいな時間の範囲です。"; }
-                if (isAmbiguouse) { mode += "endがあいまいな時間の範囲です。"; }
+                mode = "Microsoft Timezone:" + Properties.Settings.Default.mstime;
+                if (isAmbiguouss) { mode += "start" + ambigous_c; }
+                if (isAmbiguouse) { mode += "end" + ambigous_c; }
 
             }
             else if (noda)
@@ -411,10 +463,10 @@ namespace neta
                     {
                         // 2. UTC時刻を指定したタイムゾーンの現地時間に変換
                         ZonedDateTime convertedTime = TZPASER.nodaparser.ConvertToTimeZone(dt.ToUniversalTime(), tznd);
-                        ZonedDateTime convertedTimes = TZPASER.nodaparser.ConvertToTimeZone(st, tznd);
-                        ZonedDateTime convertedTimee = TZPASER.nodaparser.ConvertToTimeZone(en, tznd);
+                        ZonedDateTime convertedTime_st = TZPASER.nodaparser.ConvertToTimeZone(st, tznd);
+                        ZonedDateTime convertedTime_en = TZPASER.nodaparser.ConvertToTimeZone(en, tznd);
 
-                        var zonebcl = DateTimeZoneProviders.Bcl;
+                        //var zonebcl = DateTimeZoneProviders.Bcl;　どっちからしい
                         var zonetzdb = DateTimeZoneProviders.Tzdb;
 
                         var pattern = Properties.Settings.Default.nodaformat;
@@ -423,30 +475,51 @@ namespace neta
 
                         // Format
                         string timeString = formatter.Format(SystemClock.Instance.GetCurrentInstant().InZone(zone));
-                        string timeStrings = formatter.Format(convertedTimes);
-                        string timeStringe = formatter.Format(convertedTimee);
+                        string timeStrings = formatter.Format(convertedTime_st);
+                        string timeStringe = formatter.Format(convertedTime_en);
 
 
-                        current.Text = "現在時間:" + timeString;
-                        start.Text = "開始時間:" + timeStrings;
-                        end.Text = "終了時間:" + timeStringe;
+                        current_tmp = current_c + timeString;
+                        start_tmp = start_c + timeStrings;
+                        end_tmp = end_c + timeStringe;
 
 
-                        mode = "Nodatime Timezone:"+ zone;
+                        // タイムゾーンでの ZonedDateTime の取得
+                        var mappings = zone.MapLocal(convertedTime_st.LocalDateTime);
+                        var mappings_e = zone.MapLocal(convertedTime_en.LocalDateTime);
+
+
+                        //https://chatgpt.com/share/678e6fdb-f598-800f-8faa-2c5521c95496 invaidtime とambigoustime
+                        mode = "Nodatime Timezone:" + zone;
+                        // 時間があいまいかどうかを確認
+                        if (mappings.Count > 1)
+                        {
+                            mode += "start" + ambigous_c;
+                        }
+                        if (mappings_e.Count > 1)
+                        {
+                            mode += "end" + ambigous_c;
+                        }
+                        if (noda_strict_error != "")
+                        {
+
+                            mode += noda_strict_error;
+                        }
+
                     }
                     catch (Exception ex)
                     {
-                        current.Text = "フォーマットでふせいです" + ex.ToString();
-                        start.Text = "error;";
-                        end.Text = "unsuppored timezone nodatime";
+                        error.Text += "フォーマットでふせいです" + ex.ToString();
+                        error.Text += "error;";
+                        error.Text += "unsuppored timezone nodatime";
 
                     }
                 }
                 else
                 {
-                    current.Text = "のだたいむが対応してないタイムゾーンです";
-                    start.Text = "error;";
-                    end.Text = "unsuppored timezone nodatime";
+                    error.Text += "のだたいむが対応してないタイムゾーンです";
+                    error.Text += "error;";
+                    error.Text += "unsuppored timezone nodatime";
                 }
 
             }
@@ -505,9 +578,9 @@ namespace neta
                             formats = Regex.Replace(formats, patternn, match => "");
                             formate = Regex.Replace(formate, patternn, match => "");
 
-                            current.Text = "現在時間:" + dt.AddHours(uo).ToString(formatc);
-                            start.Text = "開始時間:" + st.AddHours(uoc).ToString(formats);
-                            end.Text = "終了時間:" + en.AddHours(uoe).ToString(formate);
+                            current_tmp = current_c + dt.AddHours(uo).ToString(formatc);
+                            start_tmp = start_c + st.AddHours(uoc).ToString(formats);
+                            end_tmp = end_c + en.AddHours(uoe).ToString(formate);
 
                             mode = "TZif binay BisectR:" + Properties.Settings.Default.usetzdatabin;
 
@@ -530,9 +603,9 @@ namespace neta
                                 string patternn = @"(?<!\\)[Kz!""#$'&%]"; // 「\K \z」を無視し、「Kz」のみマッチ !"#$'&%はダメ文字
                                 format = Regex.Replace(format, patternn, match => "");
                                 format = format.Replace("%TZ", tzst).Replace("%Z", abb).Replace("%z", uoff).Replace("zzz", uoff);
-                                current.Text = "現在時間:" + dt.ToUniversalTime().AddHours(uo).ToString(format);
-                                start.Text = "開始時間:" + st.ToUniversalTime().AddHours(uo).ToString(format);
-                                end.Text = "終了時間:" + en.ToUniversalTime().AddHours(uo).ToString(format);
+                                current_tmp = current_c + dt.ToUniversalTime().AddHours(uo).ToString(format);
+                                start_tmp = start_c + st.ToUniversalTime().AddHours(uo).ToString(format);
+                                end_tmp = end_c + en.ToUniversalTime().AddHours(uo).ToString(format);
 
 
                                 mode = "TZif binay BisectR:" + tzst;
@@ -554,27 +627,27 @@ namespace neta
                                 string formate = TZPASER.TimeZoneOffsetParser.getoffset(een, format, tzi);
 
 
-                                current.Text = "現在時間:" + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
-                                start.Text = "開始時間:" + TimeZoneInfo.ConvertTime(sst, tzi).ToString(formats);
-                                end.Text = "終了時間:" + TimeZoneInfo.ConvertTime(een, tzi).ToString(formate);
+                                current_tmp = current_c + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
+                                start_tmp = start_c + TimeZoneInfo.ConvertTime(sst, tzi).ToString(formats);
+                                end_tmp = end_c + TimeZoneInfo.ConvertTime(een, tzi).ToString(formate);
                             }
                         }
 
                     }
                     catch (Exception ex)
                     {
-                        current.Text = "例外発生";
-                        start.Text = "えらー:tzdbを変換したJSONが空か異常があります";
-                        end.Text = ex.ToString();
+                        error.Text += "例外発生 ";
+                        error.Text += "えらー:tzdbを変換したJSONが空か異常があります";
+                        error.Text += ex.ToString();
                     }
 
                 }
             }
             else
             {
-                current.Text = "現在時間:" + dt.ToLocalTime().ToString(format);
-                start.Text = "開始時間:" + st.ToLocalTime().ToString(format);
-                end.Text = "終了時間:" + en.ToLocalTime().ToString(format);
+                current_tmp = current_c + dt.ToLocalTime().ToString(format);
+                start_tmp = start_c + st.ToLocalTime().ToString(format);
+                end_tmp = end_c + en.ToLocalTime().ToString(format);
 
                 mode = "Local Timezone";
             }
@@ -586,30 +659,30 @@ namespace neta
             if (st < dt)
             {
                 TimeSpan elapsedSpan = dt - st;
-                elapsed.Text = "経過時間:" + TZPASER.TimeZoneOffsetParser.getleft(elapsedSpan, L_format);
+                elapsed_tmp = elapsed_c + TZPASER.TimeZoneOffsetParser.getleft(elapsedSpan, L_format);
 
                 if (en > dt)
                 {
                     TimeSpan leftSpan = en - dt;
-                    left.Text = "残り時間:" + TZPASER.TimeZoneOffsetParser.getleft(leftSpan, L_format);
+                    left_tmp = left_c + TZPASER.TimeZoneOffsetParser.getleft(leftSpan, L_format);
                 }
                 else
                 {
-                    left.Text = "残り時間:イベントはすでに終了しています";
+                    left_tmp = left_c + has_end_c;
                 }
 
             }
             else
             {
 
-                elapsed.Text = "経過時間:イベントがまだ開始されてません";
-                left.Text = "残り時間:イベントがまだ開始されてません";
+                elapsed_tmp = elapsed_c + not_start_c;
+                left_tmp = left_c + not_start_c;
             }
 
 
             TimeSpan drationSpan = en - st;
 
-            duration.Text = "イベ期間:" + TZPASER.TimeZoneOffsetParser.getleft(drationSpan, L_format);
+            duration_tmp = duration_c + TZPASER.TimeZoneOffsetParser.getleft(drationSpan, L_format);
 
 
             //msbarだとst=en 零割例外が起きない
@@ -627,8 +700,105 @@ namespace neta
             bar = Math.Floor(bar);
             progressBar1.Value = Convert.ToInt32(bar.ToString());
 
-            label1.Text = mode;
+            if (d_curr == false) { current.Text = ""; }
+            if (d_st == false) { start.Text = ""; }
+            if (d_en == false) { end.Text = ""; }
+            if (d_el == false) { elapsed.Text = ""; }
+            if (d_lf == false) { left.Text = ""; }
+            if (d_sp == false) { duration.Text = ""; }
 
+
+            if (縺化けUTF8SJIS.Checked)
+            {
+
+                eventname.Text = wrong_encoder(ibemei.Text);
+
+                if (d_curr) { current.Text = wrong_encoder(current_tmp); }
+                if (d_st) { start.Text = wrong_encoder(start_tmp); }
+                if (d_en) { end.Text = wrong_encoder(end_tmp); }
+                if (d_el) { elapsed.Text = wrong_encoder(elapsed_tmp); }
+                if (d_lf) { left.Text = wrong_encoder(left_tmp); }
+                if (d_sp) { duration.Text = wrong_encoder(duration_tmp); }
+
+                label1.Text = wrong_encoder(mode);
+
+            }
+            else if (縺化け戻し.Checked)
+            {
+                eventname.Text = wrong_encoder_restore(ibemei.Text);
+                if (d_curr) { current.Text = wrong_encoder_restore(current_tmp); }
+                if (d_st) { start.Text = wrong_encoder_restore(start_tmp); }
+                if (d_en) { end.Text = wrong_encoder_restore(end_tmp); }
+                if (d_el) { elapsed.Text = wrong_encoder_restore(elapsed_tmp); }
+                if (d_lf) { left.Text = wrong_encoder_restore(left_tmp); }
+                if (d_sp) { duration.Text = wrong_encoder_restore(duration_tmp); }
+                label1.Text = wrong_encoder_restore(mode);
+
+            }
+            else if (コードページ指定.Checked)
+            {
+                try
+                {
+                    Encoding encoding_in = Encoding.GetEncoding(Properties.Settings.Default.wrong_encoder_in);
+                    Encoding encoding_out = Encoding.GetEncoding(Properties.Settings.Default.wrong_encoder_out);
+                    eventname.Text = wrong_encoder_codepage(ibemei.Text, encoding_in, encoding_out);
+
+                    if (d_curr) { current.Text = wrong_encoder_codepage(current_tmp, encoding_in, encoding_out); }
+                    if (d_st) { start.Text = wrong_encoder_codepage(start_tmp, encoding_in, encoding_out); }
+                    if (d_en) { end.Text = wrong_encoder_codepage(end_tmp, encoding_in, encoding_out); }
+                    if (d_el) { elapsed.Text = wrong_encoder_codepage(elapsed_tmp, encoding_in, encoding_out); }
+                    if (d_lf) { left.Text = wrong_encoder_codepage(left_tmp, encoding_in, encoding_out); }
+                    if (d_sp) { duration.Text = wrong_encoder_codepage(duration_tmp, encoding_in, encoding_out); }
+
+                    label1.Text = wrong_encoder_codepage(mode, encoding_in, encoding_out);
+
+                }
+                catch (Exception ex)
+                {
+                    error.Text += "例外発生 ";
+                    error.Text += "エンコーディングエラー";
+                    error.Text += ex.ToString();
+                }
+            }
+            else
+            {
+                eventname.Text = ibemei.Text;
+
+                if (d_curr) { current.Text = (current_tmp); }
+                if (d_st) { start.Text = (start_tmp); }
+                if (d_en) { end.Text = (end_tmp); }
+                if (d_el) { elapsed.Text = (elapsed_tmp); }
+                if (d_lf) { left.Text = (left_tmp); }
+                if (d_sp) { duration.Text = (duration_tmp); }
+
+
+                label1.Text = mode;
+            }
+        }
+
+        private static string wrong_encoder(string input)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(input);
+            string wrong_sjis = Encoding.GetEncoding("Shift_JIS").GetString(utf8);
+
+            return wrong_sjis;
+        }
+
+        private static string wrong_encoder_restore(string input)
+        {
+            byte[] st_bytes = Encoding.GetEncoding(932).GetBytes(input);
+            string wrong_sjis = Encoding.GetEncoding(65001).GetString(st_bytes);
+
+            return wrong_sjis;
+        }
+
+
+        private static string wrong_encoder_codepage(string input, Encoding incp, Encoding outcp)
+        {
+            byte[] st_bytes = incp.GetBytes(input);
+            string wrong_st = outcp.GetString(st_bytes);
+
+            return wrong_st;
         }
 
 
@@ -1980,23 +2150,20 @@ namespace neta
 
             //はじめに表示されるフォルダを指定する
             //指定しない（空の文字列）の時は、現在のディレクトリが表示される
-            ofd.InitialDirectory = Properties.Settings.Default.lastimagefile;
-            //[ファイルの種類]に表示される選択肢を指定する
-            //指定しないとすべてのファイルが表示される
-            ofd.Filter = "pngファイル(*.png)|*.png|すべてのファイル(*.*)|*.*";
-            //[ファイルの種類]ではじめに選択されるものを指定する
-            //2番目の「すべてのファイル」が選択されているようにする
-            ofd.FilterIndex = 2;
-            //タイトルを設定する
-            ofd.Title = "開くpngファイルを選択してください";
-            //ダイアログボックスを閉じる前に現在のディレクトリを復元するようにする
+            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
+
+            ofd.Filter = "すべての対応画像|*.bmp;*.jpg;*.jpeg;*.gif;*.png;*.tiff;*.ico|" +
+                     "BMP 画像 (*.bmp)|*.bmp|" +
+                     "JPEG 画像 (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
+                     "GIF 画像 (*.gif)|*.gif|" +
+                     "PNG 画像 (*.png)|*.png|" +
+                     "TIFF 画像 (*.tiff)|*.tiff|" +
+                     "ICO アイコン (*.ico)|*.ico";
+            //"WebP 画像 (*.webp)|*.webp";
+
+            ofd.FilterIndex = 1;
             ofd.RestoreDirectory = true;
-            //存在しないファイルの名前が指定されたとき警告を表示する
-            //デフォルトでTrueなので指定する必要はない
-            ofd.CheckFileExists = true;
-            //存在しないパスが指定されたとき警告を表示する
-            //デフォルトでTrueなので指定する必要はない
-            ofd.CheckPathExists = true;
+
 
             //ダイアログを表示する
             if (ofd.ShowDialog() == DialogResult.OK)
@@ -2008,16 +2175,28 @@ namespace neta
 
 
                 string s = ofd.FileName;
+
                 try
                 {
+
                     // 画像を直接パネルの背景として設定
                     panel1.BackgroundImage = System.Drawing.Image.FromFile(s);
-                    panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                    if (ぱねる１似合わせるToolStripMenuItem.Checked)
+                    {
+                        panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                    }
+                    else
+                    {
+                        panel1.BackgroundImageLayout = ImageLayout.Tile;
+
+                    }
 
                     Properties.Settings.Default.lastimagefile = s;
                 }
                 catch (Exception ex)
                 {
+
+
                     MessageBox.Show(ex.ToString());
                 }
             }
@@ -2079,8 +2258,19 @@ namespace neta
             eventname.ForeColor = Color.FromArgb(200, 0, 0, 0);        // 文字をやや透明な黒に
         }
 
-        private void menu_align(int y, bool fontsize)
+        public void menu_align(int y, bool fontsize)
         {
+
+
+
+            // インデックス0の項目のチェック状態を取得
+            bool d_curr = Properties.Settings.Default.display_curr;
+            bool d_el = Properties.Settings.Default.display_elapsed;
+            bool d_lf = Properties.Settings.Default.display_left;
+            bool d_sp = Properties.Settings.Default.display_span;
+            bool d_st = Properties.Settings.Default.display_start;
+            bool d_en = Properties.Settings.Default.display_end;
+
 
             int height = y;
             int base_x = 4;
@@ -2092,13 +2282,44 @@ namespace neta
             }
 
             eventname.Location = new Point(base_x, base_y);
-            current.Location = new Point(base_x, base_y + height);
-            elapsed.Location = new Point(base_x, base_y + height * 2);
-            left.Location = new Point(base_x, base_y + height * 3);
-            duration.Location = new Point(base_x, base_y + height * 4);
-            start.Location = new Point(base_x, base_y + height * 5);
-            end.Location = new Point(base_x, base_y + height * 6);
+            int tmp_counter = 1;
 
+            string[] item = Properties.Settings.Default.display_order.Split(",");
+            int ITEMMAX = 6;
+
+            for (var i = 0; i < ITEMMAX; i++)
+            {
+                string s = item[i].ToString();
+
+                if (s == "現在時刻") {
+                    current.Location = new Point(base_x, base_y + height * tmp_counter);
+                    if (d_curr) { tmp_counter++; }
+                }
+                if (s == "経過時間")
+                {
+                    elapsed.Location = new Point(base_x, base_y + height * tmp_counter);
+                    if (d_el) { tmp_counter++; }
+                }
+                if (s == "残り時間") {
+                    left.Location = new Point(base_x, base_y + height * tmp_counter);
+                    if (d_lf) { tmp_counter++; }
+                }
+                if (s == "イベ期間") {
+                    duration.Location = new Point(base_x, base_y + height * tmp_counter);
+                    if (d_sp) { tmp_counter++; }
+                }
+                if (s == "開始時間")
+                {
+                    start.Location = new Point(base_x, base_y + height * tmp_counter);
+                    if (d_st) { tmp_counter++; }
+                }
+                if (s == "終了時間")
+                {
+                    end.Location = new Point(base_x, base_y + height * tmp_counter);
+                    if (d_en) { tmp_counter++; }
+                }
+
+            }
             height = TextRenderer.MeasureText("A", this.Font).Height;
             progressBar1.Location = new Point(base_x, end.Location.Y + height);
             parcent.Location = new Point(parcent.Location.X, end.Location.Y + height);
@@ -2113,9 +2334,10 @@ namespace neta
 
         private void バーの表示ToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            バーの表示ToolStripMenuItem.Checked = !バーの表示ToolStripMenuItem.Checked;
             progressBar1.Visible = !progressBar1.Visible;
             parcent.Visible = !parcent.Visible;
-            Properties.Settings.Default.barvisible = progressBar1.Visible;
+            Properties.Settings.Default.barvisible = バーの表示ToolStripMenuItem.Checked;
         }
 
         private void toolStripMenuItem3_Click(object sender, EventArgs e)
@@ -2221,9 +2443,355 @@ namespace neta
         {
 
         }
+
+        private void ぱねる１似合わせるToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ぱねる１似合わせるToolStripMenuItem.Checked = !ぱねる１似合わせるToolStripMenuItem.Checked;
+            Properties.Settings.Default.image_Stretch = ぱねる１似合わせるToolStripMenuItem.Checked;
+
+            try
+            {
+                // 画像を直接パネルの背景として設定
+                panel1.BackgroundImage = System.Drawing.Image.FromFile(Properties.Settings.Default.lastimagefile);
+                if (ぱねる１似合わせるToolStripMenuItem.Checked)
+                {
+                    panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                }
+                else
+                {
+                    panel1.BackgroundImageLayout = ImageLayout.Tile;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void 画像ToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void wrong_encode_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void 縺化け_Click(object sender, EventArgs e)
+        {
+            縺化けUTF8SJIS.Checked = !縺化けUTF8SJIS.Checked;
+        }
+
+        private void コードページ指定ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            コードページ指定.Checked = !コードページ指定.Checked;
+            EncodingSelectForm cp = new EncodingSelectForm();
+            cp.Show();
+
+        }
+
+        private void かすたむToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            var form6 = new Form6(this);
+            form6.ShowDialog();
+            form6.Dispose();
+        }
+
+        private void 縺化け戻しSJISUTF8CP932CP65001ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            縺化け戻し.Checked = !縺化け戻し.Checked;
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 
+    public partial class EncodingSelectForm : Form
+    {
+        private ComboBox inputEncodingComboBox;
+        private ComboBox outputEncodingComboBox;
+        private Label inputLabel;
+        private Label outputLabel;
+        private Label selectedInputEncoding;
+        private Label selectedOutputEncoding;
 
+        public EncodingSelectForm()
+        {
+            InitializeComponent();
+            InitializeEncodingSelectors();
+        }
+
+        private void InitializeComponent()
+        {
+            this.inputEncodingComboBox = new ComboBox();
+            this.outputEncodingComboBox = new ComboBox();
+            this.inputLabel = new Label();
+            this.outputLabel = new Label();
+            this.selectedInputEncoding = new Label();
+            this.selectedOutputEncoding = new Label();
+
+            // Input encoding controls
+            this.inputLabel.Text = "入力エンコーディング:";
+            this.inputLabel.Location = new System.Drawing.Point(10, 20);
+            this.inputLabel.AutoSize = true;
+
+            this.inputEncodingComboBox.Location = new System.Drawing.Point(10, 40);
+            this.inputEncodingComboBox.Width = 200;
+            this.inputEncodingComboBox.SelectedIndexChanged += new EventHandler(InputEncoding_SelectedIndexChanged);
+
+            this.selectedInputEncoding.Location = new System.Drawing.Point(220, 43);
+            this.selectedInputEncoding.AutoSize = true;
+
+            // Output encoding controls
+            this.outputLabel.Text = "出力エンコーディング:";
+            this.outputLabel.Location = new System.Drawing.Point(10, 80);
+            this.outputLabel.AutoSize = true;
+
+            this.outputEncodingComboBox.Location = new System.Drawing.Point(10, 100);
+            this.outputEncodingComboBox.Width = 200;
+            this.outputEncodingComboBox.SelectedIndexChanged += new EventHandler(OutputEncoding_SelectedIndexChanged);
+
+            this.selectedOutputEncoding.Location = new System.Drawing.Point(220, 103);
+            this.selectedOutputEncoding.AutoSize = true;
+
+            // Form settings
+            this.Controls.AddRange(new Control[] {
+            this.inputLabel,
+            this.inputEncodingComboBox,
+            this.selectedInputEncoding,
+            this.outputLabel,
+            this.outputEncodingComboBox,
+            this.selectedOutputEncoding
+        });
+            this.ClientSize = new System.Drawing.Size(400, 150);
+            this.Text = "エンコーディング選択";
+        }
+
+        private void InitializeEncodingSelectors()
+        {
+            // よく使用されるエンコーディングのリストを作成
+            var encodings = new List<EncodingInfo>
+        {
+new EncodingInfo { DisplayName = "cp65001 utf-8	Unicode (UTF-8)", CodePage = 65001 },
+//new EncodingInfo { DisplayName = "cp65000 utf-7	Unicode (UTF-7)", CodePage = 65000 },
+new EncodingInfo { DisplayName = "cp57011 x-iscii-pa	ISCII パンジャブ語", CodePage = 57011 },
+new EncodingInfo { DisplayName = "cp57010 x-iscii-gu	ISCII グジャラート語", CodePage = 57010 },
+new EncodingInfo { DisplayName = "cp57009 x-iscii-ma	ISCII マラヤーラム語", CodePage = 57009 },
+new EncodingInfo { DisplayName = "cp57008 x-iscii-ka	ISCII カンナダ語", CodePage = 57008 },
+new EncodingInfo { DisplayName = "cp57007 x-iscii-または	ISCII Odia", CodePage = 57007 },
+new EncodingInfo { DisplayName = "cp57006 x-iscii-as	ISCII アッサム語", CodePage = 57006 },
+new EncodingInfo { DisplayName = "cp57005 x-iscii-te	ISCII テルグ語", CodePage = 57005 },
+new EncodingInfo { DisplayName = "cp57004 x-iscii-ta	ISCII タミール語", CodePage = 57004 },
+new EncodingInfo { DisplayName = "cp57003 x-iscii-be	ISCII Bangla", CodePage = 57003 },
+new EncodingInfo { DisplayName = "cp57002 x-iscii-de	ISCII デバナガリ文字", CodePage = 57002 },
+new EncodingInfo { DisplayName = "cp54936 GB18030	Windows XP 以降: GB18030 簡体字中国語 (4 バイト);簡体字中国語 (GB18030)", CodePage = 54936 },
+new EncodingInfo { DisplayName = "cp52936 hz-gb-2312	HZ-GB2312 簡体字中国語;簡体字中国語 (HZ)", CodePage = 52936 },
+//new EncodingInfo { DisplayName = "cp51950 EUC 繁体字中国語	", CodePage = 51950 },
+new EncodingInfo { DisplayName = "cp51949 euc-韓国	EUC 韓国語", CodePage = 51949 },
+new EncodingInfo { DisplayName = "cp51936 EUC-CN	EUC 簡体字中国語;簡体字中国語 (EUC)", CodePage = 51936 },
+new EncodingInfo { DisplayName = "cp51932 euc-jp	EUC 日本語", CodePage = 51932 },
+//new EncodingInfo { DisplayName = "cp50939 EBCDIC 日本語 (ラテン) 拡張および日本語	", CodePage = 50939 },
+//new EncodingInfo { DisplayName = "cp50937 EBCDIC US-Canadaと繁体字中国語	", CodePage = 50937 },
+//new EncodingInfo { DisplayName = "cp50936 EBCDIC 簡体字中国語	", CodePage = 50936 },
+//new EncodingInfo { DisplayName = "cp50935 EBCDIC 簡体中国語 拡張中国語と簡体字中国語	", CodePage = 50935 },
+//new EncodingInfo { DisplayName = "cp50933 EBCDIC 韓国語拡張および韓国語	", CodePage = 50933 },
+//new EncodingInfo { DisplayName = "cp50931 EBCDIC US-Canadaと日本語	", CodePage = 50931 },
+//new EncodingInfo { DisplayName = "cp50930 EBCDIC 日本語 (カタカナ) 拡張	", CodePage = 50930 },
+//new EncodingInfo { DisplayName = "cp50229 ISO 2022 繁体字中国語	", CodePage = 50229 },
+new EncodingInfo { DisplayName = "cp50227 x-cp50227	ISO 2022 簡体字中国語;簡体字中国語 (ISO 2022)", CodePage = 50227 },
+new EncodingInfo { DisplayName = "cp50225 iso-2022-韓国	ISO 2022 韓国語", CodePage = 50225 },
+new EncodingInfo { DisplayName = "cp50222 iso-2022-jp	ISO 2022 日本語 JIS X 0201-1989;日本語 (JIS-Allow 1 バイトかな - SO/SI)", CodePage = 50222 },
+new EncodingInfo { DisplayName = "cp50221 csISO2022JP	ISO 2022 日本語(半角カタカナ)日本語 (JIS-Allow 1 バイトかな)", CodePage = 50221 },
+new EncodingInfo { DisplayName = "cp50220 iso-2022-jp	半角カタカナを持たないISO 2022日本語;日本語 (JIS)", CodePage = 50220 },
+new EncodingInfo { DisplayName = "cp38598 iso-8859-8-i	ISO 8859-8 ヘブライ語;ヘブライ語 (ISO-Logical)", CodePage = 38598 },
+new EncodingInfo { DisplayName = "cp29001 x-Europa	ヨーロッパ 3", CodePage = 29001 },
+new EncodingInfo { DisplayName = "cp28605 iso-8859-15	ISO 8859-15 Latin 9", CodePage = 28605 },
+new EncodingInfo { DisplayName = "cp28603 iso-8859-13	ISO 8859-13 エストニア語", CodePage = 28603 },
+new EncodingInfo { DisplayName = "cp28599 iso-8859-9	ISO 8859-3 トルコ語", CodePage = 28599 },
+new EncodingInfo { DisplayName = "cp28598 iso-8859-8	ISO 8859-8 ヘブライ語;ヘブライ語 (ISO-Visual)", CodePage = 28598 },
+new EncodingInfo { DisplayName = "cp28597 iso-8859-7	ISO 8859-7 ギリシャ語", CodePage = 28597 },
+new EncodingInfo { DisplayName = "cp28596 iso-8859-6	ISO 8859-6 アラビア語", CodePage = 28596 },
+new EncodingInfo { DisplayName = "cp28595 iso-8859-5	ISO 8859-5 キリル語", CodePage = 28595 },
+new EncodingInfo { DisplayName = "cp28594 iso-8859-4	ISO 8859-4 バルティック", CodePage = 28594 },
+new EncodingInfo { DisplayName = "cp28593 iso-8859-3	ISO 8859-3 ラテン 3", CodePage = 28593 },
+new EncodingInfo { DisplayName = "cp28592 iso-8859-2	ISO 8859-2 中央ヨーロッパ;中央ヨーロッパ (ISO)", CodePage = 28592 },
+new EncodingInfo { DisplayName = "cp28591 iso-8859-1	ISO 8859-1 ラテン 1;西ヨーロッパ語 (ISO)", CodePage = 28591 },
+new EncodingInfo { DisplayName = "cp21866 koi8-u	ウクライナ語 (KOI8-U);キリル語 (KOI8-U)", CodePage = 21866 },
+//new EncodingInfo { DisplayName = "cp21027 (非推奨)	", CodePage = 21027 },
+new EncodingInfo { DisplayName = "cp21025 cp1025	IBM EBCDIC キリル文字Serbian-Bulgarian", CodePage = 21025 },
+new EncodingInfo { DisplayName = "cp20949 x-cp20949	韓国 Korean-wansung-unicode", CodePage = 20949 },
+new EncodingInfo { DisplayName = "cp20936 x-cp20936	簡体字中国語 (GB2312);簡体字中国語 (GB2312-80)", CodePage = 20936 },
+new EncodingInfo { DisplayName = "cp20932 EUC-JP	日本語 (JIS 0208-1990 および 0212-1990)", CodePage = 20932 },
+new EncodingInfo { DisplayName = "cp20924 IBM00924	IBM EBCDIC Latin 1/Open System (1047 + ユーロ記号)", CodePage = 20924 },
+new EncodingInfo { DisplayName = "cp20905 IBM905	IBM EBCDIC トルコ語", CodePage = 20905 },
+new EncodingInfo { DisplayName = "cp20880 IBM880	IBM EBCDIC キリルロシア語", CodePage = 20880 },
+new EncodingInfo { DisplayName = "cp20871 IBM871	IBM EBCDIC アイスランド語", CodePage = 20871 },
+new EncodingInfo { DisplayName = "cp20866 koi8-r	ロシア語 (KOI8-R);キリル語 (KOI8-R)", CodePage = 20866 },
+new EncodingInfo { DisplayName = "cp20838 IBM-タイ語	IBM EBCDIC タイ語", CodePage = 20838 },
+new EncodingInfo { DisplayName = "cp20833 x-EBCDIC-KoreanExtended	IBM EBCDIC 韓国語拡張", CodePage = 20833 },
+new EncodingInfo { DisplayName = "cp20424 IBM424	IBM EBCDIC ヘブライ語", CodePage = 20424 },
+new EncodingInfo { DisplayName = "cp20423 IBM423	IBM EBCDIC ギリシャ語", CodePage = 20423 },
+new EncodingInfo { DisplayName = "cp20420 IBM420	IBM EBCDIC アラビア語", CodePage = 20420 },
+new EncodingInfo { DisplayName = "cp20297 IBM297	IBM EBCDIC France", CodePage = 20297 },
+new EncodingInfo { DisplayName = "cp20290 IBM290	IBM EBCDIC 日本語カタカナ拡張", CodePage = 20290 },
+new EncodingInfo { DisplayName = "cp20285 IBM285	IBM EBCDIC イギリス", CodePage = 20285 },
+new EncodingInfo { DisplayName = "cp20284 IBM284	IBM EBCDIC Latin America-Spain", CodePage = 20284 },
+new EncodingInfo { DisplayName = "cp20280 IBM280	IBM EBCDIC イタリア", CodePage = 20280 },
+new EncodingInfo { DisplayName = "cp20278 IBM278	IBM EBCDIC Finland-Sweden", CodePage = 20278 },
+new EncodingInfo { DisplayName = "cp20277 IBM277	IBM EBCDIC Denmark-Norway", CodePage = 20277 },
+new EncodingInfo { DisplayName = "cp20273 IBM273	IBM EBCDIC Germany", CodePage = 20273 },
+new EncodingInfo { DisplayName = "cp20269 x-cp20269	ISO 6937 スペースなしアクサン", CodePage = 20269 },
+new EncodingInfo { DisplayName = "cp20261 x-cp20261	T. 61", CodePage = 20261 },
+new EncodingInfo { DisplayName = "cp20127 us-ascii	US-ASCII (7 ビット)", CodePage = 20127 },
+new EncodingInfo { DisplayName = "cp20108 x-IA5-ノルウェー語	IA5 ノルウェー語 (7 ビット)", CodePage = 20108 },
+new EncodingInfo { DisplayName = "cp20107 x-IA5-スウェーデン語	IA5 スウェーデン語 (7 ビット)", CodePage = 20107 },
+new EncodingInfo { DisplayName = "cp20106 x-IA5-ドイツ語	IA5 ドイツ語 (7 ビット)", CodePage = 20106 },
+new EncodingInfo { DisplayName = "cp20105 x-IA5	IA5 (IRV International Alphabet No. 5, 7-bit);西ヨーロッパ (IA5)", CodePage = 20105 },
+new EncodingInfo { DisplayName = "cp20005 x-cp20005	Wang 台湾", CodePage = 20005 },
+new EncodingInfo { DisplayName = "cp20004 x-cp20004	文字放送 (台湾)", CodePage = 20004 },
+new EncodingInfo { DisplayName = "cp20003 x-cp20003	IBM5550 台湾", CodePage = 20003 },
+new EncodingInfo { DisplayName = "cp20002 x_Chinese-Eten	Eten Taiwan;繁体字中国語 (Eten)", CodePage = 20002 },
+new EncodingInfo { DisplayName = "cp20001 x-cp20001	TCA 台湾", CodePage = 20001 },
+new EncodingInfo { DisplayName = "cp20000 x-Chinese_CNS	CNS 台湾;繁体字中国語 (CNS)", CodePage = 20000 },
+new EncodingInfo { DisplayName = "cp12001 utf-32	Unicode UTF-32、ビッグ エンディアン バイト順。マネージド アプリケーションでのみ使用できる", CodePage = 12001 },
+new EncodingInfo { DisplayName = "cp12000 utf-8-32	Unicode UTF-32、リトル エンディアン バイト順。マネージド アプリケーションでのみ使用できる", CodePage = 12000 },
+new EncodingInfo { DisplayName = "cp10082 x-mac-クロアチア語	クロアチア語 (Mac)", CodePage = 10082 },
+new EncodingInfo { DisplayName = "cp10081 x-mac-トルコ語	トルコ語 (Mac)", CodePage = 10081 },
+new EncodingInfo { DisplayName = "cp10079 x-mac-アイスランド語	アイスランド語 (Mac)", CodePage = 10079 },
+new EncodingInfo { DisplayName = "cp10029 x-mac-ce	MAC ラテン 2;中央ヨーロッパ (Mac)", CodePage = 10029 },
+new EncodingInfo { DisplayName = "cp10021 x-mac-タイ語	タイ語 (Mac)", CodePage = 10021 },
+new EncodingInfo { DisplayName = "cp10017 x-mac-ウクライナ語	ウクライナ語 (Mac)", CodePage = 10017 },
+new EncodingInfo { DisplayName = "cp10010 x-mac-ルーマニア語	ルーマニア語 (Mac)", CodePage = 10010 },
+new EncodingInfo { DisplayName = "cp10008 chinesesimp	MAC 簡体字中国語 (GB 2312);簡体字中国語 (Mac)", CodePage = 10008 },
+new EncodingInfo { DisplayName = "cp10007 x-mac-キリル文字	キリル語 (Mac)", CodePage = 10007 },
+new EncodingInfo { DisplayName = "cp10006 x-mac-ギリシャ語	ギリシャ語 (Mac)", CodePage = 10006 },
+new EncodingInfo { DisplayName = "cp10005 x-mac-ヘブライ語	ヘブライ語 (Mac)", CodePage = 10005 },
+new EncodingInfo { DisplayName = "cp10004 x-mac-アラビア語	アラビア語 (Mac)", CodePage = 10004 },
+new EncodingInfo { DisplayName = "cp10003 x-mac-韓国語	韓国語 (Mac)", CodePage = 10003 },
+new EncodingInfo { DisplayName = "cp10002 chinesetrad	MAC 繁体字中国語 (Big5);繁体字中国語 (Mac)", CodePage = 10002 },
+new EncodingInfo { DisplayName = "cp10001 x-mac-日本語	日本語 (Mac)", CodePage = 10001 },
+new EncodingInfo { DisplayName = "cp10000 版	MAC Roman;西ヨーロッパ語 (Mac)", CodePage = 10000 },
+new EncodingInfo { DisplayName = "cp1361 Johab	韓国語 (Johab)", CodePage = 1361 },
+new EncodingInfo { DisplayName = "cp1258 windows-1258	ANSI/OEM ベトナム語;ベトナム語 (Windows)", CodePage = 1258 },
+new EncodingInfo { DisplayName = "cp1257 windows-1257	ANSI バルト語;バルト語 (Windows)", CodePage = 1257 },
+new EncodingInfo { DisplayName = "cp1256 windows-1256	ANSI アラビア語;アラビア語 (Windows)", CodePage = 1256 },
+new EncodingInfo { DisplayName = "cp1255 windows-1255	ANSI ヘブライ語;ヘブライ語 (Windows)", CodePage = 1255 },
+new EncodingInfo { DisplayName = "cp1254 windows-1254	ANSI トルコ語;トルコ語 (Windows)", CodePage = 1254 },
+new EncodingInfo { DisplayName = "cp1253 windows-1253	ANSI ギリシャ語;ギリシャ語 (Windows)", CodePage = 1253 },
+new EncodingInfo { DisplayName = "cp1252 windows-1252	ANSI ラテン 1;西ヨーロッパ (Windows)", CodePage = 1252 },
+new EncodingInfo { DisplayName = "cp1251 windows-1251	ANSI キリル文字;キリル文字 (Windows)", CodePage = 1251 },
+new EncodingInfo { DisplayName = "cp1250 windows-1250	ANSI 中央ヨーロッパ;中央ヨーロッパ (Windows)", CodePage = 1250 },
+new EncodingInfo { DisplayName = "cp1201 unicodeFFFE	Unicode UTF-16、ビッグ エンディアン バイト順。マネージド アプリケーションでのみ使用できる", CodePage = 1201 },
+new EncodingInfo { DisplayName = "cp1200 utf-16	Unicode UTF-16、リトル エンディアン バイト順 (ISO 10646 の BMP)。マネージド アプリケーションでのみ使用できる", CodePage = 1200 },
+new EncodingInfo { DisplayName = "cp1149 IBM01149	IBM EBCDIC アイスランド語 (20871 + ユーロ記号);IBM EBCDIC (アイスランド語-ユーロ)", CodePage = 1149 },
+new EncodingInfo { DisplayName = "cp1148 IBM01148	IBM EBCDIC International (500 + ユーロ記号);IBM EBCDIC (国際ユーロ)", CodePage = 1148 },
+new EncodingInfo { DisplayName = "cp1147 IBM01147	IBM EBCDIC フランス (20297 + ユーロ記号);IBM EBCDIC (フランス-ユーロ)", CodePage = 1147 },
+new EncodingInfo { DisplayName = "cp1146 IBM01146	IBM EBCDIC 英国 (20285 + ユーロ記号);IBM EBCDIC (UK-Euro)", CodePage = 1146 },
+new EncodingInfo { DisplayName = "cp1145 IBM01145	IBM EBCDIC Latin America-Spain (20284 + ユーロ記号);IBM EBCDIC (スペイン-ユーロ)", CodePage = 1145 },
+new EncodingInfo { DisplayName = "cp1144 IBM01144	IBM EBCDIC イタリア (20280 + ユーロ記号);IBM EBCDIC (イタリア-ユーロ)", CodePage = 1144 },
+new EncodingInfo { DisplayName = "cp1143 IBM01143	IBM EBCDIC Finland-Sweden (20278 + ユーロ記号);IBM EBCDIC (フィンランド-スウェーデン-ユーロ)", CodePage = 1143 },
+new EncodingInfo { DisplayName = "cp1142 IBM01142	IBM EBCDIC Denmark-Norway (20277 + ユーロ記号);IBM EBCDIC (デンマーク-ノルウェー-ユーロ)", CodePage = 1142 },
+new EncodingInfo { DisplayName = "cp1141 IBM01141	IBM EBCDIC Germany (20273 + ユーロ記号);IBM EBCDIC (ドイツ-ユーロ)", CodePage = 1141 },
+new EncodingInfo { DisplayName = "cp1140 IBM01140	IBM EBCDIC US-Canada (037 + ユーロ記号);IBM EBCDIC (US-Canada-Euro)", CodePage = 1140 },
+new EncodingInfo { DisplayName = "cp1047 IBM01047	IBM EBCDIC Latin 1/Open システム", CodePage = 1047 },
+new EncodingInfo { DisplayName = "cp1026 IBM1026	IBM EBCDIC トルコ語 (ラテン 5)", CodePage = 1026 },
+new EncodingInfo { DisplayName = "cp950 big5	ANSI/OEM 繁体字中国語 (台湾;香港特別行政区(PRC);繁体字中国語 (Big5)", CodePage = 950 },
+new EncodingInfo { DisplayName = "cp949 ks_c_5601-1987	ANSI/OEM 韓国語 (統合ハングル コード)", CodePage = 949 },
+new EncodingInfo { DisplayName = "cp936 gb2312	ANSI/OEM 簡体字中国語 (PRC、シンガポール);簡体字中国語 (GB2312)", CodePage = 936 },
+new EncodingInfo { DisplayName = "cp932 shift_jis	ANSI/OEM 日本語;日本語 (Shift-JIS)", CodePage = 932 },
+new EncodingInfo { DisplayName = "cp875 cp875	IBM EBCDIC ギリシャ語モダン", CodePage = 875 },
+new EncodingInfo { DisplayName = "cp874 windows-874	タイ語 (Windows)", CodePage = 874 },
+new EncodingInfo { DisplayName = "cp870 IBM870	IBM EBCDIC 多言語/ROECE (ラテン 2);IBM EBCDIC 多言語ラテン語 2", CodePage = 870 },
+new EncodingInfo { DisplayName = "cp869 ibm869	OEM モダン ギリシャ語;ギリシャ語、モダン (DOS)", CodePage = 869 },
+new EncodingInfo { DisplayName = "cp866 cp866	OEM ロシア語;キリル語 (DOS)", CodePage = 866 },
+new EncodingInfo { DisplayName = "cp865 IBM865	OEM ノルディック;ノルディック語 (DOS)", CodePage = 865 },
+new EncodingInfo { DisplayName = "cp864 IBM864	OEM アラビア語;アラビア語 (864)", CodePage = 864 },
+new EncodingInfo { DisplayName = "cp863 IBM863	OEM フランス語 (カナダ)フランス語 (カナダ) (DOS)", CodePage = 863 },
+new EncodingInfo { DisplayName = "cp862 DOS-862	OEM ヘブライ語;ヘブライ語 (DOS)", CodePage = 862 },
+new EncodingInfo { DisplayName = "cp861 ibm861	OEM アイスランド語;アイスランド語 (DOS)", CodePage = 861 },
+new EncodingInfo { DisplayName = "cp860 IBM860	OEM ポルトガル語;ポルトガル語 (DOS)", CodePage = 860 },
+new EncodingInfo { DisplayName = "cp858 IBM00858	OEM 多言語ラテン 1 + ユーロ記号", CodePage = 858 },
+new EncodingInfo { DisplayName = "cp857 ibm857	OEM トルコ語;トルコ語 (DOS)", CodePage = 857 },
+new EncodingInfo { DisplayName = "cp855 IBM855	OEM キリル語 (主にロシア語)", CodePage = 855 },
+new EncodingInfo { DisplayName = "cp852 ibm852	OEM ラテン 2;中央ヨーロッパ (DOS)", CodePage = 852 },
+new EncodingInfo { DisplayName = "cp850 ibm850	OEM 多言語ラテン 1;西ヨーロッパ語 (DOS)", CodePage = 850 },
+new EncodingInfo { DisplayName = "cp775 ibm775	OEM バルト語;バルト語 (DOS)", CodePage = 775 },
+new EncodingInfo { DisplayName = "cp737 ibm737	OEM ギリシャ語 (旧称 437G);ギリシャ語 (DOS)", CodePage = 737 },
+//new EncodingInfo { DisplayName = "cp720 DOS-720	アラビア語 (Transparent ASMO);アラビア語 (DOS)", CodePage = 720 },
+//new EncodingInfo { DisplayName = "cp710 アラビア語 - 透明アラビア語	", CodePage = 710 },
+//new EncodingInfo { DisplayName = "cp709 アラビア語 (ASMO-449 以降、BCON V4)	", CodePage = 709 },
+new EncodingInfo { DisplayName = "cp708 ASMO-708	アラビア語 (ASMO 708)", CodePage = 708 },
+new EncodingInfo { DisplayName = "cp500 IBM500	IBM EBCDIC International", CodePage = 500 },
+new EncodingInfo { DisplayName = "cp437 IBM437	OEM 米国", CodePage = 437 },
+new EncodingInfo { DisplayName = "cp37 IBM037	IBM EBCDIC US-Canada", CodePage = 37 },
+new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
+
+            // コンボボックスにエンコーディングを追加
+            inputEncodingComboBox.DataSource = new List<EncodingInfo>(encodings);
+            outputEncodingComboBox.DataSource = new List<EncodingInfo>(encodings);
+
+            inputEncodingComboBox.DisplayMember = "DisplayName";
+            outputEncodingComboBox.DisplayMember = "DisplayName";
+
+            // デフォルトでUTF-8を選択
+            inputEncodingComboBox.SelectedIndex = Properties.Settings.Default.w_in_idx;
+            outputEncodingComboBox.SelectedIndex = Properties.Settings.Default.w_out_idx;
+        }
+
+        private void InputEncoding_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selectedEncoding = (EncodingInfo)inputEncodingComboBox.SelectedItem;
+            selectedInputEncoding.Text = $"CodePage: {selectedEncoding.CodePage}";
+            Properties.Settings.Default.wrong_encoder_in = selectedEncoding.CodePage;
+            Properties.Settings.Default.w_in_idx = inputEncodingComboBox.SelectedIndex;
+        }
+
+        private void OutputEncoding_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selectedEncoding = (EncodingInfo)outputEncodingComboBox.SelectedItem;
+            selectedOutputEncoding.Text = $"CodePage: {selectedEncoding.CodePage}";
+            Properties.Settings.Default.wrong_encoder_out = selectedEncoding.CodePage;
+            Properties.Settings.Default.w_out_idx = outputEncodingComboBox.SelectedIndex;
+        }
+
+        private class EncodingInfo
+        {
+            public string DisplayName { get; set; }
+            public int CodePage { get; set; }
+        }
+    }
+
+    class EncodingList
+    {
+        public static void ListAllEncodings()
+        {
+            // すべての利用可能なエンコーディングを取得
+            EncodingInfo[] encodings = Encoding.GetEncodings();
+
+            // エンコーディング情報を整理して表示
+            Console.WriteLine("利用可能なエンコーディング一覧:");
+            Console.WriteLine("CodePage\tName\tDisplayName");
+            Console.WriteLine("----------------------------------------");
+
+            foreach (EncodingInfo ei in encodings.OrderBy(e => e.CodePage))
+            {
+                Encoding e = ei.GetEncoding();
+                Console.WriteLine($"{ei.CodePage}\t{ei.Name}\t{ei.DisplayName}");
+            }
+
+            Console.WriteLine($"\n合計: {encodings.Length} エンコーディング");
+        }
+
+        public static List<EncodingInfo> GetAllEncodingsAsList()
+        {
+            return Encoding.GetEncodings().OrderBy(e => e.CodePage).ToList();
+        }
+    }
 
     //public class CustomTransparentPanel : Form
     //{
