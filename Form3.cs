@@ -14,6 +14,9 @@ using static System.Net.WebRequestMethods;
 using NodaTime.Text;
 using NodaTime;
 using System.Security.Cryptography;
+using System.Globalization;
+using System.Windows.Controls;
+using System.Threading;
 
 
 namespace neta
@@ -39,6 +42,8 @@ namespace neta
                     ms_timezone_items.Items.Add(z.DisplayName + " - " + z.Id);
                 }
             }
+
+            LoadCultures();
 
 
             elapst_left.Text = Properties.Settings.Default.lefttimeformat;
@@ -67,15 +72,16 @@ namespace neta
             noda_timezone.Checked = Properties.Settings.Default.usenoda;
             noda_timezone_items.Text = Properties.Settings.Default.noddatz;
 
-            noda_dateformat.Text = Properties.Settings.Default.nodaformat; 
-            
-            
+            noda_dateformat.Text = Properties.Settings.Default.nodaformat;
+
+
             invaid_ambigous.Checked = Properties.Settings.Default.noda_strict;
 
             panel6.Location = new System.Drawing.Point(5, panel6.Location.Y);
 
 
             change_baseurl.Checked = Properties.Settings.Default.change_baseurl;
+            localeBox.Text = Properties.Settings.Default.locale;
         }
 
 
@@ -90,13 +96,6 @@ namespace neta
         {
         }
 
-        private static void check_one()
-        {
-            var checkboxs = new List<CheckBox>();
-
-
-
-        }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
@@ -1493,6 +1492,43 @@ namespace neta
         {
 
             Properties.Settings.Default.noda_strict = invaid_ambigous.Checked;
+        }
+
+        private void LoadCultures()
+        {
+            // すべてのカルチャーを取得
+            CultureInfo[] cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+
+            // コンボボックスにカルチャー名を追加
+            foreach (CultureInfo culture in cultures)
+            {
+                if (culture.Name != "")
+                {
+                    localeBox.Items.Add(culture.Name + ";" + culture.DisplayName);
+                }
+                else
+                {
+                    localeBox.Items.Add("InvariantCulture");
+                }
+            }
+
+        }
+
+       
+        private void localeBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Regex rg = new Regex("^.*?:");
+            Match m = rg.Match(localeBox.Text);
+            if (m.Success)
+            {
+                Properties.Settings.Default.locale = m.Value.Replace(":","");
+                Thread.CurrentThread.CurrentCulture = new CultureInfo(Properties.Settings.Default.locale);
+            }
+            else
+            {
+                Properties.Settings.Default.locale = "InvariantCulture";
+                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            }
         }
     }
 }

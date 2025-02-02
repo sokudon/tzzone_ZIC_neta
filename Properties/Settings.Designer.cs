@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/01/21")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/02/02")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -981,6 +981,18 @@ namespace neta.Properties {
             }
             set {
                 this["display_order"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ja-JP")]
+        public string locale {
+            get {
+                return ((string)(this["locale"]));
+            }
+            set {
+                this["locale"] = value;
             }
         }
     }

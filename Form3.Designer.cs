@@ -47,6 +47,8 @@
             ms_timezone = new System.Windows.Forms.CheckBox();
             ms_timezone_items = new System.Windows.Forms.ComboBox();
             panel5 = new System.Windows.Forms.Panel();
+            label14 = new System.Windows.Forms.Label();
+            localeBox = new System.Windows.Forms.ComboBox();
             elapst_left = new System.Windows.Forms.ComboBox();
             panel6 = new System.Windows.Forms.Panel();
             linkLabel2 = new System.Windows.Forms.LinkLabel();
@@ -300,6 +302,8 @@
             // 
             // panel5
             // 
+            panel5.Controls.Add(label14);
+            panel5.Controls.Add(localeBox);
             panel5.Controls.Add(elapst_left);
             panel5.Controls.Add(panel6);
             panel5.Controls.Add(normal_dateformat);
@@ -312,6 +316,26 @@
             panel5.Name = "panel5";
             panel5.Size = new System.Drawing.Size(333, 137);
             panel5.TabIndex = 28;
+            // 
+            // label14
+            // 
+            label14.AutoSize = true;
+            label14.Location = new System.Drawing.Point(163, 105);
+            label14.Name = "label14";
+            label14.Size = new System.Drawing.Size(53, 20);
+            label14.TabIndex = 32;
+            label14.Text = "ろけーる";
+            // 
+            // localeBox
+            // 
+            localeBox.FormattingEnabled = true;
+            localeBox.ImeMode = System.Windows.Forms.ImeMode.Disable;
+            localeBox.Items.AddRange(new object[] { "ja-JP: 日本語 (日本)", "en-US: 英語 (アメリカ)", "en-GB: 英語 (イギリス)", "es-ES: スペイン語 (スペイン)", "fr-FR: フランス語 (フランス)", "de-DE: ドイツ語 (ドイツ)", "zh-CN: 中国語 (中国)", "ko-KR: 韓国語 (韓国)" });
+            localeBox.Location = new System.Drawing.Point(212, 102);
+            localeBox.Name = "localeBox";
+            localeBox.Size = new System.Drawing.Size(118, 28);
+            localeBox.TabIndex = 31;
+            localeBox.SelectedIndexChanged += localeBox_SelectedIndexChanged;
             // 
             // elapst_left
             // 
@@ -349,7 +373,7 @@
             // noda_dateformat
             // 
             noda_dateformat.FormattingEnabled = true;
-            noda_dateformat.Items.AddRange(new object[] { "HH':'mm", "MM'-'dd", "MM'-'dd HH':'mm", "yyyy'-'MM'-'dd HH':'mm", "yyyy'-'MM'-'dd'T'HH':'mm z", "yyyy'-'MM'-'dd'T'HH':'mm':'ss z", "yyyy'-'MM'-'dd'T'HH':'mm':'ss '('o<g>')'", "yyyy'-'MM'-'dd'T'HH':'mm':'ss z '('o<g>')'", "yyyy'-'MM'-'dd'T'HH':'mm':'ss;FFFFFFF z '('o<g>')'", "G", "F" });
+            noda_dateformat.Items.AddRange(new object[] { "HH':'mm", "MM'-'dd", "MM'-'dd HH':'mm", "yyyy'-'MM'-'dd HH':'mm", "yyyy'-'MM'-'dd'T'HH':'mm z", "yyyy'-'MM'-'dd'T'HH':'mm':'ss z", "yyyy'-'MM'-'dd'T'HH':'mm':'ss '('o<g>')'", "yyyy'-'MM'-'dd'T'HH':'mm':'ss z '('o<g>')'", "yyyy'-'MM'-'dd'T'HH':'mm':'ss;FFFFFFF z '('o<g>')'", "yyyy'年'MMMd日'('ddd')'HH':'mm':'ss", "G", "F" });
             noda_dateformat.Location = new System.Drawing.Point(78, 6);
             noda_dateformat.Name = "noda_dateformat";
             noda_dateformat.Size = new System.Drawing.Size(244, 28);
@@ -361,7 +385,7 @@
             // normal_dateformat
             // 
             normal_dateformat.FormattingEnabled = true;
-            normal_dateformat.Items.AddRange(new object[] { "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM/dd HH", "yyyy/MM/dd", "MM/dd HH:mm:ss", "MM/dd HH:mm", "MM/dd HH", "MM/dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH", "yyyy-MM-dd", "MM-dd HH:mm:ss", "MM-dd HH:mm", "MM-dd HH", "MM-dd", "dd MMM yyyy HH:mm", "yyyy-MM-ddTHH:mm:ss z", "yyyy-MM-ddTHH:mm:ss zz", "yyyy-MM-ddTHH:mm:sszzz", "yyyy-MM-ddTHH:mm:ss K", "yyyy-MM-ddTHH:mm:ss %TZ %Z %z", "yyyy-MM-ddTHH:mm:ss K zzz %TZ %Z %z", "%PO" });
+            normal_dateformat.Items.AddRange(new object[] { "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM/dd HH", "yyyy/MM/dd", "MM/dd HH:mm:ss", "MM/dd HH:mm", "MM/dd HH", "MM/dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH", "yyyy-MM-dd", "MM-dd HH:mm:ss", "MM-dd HH:mm", "MM-dd HH", "MM-dd", "dd MMM yyyy HH:mm", "yyyy年MMMd日(ddd) HH:mm:ss", "yyyy-MM-ddTHH:mm:ss z", "yyyy-MM-ddTHH:mm:ss zz", "yyyy-MM-ddTHH:mm:sszzz", "yyyy-MM-ddTHH:mm:ss K", "yyyy-MM-ddTHH:mm:ss %TZ %Z %z", "yyyy-MM-ddTHH:mm:ss K zzz %TZ %Z %z", "%PO" });
             normal_dateformat.Location = new System.Drawing.Point(79, 66);
             normal_dateformat.Name = "normal_dateformat";
             normal_dateformat.Size = new System.Drawing.Size(246, 28);
@@ -398,7 +422,7 @@
             bar_length.Location = new System.Drawing.Point(109, 102);
             bar_length.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             bar_length.Name = "bar_length";
-            bar_length.Size = new System.Drawing.Size(97, 28);
+            bar_length.Size = new System.Drawing.Size(51, 28);
             bar_length.TabIndex = 9;
             bar_length.Text = "390";
             bar_length.SelectedIndexChanged += comboBox3_SelectedIndexChanged;
@@ -734,5 +758,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.CheckBox invaid_ambigous;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.ComboBox localeBox;
     }
 }

@@ -49,6 +49,7 @@
             button2 = new System.Windows.Forms.Button();
             ibemei = new System.Windows.Forms.TextBox();
             panel2 = new System.Windows.Forms.Panel();
+            button4 = new System.Windows.Forms.Button();
             label2 = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             button3 = new System.Windows.Forms.Button();
@@ -313,6 +314,7 @@
             // 
             // panel2
             // 
+            panel2.Controls.Add(button4);
             panel2.Controls.Add(label2);
             panel2.Controls.Add(label1);
             panel2.Controls.Add(button3);
@@ -327,6 +329,17 @@
             panel2.Name = "panel2";
             panel2.Size = new System.Drawing.Size(576, 167);
             panel2.TabIndex = 9;
+            // 
+            // button4
+            // 
+            button4.Location = new System.Drawing.Point(464, 136);
+            button4.Name = "button4";
+            button4.Size = new System.Drawing.Size(94, 41);
+            button4.TabIndex = 11;
+            button4.Text = "OBS";
+            button4.UseVisualStyleBackColor = true;
+            button4.Visible = false;
+            button4.Click += button4_Click;
             // 
             // label2
             // 
@@ -768,6 +781,7 @@
         private System.Windows.Forms.ToolStripMenuItem かすたむToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 縺化け戻し;
         private System.Windows.Forms.Label error;
+        private System.Windows.Forms.Button button4;
     }
 }
 

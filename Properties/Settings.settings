@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/01/21</Value>
+      <Value Profile="(Default)">2025/02/02</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -241,6 +241,9 @@
     </Setting>
     <Setting Name="display_order" Type="System.String" Scope="User">
       <Value Profile="(Default)">現在時刻,経過時間,残り時間,イベ期間,開始時間,終了時間</Value>
+    </Setting>
+    <Setting Name="locale" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ja-JP</Value>
     </Setting>
   </Settings>
 </SettingsFile>

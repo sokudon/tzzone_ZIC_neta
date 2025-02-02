@@ -14,18 +14,13 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using NodaTime;
 using NodaTime.Text;
-using NodaTime.Extensions;
-using static System.Windows.Forms.DataFormats;
-using System.Runtime.Intrinsics.X86;
 using neta.Properties;
-using System.Reflection.Metadata;
-using System.Web;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
-using System.Security.Policy;
-using System.Xml.Linq;
-using System.Text.Unicode;
-
+using OBSWebsocketDotNet;
+using Newtonsoft.Json;
+using System.Globalization;
+using System.Threading;
 
 namespace neta
 {
@@ -201,6 +196,16 @@ namespace neta
             //https://chatgpt.com/share/677e10d5-018c-800f-9356-ac6a02a537e2 begin updateみたいな描写制御        
             this_begin_update();
 
+            if (Properties.Settings.Default.locale== "InvariantCulture")
+            {
+                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            }
+            else
+            {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo(Properties.Settings.Default.locale);
+            }
+
+
             this.comboBox1.Text = Properties.Settings.Default.goog;
             this.startbox.Text = Properties.Settings.Default.st;
             this.endbox.Text = Properties.Settings.Default.en;
@@ -334,6 +339,7 @@ namespace neta
             string mode = "";
             DateTime dt = DateTime.Now;
             error.Text = "";
+
 
             string current_tmp = "";
             string start_tmp = "";
@@ -471,7 +477,9 @@ namespace neta
 
                         var pattern = Properties.Settings.Default.nodaformat;
                         DateTimeZone zone = DateTimeZoneProviders.Tzdb[tznd]; // Specify your timezone
-                        ZonedDateTimePattern formatter = ZonedDateTimePattern.CreateWithInvariantCulture(pattern, zonetzdb);
+                        //ZonedDateTimePattern formatter = ZonedDateTimePattern.CreateWithInvariantCulture(pattern, zonetzdb);
+                        ZonedDateTimePattern formatter = ZonedDateTimePattern.CreateWithCurrentCulture(pattern, zonetzdb);
+
 
                         // Format
                         string timeString = formatter.Format(SystemClock.Instance.GetCurrentInstant().InZone(zone));
@@ -2146,7 +2154,7 @@ namespace neta
         private void 画像ToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            OpenFileDialog ofd = new OpenFileDialog();
+            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
 
             //はじめに表示されるフォルダを指定する
             //指定しない（空の文字列）の時は、現在のディレクトリが表示される
@@ -2291,7 +2299,8 @@ namespace neta
             {
                 string s = item[i].ToString();
 
-                if (s == "現在時刻") {
+                if (s == "現在時刻")
+                {
                     current.Location = new Point(base_x, base_y + height * tmp_counter);
                     if (d_curr) { tmp_counter++; }
                 }
@@ -2300,11 +2309,13 @@ namespace neta
                     elapsed.Location = new Point(base_x, base_y + height * tmp_counter);
                     if (d_el) { tmp_counter++; }
                 }
-                if (s == "残り時間") {
+                if (s == "残り時間")
+                {
                     left.Location = new Point(base_x, base_y + height * tmp_counter);
                     if (d_lf) { tmp_counter++; }
                 }
-                if (s == "イベ期間") {
+                if (s == "イベ期間")
+                {
                     duration.Location = new Point(base_x, base_y + height * tmp_counter);
                     if (d_sp) { tmp_counter++; }
                 }
@@ -2509,6 +2520,48 @@ namespace neta
         {
 
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            string obsAddress = "ws://localhost:4455"; // OBS WebSocketのアドレス
+            string password = ""; // 設定したパスワード（空でも可）
+
+            // OBS WebSocket クライアントを作成
+            OBSWebsocket obs = new OBSWebsocket();
+            obs.Connect(obsAddress, password);
+
+            if (obs.IsConnected)
+            {
+                Console.WriteLine("OBS WebSocket に接続しました！");
+
+                // OBS Luaスクリプトの設定を更新
+                SetScriptSettings(obs, "obsduration_timer_yumesute.lua", new
+                {
+                    start_text =startbox.Text,
+                    stop_text = endbox.Text,
+                    title_text = ibemei.Text
+                });
+
+                Console.WriteLine("設定を更新しました！");
+            }
+            else
+            {
+                Console.WriteLine("OBS WebSocket に接続できませんでした...");
+            }
+
+            obs.Disconnect();
+        }
+
+        static void SetScriptSettings(OBSWebsocket obs, string scriptName, object settings)
+        {
+            JObject parameters = new JObject
+        {
+            { "scriptName", scriptName },
+            { "settings", JObject.FromObject(settings) }
+        };
+
+            obs.SendRequest("SetScriptSettings", parameters);
+        }
     }
 
     public partial class EncodingSelectForm : Form
@@ -2578,7 +2631,6 @@ namespace neta
             var encodings = new List<EncodingInfo>
         {
 new EncodingInfo { DisplayName = "cp65001 utf-8	Unicode (UTF-8)", CodePage = 65001 },
-//new EncodingInfo { DisplayName = "cp65000 utf-7	Unicode (UTF-7)", CodePage = 65000 },
 new EncodingInfo { DisplayName = "cp57011 x-iscii-pa	ISCII パンジャブ語", CodePage = 57011 },
 new EncodingInfo { DisplayName = "cp57010 x-iscii-gu	ISCII グジャラート語", CodePage = 57010 },
 new EncodingInfo { DisplayName = "cp57009 x-iscii-ma	ISCII マラヤーラム語", CodePage = 57009 },
@@ -2591,10 +2643,11 @@ new EncodingInfo { DisplayName = "cp57003 x-iscii-be	ISCII Bangla", CodePage = 5
 new EncodingInfo { DisplayName = "cp57002 x-iscii-de	ISCII デバナガリ文字", CodePage = 57002 },
 new EncodingInfo { DisplayName = "cp54936 GB18030	Windows XP 以降: GB18030 簡体字中国語 (4 バイト);簡体字中国語 (GB18030)", CodePage = 54936 },
 new EncodingInfo { DisplayName = "cp52936 hz-gb-2312	HZ-GB2312 簡体字中国語;簡体字中国語 (HZ)", CodePage = 52936 },
-//new EncodingInfo { DisplayName = "cp51950 EUC 繁体字中国語	", CodePage = 51950 },
 new EncodingInfo { DisplayName = "cp51949 euc-韓国	EUC 韓国語", CodePage = 51949 },
 new EncodingInfo { DisplayName = "cp51936 EUC-CN	EUC 簡体字中国語;簡体字中国語 (EUC)", CodePage = 51936 },
 new EncodingInfo { DisplayName = "cp51932 euc-jp	EUC 日本語", CodePage = 51932 },
+//new EncodingInfo { DisplayName = "cp65000 utf-7	Unicode (UTF-7)", CodePage = 65000 },
+//new EncodingInfo { DisplayName = "cp51950 EUC 繁体字中国語	", CodePage = 51950 },
 //new EncodingInfo { DisplayName = "cp50939 EBCDIC 日本語 (ラテン) 拡張および日本語	", CodePage = 50939 },
 //new EncodingInfo { DisplayName = "cp50937 EBCDIC US-Canadaと繁体字中国語	", CodePage = 50937 },
 //new EncodingInfo { DisplayName = "cp50936 EBCDIC 簡体字中国語	", CodePage = 50936 },
@@ -2603,6 +2656,10 @@ new EncodingInfo { DisplayName = "cp51932 euc-jp	EUC 日本語", CodePage = 5193
 //new EncodingInfo { DisplayName = "cp50931 EBCDIC US-Canadaと日本語	", CodePage = 50931 },
 //new EncodingInfo { DisplayName = "cp50930 EBCDIC 日本語 (カタカナ) 拡張	", CodePage = 50930 },
 //new EncodingInfo { DisplayName = "cp50229 ISO 2022 繁体字中国語	", CodePage = 50229 },
+//new EncodingInfo { DisplayName = "cp720 DOS-720	アラビア語 (Transparent ASMO);アラビア語 (DOS)", CodePage = 720 },
+//new EncodingInfo { DisplayName = "cp710 アラビア語 - 透明アラビア語	", CodePage = 710 },
+//new EncodingInfo { DisplayName = "cp709 アラビア語 (ASMO-449 以降、BCON V4)	", CodePage = 709 },
+//new EncodingInfo { DisplayName = "cp21027 (非推奨)	", CodePage = 21027 },
 new EncodingInfo { DisplayName = "cp50227 x-cp50227	ISO 2022 簡体字中国語;簡体字中国語 (ISO 2022)", CodePage = 50227 },
 new EncodingInfo { DisplayName = "cp50225 iso-2022-韓国	ISO 2022 韓国語", CodePage = 50225 },
 new EncodingInfo { DisplayName = "cp50222 iso-2022-jp	ISO 2022 日本語 JIS X 0201-1989;日本語 (JIS-Allow 1 バイトかな - SO/SI)", CodePage = 50222 },
@@ -2622,7 +2679,6 @@ new EncodingInfo { DisplayName = "cp28593 iso-8859-3	ISO 8859-3 ラテン 3", Co
 new EncodingInfo { DisplayName = "cp28592 iso-8859-2	ISO 8859-2 中央ヨーロッパ;中央ヨーロッパ (ISO)", CodePage = 28592 },
 new EncodingInfo { DisplayName = "cp28591 iso-8859-1	ISO 8859-1 ラテン 1;西ヨーロッパ語 (ISO)", CodePage = 28591 },
 new EncodingInfo { DisplayName = "cp21866 koi8-u	ウクライナ語 (KOI8-U);キリル語 (KOI8-U)", CodePage = 21866 },
-//new EncodingInfo { DisplayName = "cp21027 (非推奨)	", CodePage = 21027 },
 new EncodingInfo { DisplayName = "cp21025 cp1025	IBM EBCDIC キリル文字Serbian-Bulgarian", CodePage = 21025 },
 new EncodingInfo { DisplayName = "cp20949 x-cp20949	韓国 Korean-wansung-unicode", CodePage = 20949 },
 new EncodingInfo { DisplayName = "cp20936 x-cp20936	簡体字中国語 (GB2312);簡体字中国語 (GB2312-80)", CodePage = 20936 },
@@ -2722,9 +2778,6 @@ new EncodingInfo { DisplayName = "cp852 ibm852	OEM ラテン 2;中央ヨーロ�
 new EncodingInfo { DisplayName = "cp850 ibm850	OEM 多言語ラテン 1;西ヨーロッパ語 (DOS)", CodePage = 850 },
 new EncodingInfo { DisplayName = "cp775 ibm775	OEM バルト語;バルト語 (DOS)", CodePage = 775 },
 new EncodingInfo { DisplayName = "cp737 ibm737	OEM ギリシャ語 (旧称 437G);ギリシャ語 (DOS)", CodePage = 737 },
-//new EncodingInfo { DisplayName = "cp720 DOS-720	アラビア語 (Transparent ASMO);アラビア語 (DOS)", CodePage = 720 },
-//new EncodingInfo { DisplayName = "cp710 アラビア語 - 透明アラビア語	", CodePage = 710 },
-//new EncodingInfo { DisplayName = "cp709 アラビア語 (ASMO-449 以降、BCON V4)	", CodePage = 709 },
 new EncodingInfo { DisplayName = "cp708 ASMO-708	アラビア語 (ASMO 708)", CodePage = 708 },
 new EncodingInfo { DisplayName = "cp500 IBM500	IBM EBCDIC International", CodePage = 500 },
 new EncodingInfo { DisplayName = "cp437 IBM437	OEM 米国", CodePage = 437 },
@@ -2739,24 +2792,24 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             outputEncodingComboBox.DisplayMember = "DisplayName";
 
             // デフォルトでUTF-8を選択
-            inputEncodingComboBox.SelectedIndex = Properties.Settings.Default.w_in_idx;
-            outputEncodingComboBox.SelectedIndex = Properties.Settings.Default.w_out_idx;
+            inputEncodingComboBox.SelectedIndex = neta.Properties.Settings.Default.w_in_idx;
+            outputEncodingComboBox.SelectedIndex = neta.Properties.Settings.Default.w_out_idx;
         }
 
         private void InputEncoding_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selectedEncoding = (EncodingInfo)inputEncodingComboBox.SelectedItem;
             selectedInputEncoding.Text = $"CodePage: {selectedEncoding.CodePage}";
-            Properties.Settings.Default.wrong_encoder_in = selectedEncoding.CodePage;
-            Properties.Settings.Default.w_in_idx = inputEncodingComboBox.SelectedIndex;
+        neta.Properties.Settings.Default.wrong_encoder_in = selectedEncoding.CodePage;
+        neta.Properties.Settings.Default.w_in_idx = inputEncodingComboBox.SelectedIndex;
         }
 
         private void OutputEncoding_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selectedEncoding = (EncodingInfo)outputEncodingComboBox.SelectedItem;
             selectedOutputEncoding.Text = $"CodePage: {selectedEncoding.CodePage}";
-            Properties.Settings.Default.wrong_encoder_out = selectedEncoding.CodePage;
-            Properties.Settings.Default.w_out_idx = outputEncodingComboBox.SelectedIndex;
+        neta.Properties.Settings.Default.wrong_encoder_out = selectedEncoding.CodePage;
+        neta.Properties.Settings.Default.w_out_idx = outputEncodingComboBox.SelectedIndex;
         }
 
         private class EncodingInfo
@@ -2793,57 +2846,62 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
         }
     }
 
-    //public class CustomTransparentPanel : Form
-    //{
-    //    private Panel panel1;
-    //    private MenuStrip mainMenu;
-
-    //    public CustomTransparentPanel()
-    //    {
-    //        InitializeComponent();
-    //    }
-
-    //    private void InitializeComponent()
-    //    {
-    //        // フォームの設定
-    //        this.Size = new Size(800, 600);
-    //        this.Text = "透過パネルの例";
-
-    //        // メインメニューの作成
-    //        mainMenu = new MenuStrip();
-    //        mainMenu.Text = "メインメニュー";
-
-    //        // パネル1の作成（透過）
-    //        panel1 = new Panel();
-    //        panel1.Location = new Point(50, 100);
-    //        panel1.Size = new Size(300, 200);
-    //        panel1.BackColor = Color.FromArgb(100, Color.Green); // 透過設定
-
-    //        // メニューの作成（透過なし）
-    //        MenuStrip menuStrip = new MenuStrip();
-    //        menuStrip.Items.Add(new ToolStripMenuItem("ファイル"));
-    //        menuStrip.Items.Add(new ToolStripMenuItem("編集"));
-
-    //        // コントロールの追加
-    //        this.Controls.Add(panel1);
-    //        this.Controls.Add(menuStrip);
-    //        this.MainMenuStrip = menuStrip;
-    //    }
-
-    //    // パネル1の透過メソッド
-    //    private void SetPanelTransparency()
-    //    {
-    //        // アルファ値を調整して透過度を設定
-    //        panel1.BackColor = Color.FromArgb(100, Color.Blue); // 透過率40%
-    //    }
-
-    //    // 透過度を動的に変更するメソッド
-    //    public void AdjustTransparency(int alphaValue)
-    //    {
-    //        // alphaValue: 0(完全透過)から255(不透明)の間の値
-    //        panel1.BackColor = Color.FromArgb(alphaValue, Color.Green);
-    //    }
-    //}
 
 }
+
+
+
+
+//public class CustomTransparentPanel : Form
+//{
+//    private Panel panel1;
+//    private MenuStrip mainMenu;
+
+//    public CustomTransparentPanel()
+//    {
+//        InitializeComponent();
+//    }
+
+//    private void InitializeComponent()
+//    {
+//        // フォームの設定
+//        this.Size = new Size(800, 600);
+//        this.Text = "透過パネルの例";
+
+//        // メインメニューの作成
+//        mainMenu = new MenuStrip();
+//        mainMenu.Text = "メインメニュー";
+
+//        // パネル1の作成（透過）
+//        panel1 = new Panel();
+//        panel1.Location = new Point(50, 100);
+//        panel1.Size = new Size(300, 200);
+//        panel1.BackColor = Color.FromArgb(100, Color.Green); // 透過設定
+
+//        // メニューの作成（透過なし）
+//        MenuStrip menuStrip = new MenuStrip();
+//        menuStrip.Items.Add(new ToolStripMenuItem("ファイル"));
+//        menuStrip.Items.Add(new ToolStripMenuItem("編集"));
+
+//        // コントロールの追加
+//        this.Controls.Add(panel1);
+//        this.Controls.Add(menuStrip);
+//        this.MainMenuStrip = menuStrip;
+//    }
+
+//    // パネル1の透過メソッド
+//    private void SetPanelTransparency()
+//    {
+//        // アルファ値を調整して透過度を設定
+//        panel1.BackColor = Color.FromArgb(100, Color.Blue); // 透過率40%
+//    }
+
+//    // 透過度を動的に変更するメソッド
+//    public void AdjustTransparency(int alphaValue)
+//    {
+//        // alphaValue: 0(完全透過)から255(不透明)の間の値
+//        panel1.BackColor = Color.FromArgb(alphaValue, Color.Green);
+//    }
+//}
+
 

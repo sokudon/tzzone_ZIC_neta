@@ -11,10 +11,12 @@
           "Crc32.NET": "1.2.0",
           "DynamicJson": "1.2.0",
           "Microsoft.CSharp": "4.7.0",
-          "Microsoft.CodeAnalysis.FxCopAnalyzers": "3.3.2",
+          "Microsoft.CodeAnalysis.NetAnalyzers": "9.0.0",
           "Newtonsoft.Json": "13.0.3",
           "NodaTime": "3.2.1",
-          "System.Drawing.Common": "9.0.1"
+          "System.Drawing.Common": "9.0.1",
+          "obs-websocket-dotnet": "5.0.0.3",
+          "System.Reactive.Reference": "4.3.0.0"
         },
         "runtime": {
           "neta.dll": {}
@@ -32,20 +34,9 @@
         }
       },
       "DynamicJson/1.2.0": {},
-      "Microsoft.CodeAnalysis.FxCopAnalyzers/3.3.2": {
-        "dependencies": {
-          "Microsoft.CodeAnalysis.VersionCheckAnalyzer": "3.3.2",
-          "Microsoft.CodeQuality.Analyzers": "3.3.2",
-          "Microsoft.NetCore.Analyzers": "3.3.2",
-          "Microsoft.NetFramework.Analyzers": "3.3.2"
-        }
-      },
-      "Microsoft.CodeAnalysis.VersionCheckAnalyzer/3.3.2": {},
-      "Microsoft.CodeQuality.Analyzers/3.3.2": {},
+      "Microsoft.CodeAnalysis.NetAnalyzers/9.0.0": {},
       "Microsoft.CSharp/4.7.0": {},
-      "Microsoft.NetCore.Analyzers/3.3.2": {},
       "Microsoft.NETCore.Platforms/1.1.0": {},
-      "Microsoft.NetFramework.Analyzers/3.3.2": {},
       "Microsoft.Win32.SystemEvents/9.0.1": {
         "runtime": {
           "lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
@@ -83,6 +74,18 @@
           }
         }
       },
+      "obs-websocket-dotnet/5.0.0.3": {
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.3",
+          "Websocket.Client": "4.4.43"
+        },
+        "runtime": {
+          "lib/netstandard2.0/obs-websocket-dotnet.dll": {
+            "assemblyVersion": "5.0.0.3",
+            "fileVersion": "5.0.0.3"
+          }
+        }
+      },
       "System.Drawing.Common/9.0.1": {
         "dependencies": {
           "Microsoft.Win32.SystemEvents": "9.0.1"
@@ -95,6 +98,28 @@
           "lib/net8.0/System.Private.Windows.Core.dll": {
             "assemblyVersion": "9.0.0.0",
             "fileVersion": "9.0.124.61006"
+          }
+        }
+      },
+      "System.Reactive/4.3.2": {},
+      "System.Threading.Channels/4.7.0": {},
+      "Websocket.Client/4.4.43": {
+        "dependencies": {
+          "System.Reactive": "4.3.2",
+          "System.Threading.Channels": "4.7.0"
+        },
+        "runtime": {
+          "lib/net6.0/Websocket.Client.dll": {
+            "assemblyVersion": "4.4.0.0",
+            "fileVersion": "4.4.0.0"
+          }
+        }
+      },
+      "System.Reactive.Reference/4.3.0.0": {
+        "runtime": {
+          "System.Reactive.dll": {
+            "assemblyVersion": "4.3.0.0",
+            "fileVersion": "4.3.2.55399"
           }
         }
       }
@@ -120,26 +145,12 @@
       "path": "dynamicjson/1.2.0",
       "hashPath": "dynamicjson.1.2.0.nupkg.sha512"
     },
-    "Microsoft.CodeAnalysis.FxCopAnalyzers/3.3.2": {
+    "Microsoft.CodeAnalysis.NetAnalyzers/9.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-QlaP2SgpkiV5fnDgC1WwG3blfXIvz5WSPkA/R/AjKRwOLTGU1YLE3PArkvTz1ZtLCuXs29Qp3iY2fja7wF0iEg==",
-      "path": "microsoft.codeanalysis.fxcopanalyzers/3.3.2",
-      "hashPath": "microsoft.codeanalysis.fxcopanalyzers.3.3.2.nupkg.sha512"
-    },
-    "Microsoft.CodeAnalysis.VersionCheckAnalyzer/3.3.2": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-KTqeVJjGfwDX7/AGDgBXErYX/8Etjwu8Zg2TgmmjVPZReVZk4KLv5fpEiTtoBXis3AO+OM/Qu4cQfz828RSmDQ==",
-      "path": "microsoft.codeanalysis.versioncheckanalyzer/3.3.2",
-      "hashPath": "microsoft.codeanalysis.versioncheckanalyzer.3.3.2.nupkg.sha512"
-    },
-    "Microsoft.CodeQuality.Analyzers/3.3.2": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-WwR96abpowLKCJ/+hREuBu58zbTBCiFLQx5FjAUAYrgtuIQsg+jRtv4n9gKw6zxydnO+jd5aFJB6H+eqGqQufw==",
-      "path": "microsoft.codequality.analyzers/3.3.2",
-      "hashPath": "microsoft.codequality.analyzers.3.3.2.nupkg.sha512"
+      "sha512": "sha512-JajbvkrBgtdRghavIjcJuNHMOja4lqBmEezbhZyqWPYh2cpLhT5mPpfC7NQVDO4IehWQum9t/nwF4v+qQGtYWg==",
+      "path": "microsoft.codeanalysis.netanalyzers/9.0.0",
+      "hashPath": "microsoft.codeanalysis.netanalyzers.9.0.0.nupkg.sha512"
     },
     "Microsoft.CSharp/4.7.0": {
       "type": "package",
@@ -148,26 +159,12 @@
       "path": "microsoft.csharp/4.7.0",
       "hashPath": "microsoft.csharp.4.7.0.nupkg.sha512"
     },
-    "Microsoft.NetCore.Analyzers/3.3.2": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-L9lU2E9SaK8znn8ZkstOx8jjpYmsBTvt3xIW6btPM/Fi8m7zSK80itHV0p6f23q84uvyXS8ibECjP0Vra99zsQ==",
-      "path": "microsoft.netcore.analyzers/3.3.2",
-      "hashPath": "microsoft.netcore.analyzers.3.3.2.nupkg.sha512"
-    },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
       "path": "microsoft.netcore.platforms/1.1.0",
       "hashPath": "microsoft.netcore.platforms.1.1.0.nupkg.sha512"
-    },
-    "Microsoft.NetFramework.Analyzers/3.3.2": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-NfmC8NoxrRtw2PSmqSu+kVTcsJuMhspxWKbVzrtPxw+O8hjpCPzD0IttCUJclDf36qkmScvvd1BgRHYE17zF9g==",
-      "path": "microsoft.netframework.analyzers/3.3.2",
-      "hashPath": "microsoft.netframework.analyzers.3.3.2.nupkg.sha512"
     },
     "Microsoft.Win32.SystemEvents/9.0.1": {
       "type": "package",
@@ -197,12 +194,45 @@
       "path": "nodatime/3.2.1",
       "hashPath": "nodatime.3.2.1.nupkg.sha512"
     },
+    "obs-websocket-dotnet/5.0.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-XQ8i/e/3hHfQxxU3r2YQ6Ha3SI7uqOspb06ExSQH41SRESznywJNXB1ijRqOI+uZIpPf0slS9Sj50a+GBjTN5w==",
+      "path": "obs-websocket-dotnet/5.0.0.3",
+      "hashPath": "obs-websocket-dotnet.5.0.0.3.nupkg.sha512"
+    },
     "System.Drawing.Common/9.0.1": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-TTPkCqSMyMaG8BXlBKYTTJFtLV0SvjjsvgUN598hYgHaX/5B7tdUc2JhQF9vwrYmlzxId+gwFnKYuxQ2XsSz2g==",
       "path": "system.drawing.common/9.0.1",
       "hashPath": "system.drawing.common.9.0.1.nupkg.sha512"
+    },
+    "System.Reactive/4.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WhGkScPWxw2pp7UwRW8M1OvYZ3WUDPC2wJ0aiuaB4KRD3bt4wLkgHgYnOUu87WRhsurvv5LN0E63iWOEza2o8g==",
+      "path": "system.reactive/4.3.2",
+      "hashPath": "system.reactive.4.3.2.nupkg.sha512"
+    },
+    "System.Threading.Channels/4.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-gdOOXBhtt2UpTxYJm1DRmoqNfYg5ypvhzhVt0vxKhzxXFjS81r8yIOSFsJYLRa1Jc14GBAqCnjxJstO3zBN7gg==",
+      "path": "system.threading.channels/4.7.0",
+      "hashPath": "system.threading.channels.4.7.0.nupkg.sha512"
+    },
+    "Websocket.Client/4.4.43": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-h0sS4zsnXrVkYyMYDaRc0k/oV54uXXBlN/HOHAK5d/RWleLTmWS6bxtt0l3D5Q2rgtfLinkHLdf4sOqdrxZ0NA==",
+      "path": "websocket.client/4.4.43",
+      "hashPath": "websocket.client.4.4.43.nupkg.sha512"
+    },
+    "System.Reactive.Reference/4.3.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }

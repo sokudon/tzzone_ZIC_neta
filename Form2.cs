@@ -85,7 +85,7 @@ namespace neta
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string data = "https://raw.githubusercontent.com/sokudon/netataimaC-/master/App.config";
+            string data = "https://raw.githubusercontent.com/sokudon/tzzone_ZIC_neta/refs/heads/master/App.config";
 
             try
             {
