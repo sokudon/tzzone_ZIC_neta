@@ -21,6 +21,8 @@ using OBSWebsocketDotNet;
 using Newtonsoft.Json;
 using System.Globalization;
 using System.Threading;
+using System.Drawing.Imaging;
+using System.Net.NetworkInformation;
 
 namespace neta
 {
@@ -196,7 +198,7 @@ namespace neta
             //https://chatgpt.com/share/677e10d5-018c-800f-9356-ac6a02a537e2 begin updateみたいな描写制御        
             this_begin_update();
 
-            if (Properties.Settings.Default.locale== "InvariantCulture")
+            if (Properties.Settings.Default.locale == "InvariantCulture")
             {
                 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             }
@@ -2537,7 +2539,7 @@ namespace neta
                 // OBS Luaスクリプトの設定を更新
                 SetScriptSettings(obs, "obsduration_timer_yumesute.lua", new
                 {
-                    start_text =startbox.Text,
+                    start_text = startbox.Text,
                     stop_text = endbox.Text,
                     title_text = ibemei.Text
                 });
@@ -2562,58 +2564,140 @@ namespace neta
 
             obs.SendRequest("SetScriptSettings", parameters);
         }
-    }
 
-    public partial class EncodingSelectForm : Form
-    {
-        private ComboBox inputEncodingComboBox;
-        private ComboBox outputEncodingComboBox;
-        private Label inputLabel;
-        private Label outputLabel;
-        private Label selectedInputEncoding;
-        private Label selectedOutputEncoding;
-
-        public EncodingSelectForm()
+        private void imgtobase64_Click(object sender, EventArgs e)
         {
-            InitializeComponent();
-            InitializeEncodingSelectors();
+
+            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
+
+            //はじめに表示されるフォルダを指定する
+            //指定しない（空の文字列）の時は、現在のディレクトリが表示される
+            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
+
+            ofd.Filter = "すべての対応画像|*.bmp;*.jpg;*.jpeg;*.gif;*.png;*.tiff;*.ico|" +
+                     "BMP 画像 (*.bmp)|*.bmp|" +
+                     "JPEG 画像 (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
+                     "GIF 画像 (*.gif)|*.gif|" +
+                     "PNG 画像 (*.png)|*.png|" +
+                     "TIFF 画像 (*.tiff)|*.tiff|" +
+                     "ICO アイコン (*.ico)|*.ico";
+            //"WebP 画像 (*.webp)|*.webp";
+
+            ofd.FilterIndex = 1;
+            ofd.RestoreDirectory = true;
+
+
+            //ダイアログを表示する
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string s = ofd.FileName;
+
+                    Image raw = System.Drawing.Image.FromFile(s);
+
+                    ConvertToJpegWithQuality(s, "tmp", 90);
+                    string ss = "/*‼️次で始まるURL https://gemini.google.com/  */\r\n:where(.theme-host) {  /* デフォの白背景削除 */\r\n" +
+                        " --gem-sys-color--surface: transparent, !important; \r\n}\r\n\r\n" +
+                        "body {  /*上のバナー 明るい色*/\r\n  background-color: rgba(255, 255, 255, 0.562);\r\n}\r\n" +
+                        ".main-content{  /*子を透過する */\r\n  background-color: rgba(255, 255, 255, 0.562);\r\n}\r\n\r\n" +
+                        ".chat-app {\r\n  /*opacity: 0.3;  全体を透過 */\r\n" +
+                        "  /*backdrop-filter: blur(5px); */ /* 背景をぼかす (adjust the value as needed) */\r\n" +
+                        "  background-color:transparent, !important; \r\n    background-size: auto;\r\n" +
+                        "    background:\r\n" +
+                        "url(data:image/jpeg;base64," +
+                            ConvertImageToBase64("tmp") + ");\r\n}";
+
+                    //Pass the filepath and filename to the StreamWriter Constructor
+                    StreamWriter sw = new StreamWriter("gemini_base64.txt");
+                    //Write a line of text
+                    sw.WriteLine(ss);
+                    //Close the file
+                    sw.Close();
+                }
+                catch
+                {
+
+                }
+            }
+        }
+        static string ConvertImageToBase64(string imagePath)
+        {
+            byte[] imageBytes = File.ReadAllBytes(imagePath);
+            return Convert.ToBase64String(imageBytes);
         }
 
-        private void InitializeComponent()
+        static void ConvertToJpegWithQuality(string inputPath, string outputPath, int quality)
         {
-            this.inputEncodingComboBox = new ComboBox();
-            this.outputEncodingComboBox = new ComboBox();
-            this.inputLabel = new Label();
-            this.outputLabel = new Label();
-            this.selectedInputEncoding = new Label();
-            this.selectedOutputEncoding = new Label();
+            using (Image raw = Image.FromFile(inputPath))
+            {
+                // JPEGエンコーダーを取得
+                ImageCodecInfo jpegCodec = ImageCodecInfo.GetImageEncoders()
+                    .FirstOrDefault(codec => codec.FormatID == ImageFormat.Jpeg.Guid);
+                if (jpegCodec == null)
+                {
+                    throw new Exception("JPEGエンコーダーが見つかりません");
+                }
 
-            // Input encoding controls
-            this.inputLabel.Text = "入力エンコーディング:";
-            this.inputLabel.Location = new System.Drawing.Point(10, 20);
-            this.inputLabel.AutoSize = true;
+                // エンコーダーのパラメータを設定（品質を指定）
+                EncoderParameters encoderParams = new EncoderParameters(1);
+                encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality);
 
-            this.inputEncodingComboBox.Location = new System.Drawing.Point(10, 40);
-            this.inputEncodingComboBox.Width = 200;
-            this.inputEncodingComboBox.SelectedIndexChanged += new EventHandler(InputEncoding_SelectedIndexChanged);
+                // JPEGとして保存
+                raw.Save(outputPath, jpegCodec, encoderParams);
+            }
+        }
 
-            this.selectedInputEncoding.Location = new System.Drawing.Point(220, 43);
-            this.selectedInputEncoding.AutoSize = true;
+        public partial class EncodingSelectForm : Form
+        {
+            private ComboBox inputEncodingComboBox;
+            private ComboBox outputEncodingComboBox;
+            private Label inputLabel;
+            private Label outputLabel;
+            private Label selectedInputEncoding;
+            private Label selectedOutputEncoding;
 
-            // Output encoding controls
-            this.outputLabel.Text = "出力エンコーディング:";
-            this.outputLabel.Location = new System.Drawing.Point(10, 80);
-            this.outputLabel.AutoSize = true;
+            public EncodingSelectForm()
+            {
+                InitializeComponent();
+                InitializeEncodingSelectors();
+            }
 
-            this.outputEncodingComboBox.Location = new System.Drawing.Point(10, 100);
-            this.outputEncodingComboBox.Width = 200;
-            this.outputEncodingComboBox.SelectedIndexChanged += new EventHandler(OutputEncoding_SelectedIndexChanged);
+            private void InitializeComponent()
+            {
+                this.inputEncodingComboBox = new ComboBox();
+                this.outputEncodingComboBox = new ComboBox();
+                this.inputLabel = new Label();
+                this.outputLabel = new Label();
+                this.selectedInputEncoding = new Label();
+                this.selectedOutputEncoding = new Label();
 
-            this.selectedOutputEncoding.Location = new System.Drawing.Point(220, 103);
-            this.selectedOutputEncoding.AutoSize = true;
+                // Input encoding controls
+                this.inputLabel.Text = "入力エンコーディング:";
+                this.inputLabel.Location = new System.Drawing.Point(10, 20);
+                this.inputLabel.AutoSize = true;
 
-            // Form settings
-            this.Controls.AddRange(new Control[] {
+                this.inputEncodingComboBox.Location = new System.Drawing.Point(10, 40);
+                this.inputEncodingComboBox.Width = 200;
+                this.inputEncodingComboBox.SelectedIndexChanged += new EventHandler(InputEncoding_SelectedIndexChanged);
+
+                this.selectedInputEncoding.Location = new System.Drawing.Point(220, 43);
+                this.selectedInputEncoding.AutoSize = true;
+
+                // Output encoding controls
+                this.outputLabel.Text = "出力エンコーディング:";
+                this.outputLabel.Location = new System.Drawing.Point(10, 80);
+                this.outputLabel.AutoSize = true;
+
+                this.outputEncodingComboBox.Location = new System.Drawing.Point(10, 100);
+                this.outputEncodingComboBox.Width = 200;
+                this.outputEncodingComboBox.SelectedIndexChanged += new EventHandler(OutputEncoding_SelectedIndexChanged);
+
+                this.selectedOutputEncoding.Location = new System.Drawing.Point(220, 103);
+                this.selectedOutputEncoding.AutoSize = true;
+
+                // Form settings
+                this.Controls.AddRange(new Control[] {
             this.inputLabel,
             this.inputEncodingComboBox,
             this.selectedInputEncoding,
@@ -2621,14 +2705,14 @@ namespace neta
             this.outputEncodingComboBox,
             this.selectedOutputEncoding
         });
-            this.ClientSize = new System.Drawing.Size(400, 150);
-            this.Text = "エンコーディング選択";
-        }
+                this.ClientSize = new System.Drawing.Size(400, 150);
+                this.Text = "エンコーディング選択";
+            }
 
-        private void InitializeEncodingSelectors()
-        {
-            // よく使用されるエンコーディングのリストを作成
-            var encodings = new List<EncodingInfo>
+            private void InitializeEncodingSelectors()
+            {
+                // よく使用されるエンコーディングのリストを作成
+                var encodings = new List<EncodingInfo>
         {
 new EncodingInfo { DisplayName = "cp65001 utf-8	Unicode (UTF-8)", CodePage = 65001 },
 new EncodingInfo { DisplayName = "cp57011 x-iscii-pa	ISCII パンジャブ語", CodePage = 57011 },
@@ -2784,69 +2868,70 @@ new EncodingInfo { DisplayName = "cp437 IBM437	OEM 米国", CodePage = 437 },
 new EncodingInfo { DisplayName = "cp37 IBM037	IBM EBCDIC US-Canada", CodePage = 37 },
 new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
 
-            // コンボボックスにエンコーディングを追加
-            inputEncodingComboBox.DataSource = new List<EncodingInfo>(encodings);
-            outputEncodingComboBox.DataSource = new List<EncodingInfo>(encodings);
+                // コンボボックスにエンコーディングを追加
+                inputEncodingComboBox.DataSource = new List<EncodingInfo>(encodings);
+                outputEncodingComboBox.DataSource = new List<EncodingInfo>(encodings);
 
-            inputEncodingComboBox.DisplayMember = "DisplayName";
-            outputEncodingComboBox.DisplayMember = "DisplayName";
+                inputEncodingComboBox.DisplayMember = "DisplayName";
+                outputEncodingComboBox.DisplayMember = "DisplayName";
 
-            // デフォルトでUTF-8を選択
-            inputEncodingComboBox.SelectedIndex = neta.Properties.Settings.Default.w_in_idx;
-            outputEncodingComboBox.SelectedIndex = neta.Properties.Settings.Default.w_out_idx;
-        }
-
-        private void InputEncoding_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var selectedEncoding = (EncodingInfo)inputEncodingComboBox.SelectedItem;
-            selectedInputEncoding.Text = $"CodePage: {selectedEncoding.CodePage}";
-        neta.Properties.Settings.Default.wrong_encoder_in = selectedEncoding.CodePage;
-        neta.Properties.Settings.Default.w_in_idx = inputEncodingComboBox.SelectedIndex;
-        }
-
-        private void OutputEncoding_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var selectedEncoding = (EncodingInfo)outputEncodingComboBox.SelectedItem;
-            selectedOutputEncoding.Text = $"CodePage: {selectedEncoding.CodePage}";
-        neta.Properties.Settings.Default.wrong_encoder_out = selectedEncoding.CodePage;
-        neta.Properties.Settings.Default.w_out_idx = outputEncodingComboBox.SelectedIndex;
-        }
-
-        private class EncodingInfo
-        {
-            public string DisplayName { get; set; }
-            public int CodePage { get; set; }
-        }
-    }
-
-    class EncodingList
-    {
-        public static void ListAllEncodings()
-        {
-            // すべての利用可能なエンコーディングを取得
-            EncodingInfo[] encodings = Encoding.GetEncodings();
-
-            // エンコーディング情報を整理して表示
-            Console.WriteLine("利用可能なエンコーディング一覧:");
-            Console.WriteLine("CodePage\tName\tDisplayName");
-            Console.WriteLine("----------------------------------------");
-
-            foreach (EncodingInfo ei in encodings.OrderBy(e => e.CodePage))
-            {
-                Encoding e = ei.GetEncoding();
-                Console.WriteLine($"{ei.CodePage}\t{ei.Name}\t{ei.DisplayName}");
+                // デフォルトでUTF-8を選択
+                inputEncodingComboBox.SelectedIndex = neta.Properties.Settings.Default.w_in_idx;
+                outputEncodingComboBox.SelectedIndex = neta.Properties.Settings.Default.w_out_idx;
             }
 
-            Console.WriteLine($"\n合計: {encodings.Length} エンコーディング");
+            private void InputEncoding_SelectedIndexChanged(object sender, EventArgs e)
+            {
+                var selectedEncoding = (EncodingInfo)inputEncodingComboBox.SelectedItem;
+                selectedInputEncoding.Text = $"CodePage: {selectedEncoding.CodePage}";
+                neta.Properties.Settings.Default.wrong_encoder_in = selectedEncoding.CodePage;
+                neta.Properties.Settings.Default.w_in_idx = inputEncodingComboBox.SelectedIndex;
+            }
+
+            private void OutputEncoding_SelectedIndexChanged(object sender, EventArgs e)
+            {
+                var selectedEncoding = (EncodingInfo)outputEncodingComboBox.SelectedItem;
+                selectedOutputEncoding.Text = $"CodePage: {selectedEncoding.CodePage}";
+                neta.Properties.Settings.Default.wrong_encoder_out = selectedEncoding.CodePage;
+                neta.Properties.Settings.Default.w_out_idx = outputEncodingComboBox.SelectedIndex;
+            }
+
+            private class EncodingInfo
+            {
+                public string DisplayName { get; set; }
+                public int CodePage { get; set; }
+            }
         }
 
-        public static List<EncodingInfo> GetAllEncodingsAsList()
+        class EncodingList
         {
-            return Encoding.GetEncodings().OrderBy(e => e.CodePage).ToList();
+            public static void ListAllEncodings()
+            {
+                // すべての利用可能なエンコーディングを取得
+                EncodingInfo[] encodings = Encoding.GetEncodings();
+
+                // エンコーディング情報を整理して表示
+                Console.WriteLine("利用可能なエンコーディング一覧:");
+                Console.WriteLine("CodePage\tName\tDisplayName");
+                Console.WriteLine("----------------------------------------");
+
+                foreach (EncodingInfo ei in encodings.OrderBy(e => e.CodePage))
+                {
+                    Encoding e = ei.GetEncoding();
+                    Console.WriteLine($"{ei.CodePage}\t{ei.Name}\t{ei.DisplayName}");
+                }
+
+                Console.WriteLine($"\n合計: {encodings.Length} エンコーディング");
+            }
+
+            public static List<EncodingInfo> GetAllEncodingsAsList()
+            {
+                return Encoding.GetEncodings().OrderBy(e => e.CodePage).ToList();
+            }
         }
+
+
     }
-
-
 }
 
 

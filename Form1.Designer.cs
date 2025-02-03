@@ -94,6 +94,7 @@
             コードページ指定 = new System.Windows.Forms.ToolStripMenuItem();
             バージョンToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             終了ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            imgtobase64 = new System.Windows.Forms.ToolStripMenuItem();
             panel1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             panel2.SuspendLayout();
@@ -553,7 +554,7 @@
             // 
             // 画像ToolStripMenuItem
             // 
-            画像ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { でふぉるとにもどす正月みくToolStripMenuItem, 画像を選択ToolStripMenuItem, 画像なしToolStripMenuItem1, ぱねる１似合わせるToolStripMenuItem });
+            画像ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { でふぉるとにもどす正月みくToolStripMenuItem, 画像を選択ToolStripMenuItem, 画像なしToolStripMenuItem1, ぱねる１似合わせるToolStripMenuItem, imgtobase64 });
             画像ToolStripMenuItem.Name = "画像ToolStripMenuItem";
             画像ToolStripMenuItem.Size = new System.Drawing.Size(440, 26);
             画像ToolStripMenuItem.Text = "画像";
@@ -684,6 +685,13 @@
             終了ToolStripMenuItem.Text = "アプリ終了";
             終了ToolStripMenuItem.Click += 終了ToolStripMenuItem_Click;
             // 
+            // imgtobase64
+            // 
+            imgtobase64.Name = "imgtobase64";
+            imgtobase64.Size = new System.Drawing.Size(276, 26);
+            imgtobase64.Text = "base64に変換する";
+            imgtobase64.Click += imgtobase64_Click;
+            // 
             // NETA_TIMER
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -782,6 +790,7 @@
         private System.Windows.Forms.ToolStripMenuItem 縺化け戻し;
         private System.Windows.Forms.Label error;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.ToolStripMenuItem imgtobase64;
     }
 }
 
