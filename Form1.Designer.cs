@@ -81,6 +81,9 @@
             画像を選択ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             画像なしToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             ぱねる１似合わせるToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            imgtobase64 = new System.Windows.Forms.ToolStripMenuItem();
+            geminiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            claudeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
@@ -94,7 +97,6 @@
             コードページ指定 = new System.Windows.Forms.ToolStripMenuItem();
             バージョンToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             終了ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            imgtobase64 = new System.Windows.Forms.ToolStripMenuItem();
             panel1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             panel2.SuspendLayout();
@@ -590,6 +592,28 @@
             ぱねる１似合わせるToolStripMenuItem.Text = "ぱねる１似合わせる";
             ぱねる１似合わせるToolStripMenuItem.Click += ぱねる１似合わせるToolStripMenuItem_Click;
             // 
+            // imgtobase64
+            // 
+            imgtobase64.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { geminiToolStripMenuItem, claudeToolStripMenuItem });
+            imgtobase64.Name = "imgtobase64";
+            imgtobase64.Size = new System.Drawing.Size(276, 26);
+            imgtobase64.Text = "base64に変換する";
+            imgtobase64.Click += imgtobase64_Click;
+            // 
+            // geminiToolStripMenuItem
+            // 
+            geminiToolStripMenuItem.Name = "geminiToolStripMenuItem";
+            geminiToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            geminiToolStripMenuItem.Text = "gemini2.0";
+            geminiToolStripMenuItem.Click += gemini20ToolStripMenuItem_Click;
+            // 
+            // claudeToolStripMenuItem
+            // 
+            claudeToolStripMenuItem.Name = "claudeToolStripMenuItem";
+            claudeToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            claudeToolStripMenuItem.Text = "claude3.5";
+            claudeToolStripMenuItem.Click += claude35ToolStripMenuItem_Click;
+            // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItem3, toolStripMenuItem5 });
@@ -684,13 +708,6 @@
             終了ToolStripMenuItem.Size = new System.Drawing.Size(155, 26);
             終了ToolStripMenuItem.Text = "アプリ終了";
             終了ToolStripMenuItem.Click += 終了ToolStripMenuItem_Click;
-            // 
-            // imgtobase64
-            // 
-            imgtobase64.Name = "imgtobase64";
-            imgtobase64.Size = new System.Drawing.Size(276, 26);
-            imgtobase64.Text = "base64に変換する";
-            imgtobase64.Click += imgtobase64_Click;
             // 
             // NETA_TIMER
             // 
@@ -791,6 +808,8 @@
         private System.Windows.Forms.Label error;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.ToolStripMenuItem imgtobase64;
+        private System.Windows.Forms.ToolStripMenuItem geminiToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem claudeToolStripMenuItem;
     }
 }
 

@@ -2565,88 +2565,7 @@ namespace neta
             obs.SendRequest("SetScriptSettings", parameters);
         }
 
-        private void imgtobase64_Click(object sender, EventArgs e)
-        {
 
-            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
-
-            //はじめに表示されるフォルダを指定する
-            //指定しない（空の文字列）の時は、現在のディレクトリが表示される
-            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
-
-            ofd.Filter = "すべての対応画像|*.bmp;*.jpg;*.jpeg;*.gif;*.png;*.tiff;*.ico|" +
-                     "BMP 画像 (*.bmp)|*.bmp|" +
-                     "JPEG 画像 (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
-                     "GIF 画像 (*.gif)|*.gif|" +
-                     "PNG 画像 (*.png)|*.png|" +
-                     "TIFF 画像 (*.tiff)|*.tiff|" +
-                     "ICO アイコン (*.ico)|*.ico";
-            //"WebP 画像 (*.webp)|*.webp";
-
-            ofd.FilterIndex = 1;
-            ofd.RestoreDirectory = true;
-
-
-            //ダイアログを表示する
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    string s = ofd.FileName;
-
-                    Image raw = System.Drawing.Image.FromFile(s);
-
-                    ConvertToJpegWithQuality(s, "tmp", 90);
-                    string ss = "/*‼️次で始まるURL https://gemini.google.com/  */\r\n:where(.theme-host) {  /* デフォの白背景削除 */\r\n" +
-                        " --gem-sys-color--surface: transparent, !important; \r\n}\r\n\r\n" +
-                        "body {  /*上のバナー 明るい色*/\r\n  background-color: rgba(255, 255, 255, 0.562);\r\n}\r\n" +
-                        ".main-content{  /*子を透過する */\r\n  background-color: rgba(255, 255, 255, 0.562);\r\n}\r\n\r\n" +
-                        ".chat-app {\r\n  /*opacity: 0.3;  全体を透過 */\r\n" +
-                        "  /*backdrop-filter: blur(5px); */ /* 背景をぼかす (adjust the value as needed) */\r\n" +
-                        "  background-color:transparent, !important; \r\n    background-size: auto;\r\n" +
-                        "    background:\r\n" +
-                        "url(data:image/jpeg;base64," +
-                            ConvertImageToBase64("tmp") + ");\r\n}";
-
-                    //Pass the filepath and filename to the StreamWriter Constructor
-                    StreamWriter sw = new StreamWriter("gemini_base64.txt");
-                    //Write a line of text
-                    sw.WriteLine(ss);
-                    //Close the file
-                    sw.Close();
-                }
-                catch
-                {
-
-                }
-            }
-        }
-        static string ConvertImageToBase64(string imagePath)
-        {
-            byte[] imageBytes = File.ReadAllBytes(imagePath);
-            return Convert.ToBase64String(imageBytes);
-        }
-
-        static void ConvertToJpegWithQuality(string inputPath, string outputPath, int quality)
-        {
-            using (Image raw = Image.FromFile(inputPath))
-            {
-                // JPEGエンコーダーを取得
-                ImageCodecInfo jpegCodec = ImageCodecInfo.GetImageEncoders()
-                    .FirstOrDefault(codec => codec.FormatID == ImageFormat.Jpeg.Guid);
-                if (jpegCodec == null)
-                {
-                    throw new Exception("JPEGエンコーダーが見つかりません");
-                }
-
-                // エンコーダーのパラメータを設定（品質を指定）
-                EncoderParameters encoderParams = new EncoderParameters(1);
-                encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality);
-
-                // JPEGとして保存
-                raw.Save(outputPath, jpegCodec, encoderParams);
-            }
-        }
 
         public partial class EncodingSelectForm : Form
         {
@@ -2930,6 +2849,100 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             }
         }
 
+        private void gemini20ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            imgtobase64s(Properties.Resources.gemini, "gemini_base64.txt");
+        }
+
+        private void claude35ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            imgtobase64s(Properties.Resources.claude, "claude_base64.txt");
+        }
+
+        private void imgtobase64_Click(object sender, EventArgs e)
+        {
+
+            imgtobase64s(Properties.Resources.base64jpg, "image_base64.txt");
+        }
+
+        private static void imgtobase64s(string mode, string outpath)
+        {
+
+            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
+
+            //はじめに表示されるフォルダを指定する
+            //指定しない（空の文字列）の時は、現在のディレクトリが表示される
+            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
+
+            ofd.Filter = "すべての対応画像|*.bmp;*.jpg;*.jpeg;*.gif;*.png;*.tiff;*.ico|" +
+                     "BMP 画像 (*.bmp)|*.bmp|" +
+                     "JPEG 画像 (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
+                     "GIF 画像 (*.gif)|*.gif|" +
+                     "PNG 画像 (*.png)|*.png|" +
+                     "TIFF 画像 (*.tiff)|*.tiff|" +
+                     "ICO アイコン (*.ico)|*.ico";
+            //"WebP 画像 (*.webp)|*.webp";
+
+            ofd.FilterIndex = 1;
+            ofd.RestoreDirectory = true;
+
+
+            //ダイアログを表示する
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string s = ofd.FileName;
+
+                    Image raw = System.Drawing.Image.FromFile(s);
+
+                    ConvertToJpegWithQuality(s, "tmp", 90);
+                    string ss = mode +
+                            ConvertImageToBase64("tmp");
+                    if (mode != Properties.Resources.base64jpg)
+                    {
+                        ss += ");\r\n}}";
+                    }
+                    //Pass the filepath and filename to the StreamWriter Constructor
+                    StreamWriter sw = new StreamWriter(outpath);
+                    //Write a line of text
+                    sw.WriteLine(ss);
+                    //Close the file
+                    sw.Close();
+                }
+                catch
+                {
+
+                }
+            }
+        }
+        static string ConvertImageToBase64(string imagePath)
+        {
+            byte[] imageBytes = File.ReadAllBytes(imagePath);
+            return Convert.ToBase64String(imageBytes);
+        }
+
+        static void ConvertToJpegWithQuality(string inputPath, string outputPath, int quality)
+        {
+            using (Image raw = Image.FromFile(inputPath))
+            {
+                // JPEGエンコーダーを取得
+                ImageCodecInfo jpegCodec = ImageCodecInfo.GetImageEncoders()
+                    .FirstOrDefault(codec => codec.FormatID == ImageFormat.Jpeg.Guid);
+                if (jpegCodec == null)
+                {
+                    throw new Exception("JPEGエンコーダーが見つかりません");
+                }
+
+                // エンコーダーのパラメータを設定（品質を指定）
+                EncoderParameters encoderParams = new EncoderParameters(1);
+                encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality);
+
+                // JPEGとして保存
+                raw.Save(outputPath, jpegCodec, encoderParams);
+            }
+        }
 
     }
 }

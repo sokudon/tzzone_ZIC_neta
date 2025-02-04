@@ -20,3 +20,6 @@
 /old
 /Resources/1129/image_fx_ (1).jpg
 /bin/Release/net8.0-windows7.0/tmp_img
+/bin/Release/net8.0-windows7.0/claude_base64.txt
+/bin/Release/net8.0-windows7.0/gemini_base64.txt
+/bin/Release/net8.0-windows7.0/image_base64.txt

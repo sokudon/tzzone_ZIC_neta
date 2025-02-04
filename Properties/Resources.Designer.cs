@@ -61,6 +61,71 @@ namespace neta.Properties {
         }
         
         /// <summary>
+        ///   data:image/jpeg;base64, に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string base64jpg {
+            get {
+                return ResourceManager.GetString("base64jpg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   @-moz-document url-prefix(&quot;https://claude.ai/chat/&quot;) {
+        ///   [data-theme=claude],
+        ///   [data-theme=claude][data-mode=light] {
+        ///
+        ///       --bg-000: #62285442;
+        ///       --bg-100: #ad1f6442;
+        ///       --bg-200: #62284b42;
+        ///       --bg-300: #62286042;
+        ///       --bg-400: #62286242;
+        ///       --bg-500: #62285842;
+        ///   }
+        ///   .font-user-message {
+        ///
+        ///      background-color: #e1bf5be8;
+        ///   }
+        ///   .font-claude-message {
+        ///       background-color: #f0a15be6;
+        ///   }
+        ///   .code-block__code {
+        ///       opacity: 0.7;
+        ///   }
+        ///
+        ///   .overflow- [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string claude {
+            get {
+                return ResourceManager.GetString("claude", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   @-moz-document url-prefix(&quot;https://gemini.google.com/&quot;) {
+        ////*‼️次で始まるURL https://gemini.google.com/  */
+        ///:where(.theme-host) {  /* デフォの白背景削除 */
+        /// --gem-sys-color--surface: transparent, !important; 
+        ///}
+        ///
+        ///body {  /*上のバナー 明るい色*/
+        ///  background-color: rgba(255, 255, 255, 0.562);
+        ///}
+        ///.main-content{  /*子を透過する */
+        ///  background-color: rgba(255, 255, 255, 0.562);
+        ///}
+        ///
+        ///.chat-app {
+        ///  /*opacity: 0.3;  全体を透過 */
+        ///  /*backdrop-filter: blur(5px); */ /* 背景をぼかす (adjust the value as needed) */
+        ///  background-color:transparent [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string gemini {
+            get {
+                return ResourceManager.GetString("gemini", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   BEGIN:VCALENDAR
         ///VERSION:2.0
         ///PRODID:-//はんようたいまー//NONSGML v1.0//EN

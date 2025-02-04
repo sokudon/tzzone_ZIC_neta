@@ -128,8 +128,61 @@ SUMMARY:うづき
 END:VEVENT
 END:VCALENDAR</value>
   </data>
+  <data name="claude" xml:space="preserve">
+    <value>@-moz-document url-prefix("https://claude.ai/chat/") {
+   [data-theme=claude],
+   [data-theme=claude][data-mode=light] {
+
+       --bg-000: #62285442;
+       --bg-100: #ad1f6442;
+       --bg-200: #62284b42;
+       --bg-300: #62286042;
+       --bg-400: #62286242;
+       --bg-500: #62285842;
+   }
+   .font-user-message {
+
+      background-color: #e1bf5be8;
+   }
+   .font-claude-message {
+       background-color: #f0a15be6;
+   }
+   .code-block__code {
+       opacity: 0.7;
+   }
+
+   .overflow-hidden {
+       /*   .tracking-tight   w-full
+        opacity: 0.7;*/
+       background-size: auto;
+       background: url(data:image/jpeg;base64,</value>
+  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="syougtu_kurinuki" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\syougtu_kurinuki.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="gemini" xml:space="preserve">
+    <value>@-moz-document url-prefix("https://gemini.google.com/") {
+/*‼️次で始まるURL https://gemini.google.com/  */
+:where(.theme-host) {  /* デフォの白背景削除 */
+ --gem-sys-color--surface: transparent, !important; 
+}
+
+body {  /*上のバナー 明るい色*/
+  background-color: rgba(255, 255, 255, 0.562);
+}
+.main-content{  /*子を透過する */
+  background-color: rgba(255, 255, 255, 0.562);
+}
+
+.chat-app {
+  /*opacity: 0.3;  全体を透過 */
+  /*backdrop-filter: blur(5px); */ /* 背景をぼかす (adjust the value as needed) */
+  background-color:transparent, !important; 
+    background-size: auto;
+    background:data:image/jpeg;base64,</value>
+  </data>
+  <data name="base64jpg" xml:space="preserve">
+    <value>data:image/jpeg;base64,</value>
   </data>
 </root>
