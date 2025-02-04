@@ -2852,12 +2852,12 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
         private void gemini20ToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            imgtobase64s(Properties.Resources.gemini, "gemini_base64.txt");
+            imgtobase64s(Properties.Resources.gemini, "gemini_base64.use.css");
         }
 
         private void claude35ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            imgtobase64s(Properties.Resources.claude, "claude_base64.txt");
+            imgtobase64s(Properties.Resources.claude, "claude_base64.use.css");
         }
 
         private void imgtobase64_Click(object sender, EventArgs e)
