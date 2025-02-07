@@ -70,29 +70,19 @@ namespace neta.Properties {
         }
         
         /// <summary>
-        ///   @-moz-document url-prefix(&quot;https://claude.ai/chat/&quot;) {
-        ///   [data-theme=claude],
-        ///   [data-theme=claude][data-mode=light] {
-        ///
-        ///       --bg-000: #62285442;
-        ///       --bg-100: #ad1f6442;
-        ///       --bg-200: #62284b42;
-        ///       --bg-300: #62286042;
-        ///       --bg-400: #62286242;
-        ///       --bg-500: #62285842;
-        ///   }
-        ///   .font-user-message {
-        ///
-        ///      background-color: #e1bf5be8;
-        ///   }
-        ///   .font-claude-message {
-        ///       background-color: #f0a15be6;
-        ///   }
-        ///   .code-block__code {
-        ///       opacity: 0.7;
-        ///   }
-        ///
-        ///   .overflow- [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///   /* ==UserStyle==
+        ///@name         Claude.ai BGedit
+        ///@namespace    Claude.ai 
+        ///@author       your name
+        ///@description  change　BG data on your claude  Background image with Base64 JPEG by sokudon.s17.xrea.com/base64.html   /   github.com/sokudon/tzzone_ZIC_neta/tree/master/bin/Release/net8.0-windows7.0
+        ///@version      20250207
+        ///==/UserStyle== */
+        ///@-moz-document url-prefix(&quot;https://claude.ai/chat&quot;) {
+        ///    .flex-row-reverse {
+        ///        /*アイコン */
+        ///        background-color: #17f0cf26 !important
+        ///    }
+        ///    .bg-bg-200  [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string claude {
             get {
