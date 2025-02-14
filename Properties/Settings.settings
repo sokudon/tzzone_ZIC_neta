@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/02/07</Value>
+      <Value Profile="(Default)">2025/02/14</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -120,7 +120,7 @@
       <Value Profile="(Default)">Menu</Value>
     </Setting>
     <Setting Name="uihide" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="system_tz" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -244,6 +244,12 @@
     </Setting>
     <Setting Name="locale" Type="System.String" Scope="User">
       <Value Profile="(Default)">ja-JP</Value>
+    </Setting>
+    <Setting Name="syougautmiku" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="hosikuzuhunter" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

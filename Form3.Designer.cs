@@ -172,7 +172,7 @@
             noda_timezone.TabIndex = 27;
             noda_timezone.Text = "のだたいむ(夏修正あり)";
             noda_timezone.UseVisualStyleBackColor = true;
-            noda_timezone.CheckedChanged += checkBox5_CheckedChanged;
+            noda_timezone.CheckedChanged += noda_timezone_CheckedChanged;
             // 
             // label10
             // 
@@ -227,7 +227,7 @@
             tzbinary_timezone.TabIndex = 25;
             tzbinary_timezone.Text = "TZBINを使う(夏時間修正あり)";
             tzbinary_timezone.UseVisualStyleBackColor = true;
-            tzbinary_timezone.CheckedChanged += checkBox3_CheckedChanged;
+            tzbinary_timezone.CheckedChanged += tzbinary_timezone_CheckedChanged;
             // 
             // tzbinary_tzst
             // 
@@ -261,7 +261,7 @@
             ms_utcoffset.TabIndex = 5;
             ms_utcoffset.Text = "UTC任意時間を使う(夏時間修正なし)";
             ms_utcoffset.UseVisualStyleBackColor = true;
-            ms_utcoffset.CheckedChanged += checkBox1_CheckedChanged;
+            ms_utcoffset.CheckedChanged += ms_utcoffset_CheckedChanged;
             // 
             // ms_utcoffset_items
             // 
@@ -286,7 +286,7 @@
             ms_timezone.TabIndex = 7;
             ms_timezone.Text = "M$のタイムゾーン(夏時間修正あり)";
             ms_timezone.UseVisualStyleBackColor = true;
-            ms_timezone.CheckedChanged += checkBox2_CheckedChanged;
+            ms_timezone.CheckedChanged += ms_timezone_CheckedChanged;
             // 
             // ms_timezone_items
             // 
@@ -379,8 +379,8 @@
             noda_dateformat.Size = new System.Drawing.Size(244, 28);
             noda_dateformat.TabIndex = 4;
             noda_dateformat.Text = "MM'-'dd HH':'mm";
-            noda_dateformat.SelectedIndexChanged += comboBox9_SelectedIndexChanged;
-            noda_dateformat.TextChanged += comboBox9_SelectedIndexChanged;
+            noda_dateformat.SelectedIndexChanged += noda_dateformat_SelectedIndexChanged;
+            noda_dateformat.TextChanged += noda_dateformat_SelectedIndexChanged;
             // 
             // normal_dateformat
             // 

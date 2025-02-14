@@ -131,60 +131,73 @@ END:VCALENDAR</value>
   <data name="claude" xml:space="preserve">
     <value>/* ==UserStyle==
 @name         Claude.ai BGedit
-@namespace    Claude.ai 
-@author       your name
-@description  change　BG data on your claude  Background image with Base64 JPEG by sokudon.s17.xrea.com/base64.html   /   github.com/sokudon/tzzone_ZIC_neta/tree/master/bin/Release/net8.0-windows7.0
-@version      20250207
+@namespace    Claude.ai BGedit
+@author       -----
+@description  change　BG data on your claude  Background image with Base64  by  github.com/sokudon/tzzone_ZIC_neta
+@version      20250214
 ==/UserStyle== */
+
 @-moz-document url-prefix("https://claude.ai/chat") {
-    .flex-row-reverse {
-        /*アイコン */
-        background-color: #17f0cf26 !important
-    }
-    .bg-bg-200 {
-        /*サイドメニュー */
-        background-color: #2e50d826 !important
-    }
-    .flex_col {
-        /*アイコン右上 */
-        background-color: #12e11321 !important
-    }
+.flex-row-reverse {
+    /*アイコン */
+    background-color: #0359c7c9 !important
+}
+.bg-bg-200 {
+    /*サイドメニュー */
+    background-color: #2e50d826 !important
+}
+.flex_col {
+    /*アイコン右上 */
+    background-color: #049e05ba !important
+}
 
-    flex-1 {
-        /*アイコン右上 */
-        background-color: #c0b71726 !important
-    }
+flex-1 {
+    /*アイコン右上 */
+    background-color: #c0b71726 !important
+}
 
-    [data-theme=claude],
-    [data-theme=claude][data-mode=light] {
+[data-theme=claude],
+[data-theme=claude][data-mode=light] {
 
-        --bg-000: #60dcd5d6;
-        --bg-100: #5bf0eede;
-        --bg-200: #5b94f0f2;
-        --bg-300: #62286042;
-        --bg-400: #62286242;
-        --bg-500: #62285842;
-    }
-    .font-user-message {
+    --bg-000: #60dcd5d6;
+    --bg-100: #5bf0eede;
+    --bg-200: #5b94f0f2;
+    --bg-300: #62286042;
+    --bg-400: #62286242;
+    --bg-500: #62285842;
+}
+/*ユーザー*/
+.font-user-message {
 
-        background-color: #9393b2db;
-    }
-    .font-claude-message {
-        background-color: #5bf0efdb;
-    }
-    .code-block__code {
-        opacity: 0.8;
-    }
+    background-color: #e1bf5be8;
+}
+/*クロードメッセ */
+.font-claude-message {
+    background-color: #f0a15be6;
+}
+/*コード内 */
+.code-block__code {
+    opacity: 0.7;
+}
 
-    .overflow-hidden {
-        /*   .tracking-tight   w-full  .overflow-hidden   .flex-1
-        opacity: 0.7;*/
-        background-size: auto;
-        background: url(data:image/jpeg;base64,</value>
+/*↓背景絵のアルファ */
+.sticky,
+.overflow-x-hidden {
+
+    background: #ffffff6e;
+}
+
+
+/*背景絵のCORSなのでbase64推奨() */
+.overflow-hidden {
+    /*   .tracking-tight   w-full         opacity: 0.7;*/
+    background-size: auto;
+    background: url(data:image/jpeg;base64,</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="syougtu_kurinuki" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\syougtu_kurinuki.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <comment>正月ミクさん</comment>
   </data>
   <data name="gemini" xml:space="preserve">
     <value>@-moz-document url-prefix("https://gemini.google.com/") {
@@ -210,5 +223,9 @@ url(data:image/jpeg;base64,</value>
   </data>
   <data name="base64jpg" xml:space="preserve">
     <value>data:image/jpeg;base64,</value>
+  </data>
+  <data name="hosikuzu" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\hosikuzu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <comment>星屑ハンター</comment>
   </data>
 </root>

@@ -1,28 +1,28 @@
-﻿using System;
-using System.Text;
-using System.Windows.Forms;
-using System.Net;
-using System.IO;
-using System.Text.RegularExpressions;
-using Codeplex.Data;
+﻿using Codeplex.Data;
 using Microsoft.Win32;
-using TZPASER;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Text.Json;
+using neta.Properties;
+using Newtonsoft.Json.Linq;
 using NodaTime;
 using NodaTime.Text;
-using neta.Properties;
-using System.Net.Http;
-using Newtonsoft.Json.Linq;
 using OBSWebsocketDotNet;
-using Newtonsoft.Json;
-using System.Globalization;
-using System.Threading;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Imaging;
-using System.Net.NetworkInformation;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Input;
+using System.Windows.Shapes;
+using TZPASER;
 
 namespace neta
 {
@@ -231,36 +231,24 @@ namespace neta
 
             this.panel2.Visible = Properties.Settings.Default.uihide;
             ぱねる１似合わせるToolStripMenuItem.Checked = Properties.Settings.Default.image_Stretch;
+            hide_under_panel.Checked = Properties.Settings.Default.uihide;
+
+            this.正月ミクさん.Checked = Properties.Settings.Default.syougautmiku;
+            this.星屑ハンターの双子.Checked = Properties.Settings.Default.hosikuzuhunter;
 
 
             Properties.Settings.Default.system_tz = TimeZoneInfo.Local.Id;
 
-            if (File.Exists(Properties.Settings.Default.lastimagefile))
-            {
-                try
-                {
-                    // 画像を直接パネルの背景として設定
-                    panel1.BackgroundImage = System.Drawing.Image.FromFile(Properties.Settings.Default.lastimagefile);
-                    panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString());
-                }
-            }
-            else if (Properties.Settings.Default.lastimagefile == "null")
-            {
-                try
-                {
-                    // 画像を直接パネルの背景として設定
-                    panel1.BackgroundImage = Resources.syougtu_kurinuki;
-                    panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString());
-                }
+            LoadIni();
 
+            if (comboBox1.SelectedItem != null)
+            {
+                string key = comboBox1.SelectedItem.ToString();
+                if (HasImagePath(key))
+                {
+                    read_picture(imagePaths[key].ToString());
+                    Properties.Settings.Default.lastimagefile = imagePaths[key];
+                }
             }
 
 
@@ -896,8 +884,43 @@ namespace neta
             form2.Dispose();
         }
 
+        // 現在選択されているコンボボックス項目の画像パスが存在するか確認
+        public bool HasCurrentImagePath()
+        {
+            if (comboBox1.SelectedItem == null) return false;
+            return HasImagePath(comboBox1.SelectedItem.ToString());
+        }
+        // 画像パスが存在するか確認
+        public bool HasImagePath(string key)
+        {
+            return imagePaths.ContainsKey(key) && !string.IsNullOrEmpty(imagePaths[key]);
+        }
+
+        // 画像パスを取得（存在しない場合はnullを返す）
+        public string GetImagePath(string key)
+        {
+            return HasImagePath(key) ? imagePaths[key] : null;
+        }
+
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+
+            if (comboBox1.SelectedItem != null)
+            {
+                string key = comboBox1.SelectedItem.ToString();
+                if (HasImagePath(key))
+                {
+                    read_picture(imagePaths[key].ToString());
+                    Properties.Settings.Default.lastimagefile = imagePaths[key];
+                }
+                else
+                {
+                    panel1.BackgroundImage = null;          // 背景画像を削除
+                    panel1.BackColor = this.BackColor;
+                    panel1.Invalidate();                    // 再描画をリクエスト
+                }
+            }
+
             if (comboBox1.Text == "フリー入力")
             {
                 ibemei.Text = Properties.Settings.Default.freeevent;
@@ -911,6 +934,8 @@ namespace neta
                 button3_Click(sender, e);
                 return;
             }
+
+
 
             try
             {
@@ -1321,6 +1346,40 @@ namespace neta
             }
         }
 
+        public static string GetDefaultBrowser()
+        {
+            string browser = string.Empty;
+            RegistryKey key = null;
+            try
+            {
+                key = Registry.ClassesRoot.OpenSubKey(@"HTTP\shell\open\command", false);
+
+                if (key != null)
+                {
+                    // デフォルトブラウザのパスを取得
+                    browser = key.GetValue(null).ToString().ToLower();
+
+                    // コマンドライン引数を削除
+                    if (!string.IsNullOrEmpty(browser))
+                    {
+                        browser = browser.Split('"')[1];
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"エラー: {ex.Message}");
+            }
+            finally
+            {
+                if (key != null)
+                {
+                    key.Close();
+                }
+            }
+            return browser;
+        }
+
         private void wEBたいまーToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DateTime st;
@@ -1328,20 +1387,20 @@ namespace neta
             string sst = ",";
             string sen = ",";
             string format = "yyyy-MM-dd'T'HH:mm:ssZ";
-            if (DateTime.TryParse(startbox.Text, out st))
+            if (TryParseDateTimeCutom(startbox.Text, out st))
             {
                 sst = st.ToUniversalTime().ToString(format);
-                sst = Uri.EscapeDataString(sst) + ",";
             }
-            if (DateTime.TryParse(endbox.Text, out en))
+            if (TryParseDateTimeCutom(endbox.Text, out en))
             {
                 sen = en.ToUniversalTime().ToString(format);
                 sen = Uri.EscapeDataString(sen) + ",";
             }
             string gamename = Uri.EscapeDataString(ibemei.Text) + ",";
-            string url = "http://sokudon.s17.xrea.com/neta/imm.html#";// NAME,START,END,OS,";
+
+            string url = "https://ss1.xrea.com/sokudon.s17.xrea.com/neta/imm.html#";// NAME,START,END,OS,";
             url = url + gamename + sst + sen + "OS,";
-            System.Diagnostics.Process.Start(url);
+            System.Diagnostics.Process.Start(GetDefaultBrowser(), url);
 
         }
 
@@ -1359,11 +1418,11 @@ namespace neta
             string sst = ",";
             string sen = ",";
             string format = "yyyy-MM-dd'T'HH:mm:ssZ";
-            if (DateTime.TryParse(startbox.Text, out st))
+            if (TryParseDateTimeCutom(startbox.Text, out st))
             {
                 sst = st.ToUniversalTime().ToString(format);
             }
-            if (DateTime.TryParse(endbox.Text, out en))
+            if (TryParseDateTimeCutom(endbox.Text, out en))
             {
                 sen = en.ToUniversalTime().ToString(format);
             }
@@ -1395,17 +1454,11 @@ namespace neta
             {
                 Console.WriteLine(ex.ToString());
             }
-
         }
 
-        private void oBSタイマーToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void wEBせかいどけいToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //http://sokudon.s17.xrea.com/sekai-dere.html#%5B%E3%83%9F%E3%83%AA%E3%82%B7%E3%82%BF%5D%EC%95%84%EC%9D%B4%EB%8F%8C%EB%A7%88%EC%8A%A4%ED%84%B0%20%EB%B0%80%EB%A6%AC%EC%96%B8%20%EB%9D%BC%EC%9D%B4%EB%B8%8C!%20%EC%8B%9C%EC%96%B4%ED%84%B0%20%EB%8D%B0%EC%9D%B4%EC%A6%88%EC%9B%94%EC%9A%94%EC%9D%BC%20%ED%81%AC%EB%A6%BC%20%EC%86%8C%EB%8B%A4,2021-02-19T15%3A00%3A00%2B09%3A00,2021-02-26T21%3A00%3A00%2B09%3A00,M$E6,KST308
             DateTime st;
             DateTime en;
             string sst = ",";
@@ -1422,7 +1475,8 @@ namespace neta
                 sen = Uri.EscapeDataString(sen) + ",";
             }
             string gamename = Uri.EscapeDataString(ibemei.Text) + ",";
-            string url = "http://sokudon.s17.xrea.com/sekai-dere.html#";
+
+            string url = "https://ss1.xrea.com/sokudon.s17.xrea.com/sekai_miku.html#";
             url = url + gamename + sst + sen;
             string ms = Properties.Settings.Default.useutczone;
             Match m = Regex.Match(ms, "M\\$.+$");
@@ -1431,7 +1485,7 @@ namespace neta
                 url += m.Value;
             }
 
-            System.Diagnostics.Process.Start(url);
+            System.Diagnostics.Process.Start(GetDefaultBrowser(), url);
 
         }
 
@@ -1473,7 +1527,7 @@ namespace neta
                 .Replace("2020-05-07T21:00:00+09:00", sen)
                 .Replace("%H:%m:%s", "%d %hh:%mm:%ss")
                 .Replace("%Y/%m/%d %H:%M:%S", "%Y-%m-%d(%a)%H:%M:%S(GMT%z)")
-                .Replace("%T%n経過時間%K%n残り時間%L%nイベント時間%I%n現地時間%N%n日本時間%JST%n達成率%P%nS %S%nE %E%n%nSJ %SJ%nEJ %EJ%n%nSU %SU%nEU %EU", "日本時間%JST%n経過時間%K%n残り時間%L%nイベント時間%I%n%T%P％%n%Q")
+                .Replace("%T%n経過時間%K%n残り時間%L%nイベント時間%I%n現地時間%N%n日本時間%JST%n達成率%P%nS %S%nE %E%n%nSJ %SJ%nEJ %EJ%n%nSU %SU%nEU %EU", "日本時間%JST\\n経過時間%K\\n残り時間%L\\nイベント時間%I%\\n%T%P％\\n%Q")
                 .Replace("bar\", 1", "bar\",2");
 
             string path = @"obs_neta_timer.lua";
@@ -1544,15 +1598,11 @@ namespace neta
 
         private void 下パネルを隠すToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            panel2.Visible = false;
-            Properties.Settings.Default.uihide = false;
+            Properties.Settings.Default.uihide = !panel2.Visible;
+            hide_under_panel.Checked = !panel2.Visible;
+            panel2.Visible = !panel2.Visible;
         }
 
-        private void 下パネルを表示ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            panel2.Visible = true;
-            Properties.Settings.Default.uihide = true;
-        }
 
         private void クロマキー設定_Click(object sender, EventArgs e)
         {
@@ -1584,7 +1634,7 @@ namespace neta
             protected override void OnPaint(PaintEventArgs e)
             {
                 // 背景を描画
-                Rectangle rect = this.ClientRectangle;
+                System.Drawing.Rectangle rect = this.ClientRectangle;
                 e.Graphics.FillRectangle(Brushes.White, rect);
 
                 // プログレスバーの塗りつぶし部分を描画
@@ -2153,6 +2203,53 @@ namespace neta
             return false;
         }
 
+        private void read_picture(string s)
+        {
+            try
+            {
+                if (s == "null")
+                {
+                    if (正月ミクさん.Checked) { panel1.BackgroundImage = Resources.syougtu_kurinuki; }
+                    if (星屑ハンターの双子.Checked) { panel1.BackgroundImage = Resources.hosikuzu; }
+                    panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                    panel1.BackColor = this.BackColor;
+                    panel1.Invalidate();                    // 再描画をリクエスト
+                    return;
+                }
+                if (s == "none")
+                {
+                    panel1.BackgroundImage = null;          // 背景画像を削除
+                    panel1.BackColor = this.BackColor;
+                    panel1.Invalidate();                    // 再描画をリクエスト
+                    return;
+                }
+                if (File.Exists(s))
+                {
+                    // 画像を直接パネルの背景として設定
+                    panel1.BackgroundImage = System.Drawing.Image.FromFile(s);
+                    if (ぱねる１似合わせるToolStripMenuItem.Checked)
+                    {
+                        panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                    }
+                    else
+                    {
+                        panel1.BackgroundImageLayout = ImageLayout.Tile;
+
+                    }
+
+                    Properties.Settings.Default.lastimagefile = s;
+
+                    SaveIni();
+                }
+            }
+            catch (Exception ex)
+            {
+
+
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
         private void 画像ToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
@@ -2160,7 +2257,7 @@ namespace neta
 
             //はじめに表示されるフォルダを指定する
             //指定しない（空の文字列）の時は、現在のディレクトリが表示される
-            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
+            ofd.InitialDirectory = System.IO.Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
 
             ofd.Filter = "すべての対応画像|*.bmp;*.jpg;*.jpeg;*.gif;*.png;*.tiff;*.ico|" +
                      "BMP 画像 (*.bmp)|*.bmp|" +
@@ -2185,42 +2282,100 @@ namespace neta
 
 
                 string s = ofd.FileName;
-
-                try
-                {
-
-                    // 画像を直接パネルの背景として設定
-                    panel1.BackgroundImage = System.Drawing.Image.FromFile(s);
-                    if (ぱねる１似合わせるToolStripMenuItem.Checked)
-                    {
-                        panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
-                    }
-                    else
-                    {
-                        panel1.BackgroundImageLayout = ImageLayout.Tile;
-
-                    }
-
-                    Properties.Settings.Default.lastimagefile = s;
-                }
-                catch (Exception ex)
-                {
-
-
-                    MessageBox.Show(ex.ToString());
-                }
+                string key = comboBox1.SelectedItem.ToString();
+                imagePaths[key] = ofd.FileName;
+                read_picture(s);
             }
 
+        }
 
+        private Dictionary<string, string> imagePaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+        };
+        private const string INI_FILE = "imagePaths.ini";
+
+        // INI形式で保存
+        private void SaveIni()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(INI_FILE))
+                {
+                    writer.WriteLine("[ImagePaths]");
+                    foreach (var pair in imagePaths)
+                    {
+                        writer.WriteLine($"{pair.Key}={pair.Value}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"INIの保存に失敗しました: {ex.Message}");
+            }
+        }
+
+        private void UpdatePictureBox()
+        {
+            if (comboBox1.SelectedItem != null)
+            {
+                string key = comboBox1.SelectedItem.ToString();
+                if (imagePaths.ContainsKey(key))
+                {
+                    read_picture(imagePaths[key]);
+                }
+            }
+        }
+
+        // INI形式で読み込み
+        private void LoadIni()
+        {
+            if (!File.Exists(INI_FILE)) return;
+
+            try
+            {
+                imagePaths.Clear();
+                string[] lines = File.ReadAllLines(INI_FILE);
+                bool inImagePathsSection = false;
+
+                foreach (string line in lines)
+                {
+                    if (line.Trim().StartsWith("["))
+                    {
+                        inImagePathsSection = line.Trim() == "[ImagePaths]";
+                        continue;
+                    }
+
+                    if (inImagePathsSection && line.Contains("="))
+                    {
+                        string[] parts = line.Split(new[] { '=' }, 2);
+                        if (parts.Length == 2)
+                        {
+                            imagePaths[parts[0].Trim()] = parts[1].Trim();
+                        }
+                    }
+                }
+                UpdatePictureBox();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"INIの読み込みに失敗しました: {ex.Message}");
+            }
         }
 
         private void でふぉるとにもどす正月みくToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            panel1.BackgroundImage = Resources.syougtu_kurinuki;          // 背景画像を削除
+
+            if (正月ミクさん.Checked) { panel1.BackgroundImage = Resources.syougtu_kurinuki; }     
+            if(星屑ハンターの双子.Checked){ panel1.BackgroundImage = Resources.hosikuzu;  }
+
             panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
             panel1.BackColor = this.BackColor;
             panel1.Invalidate();                    // 再描画をリクエスト
             Properties.Settings.Default.lastimagefile = "null";
+
+            string key = comboBox1.SelectedItem.ToString();
+            imagePaths[key] = "null";
+            SaveIni();
         }
 
         private void 画像なしToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2229,6 +2384,10 @@ namespace neta
             panel1.BackColor = this.BackColor;
             panel1.Invalidate();                    // 再描画をリクエスト
             Properties.Settings.Default.lastimagefile = "";
+
+            string key = comboBox1.SelectedItem.ToString();
+            imagePaths[key] = "none";
+            SaveIni();
         }
 
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -2461,6 +2620,12 @@ namespace neta
         {
             ぱねる１似合わせるToolStripMenuItem.Checked = !ぱねる１似合わせるToolStripMenuItem.Checked;
             Properties.Settings.Default.image_Stretch = ぱねる１似合わせるToolStripMenuItem.Checked;
+
+            string ss=Properties.Settings.Default.lastimagefile;
+            if(ss =="null" || ss =="none")
+            {
+                return;
+            }
 
             try
             {
@@ -2873,7 +3038,7 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
 
             //はじめに表示されるフォルダを指定する
             //指定しない（空の文字列）の時は、現在のディレクトリが表示される
-            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
+            ofd.InitialDirectory = System.IO.Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
 
             ofd.Filter = "すべての対応画像|*.bmp;*.jpg;*.jpeg;*.gif;*.png;*.tiff;*.ico|" +
                      "BMP 画像 (*.bmp)|*.bmp|" +
@@ -2944,7 +3109,193 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             }
         }
 
+        private void luascripttzselectedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Properties.Settings.Default.TZJSON == "")
+            {
+                MessageBox.Show("tzdatebaseバイナリ" +
+                    "が読まれてません");
+                return;
+            }
+
+
+            string url = "https://raw.githubusercontent.com/sokudon/miku/refs/heads/master/neta/obsduration_timer_39usatz.lua";
+            WebClient wc = new WebClient();
+            wc.Encoding = Encoding.UTF8;
+            string text = wc.DownloadString(url);
+            DateTime st;
+            DateTime en;
+            string sst = ",";
+            string sen = ",";
+            string format = "yyyy-MM-dd'T'HH:mm:ssZ";
+
+            if (TryParseDateTimeCutom(startbox.Text, out st))
+            {
+                sst = st.ToUniversalTime().ToString(format);
+            }
+            if (TryParseDateTimeCutom(endbox.Text, out en))
+            {
+                sen = en.ToUniversalTime().ToString(format);
+            }
+
+            text = text.Replace("でれすて", ibemei.Text)
+               .Replace("2020-04-30T12:00:00+09:00", sst)
+               .Replace("2020-05-07T21:00:00+09:00", sen)
+               .Replace("%H:%m:%s", "%d %hh:%mm:%ss")
+               .Replace("%Y/%m/%d %H:%M:%S", "%Y-%m-%d(%a)%H:%M:%S(GMT%z)")
+               .Replace("%T%n経過時間%K%n残り時間%L%nイベント時間%I%n現地時間%N%n日本時間%JST%n達成率%P%nS %S%nE %E%n%nSJ %SJ%nEJ %EJ%n%nSU %SU%nEU %EU", "NOW:%TZ\\nEND:%EE\\nLEFT:%L\\nSPAN:%I%\\n%T%P％\\n%Q")
+               .Replace("bar\", 1", "bar\",2");
+
+            string[] rp = [];
+
+            text = ConvertTimeZoneData(text, rp);
+
+            if (text == "")
+            {
+
+
+            }
+
+            string tzst = Properties.Settings.Default.usetzdatabin.Replace("/", "_").Replace("/", "_");
+
+            string path = $"obs_neta_timer_tz_{tzst}.lua";
+
+            try
+            {
+                // Create the file, or overwrite if the file exists.
+                using (FileStream fs = File.Create(path))
+                {
+                    byte[] info = new UTF8Encoding(true).GetBytes(text);
+                    // Add some information to the file.
+                    fs.Write(info, 0, info.Length);
+                    fs.Close();
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+
+
+        public static string ConvertTimeZoneData(string data, string[] rp)
+        {
+            try
+            {
+                // JSONパース
+                TimeZoneData tzData = System.Text.Json.JsonSerializer.Deserialize<TimeZoneData>(Properties.Settings.Default.TZJSON);
+
+                // TimeZoneTransitionsインスタンスを作成
+                TimeZoneTransitions tzTransitions = new TimeZoneTransitions(
+                    tzData.TransList,
+                    tzData.Offsets,
+                    tzData.Abbrs
+                );
+
+
+
+
+                string tzst = Properties.Settings.Default.usetzdatabin;
+                // Replace timezone name
+                data = data.Replace("America/Los_Angeles", tzst);
+                data = data.Replace("ロサンゼルス", tzst);
+                data = data.Replace("--//! github.com/moment/moment-timezone", "--converted tzif binary timezezone:");
+
+                // Extract country/city name
+                string cut_country = Regex.Replace(tzst, @"^.*?/", "").Replace("_", "");
+
+
+                // Replace town name
+                data = data.Replace("town_name = \"LA\"", $"town_name = \"{cut_country}\"");
+
+                // Update report placeholders
+                if (rp != null && rp.Length > 1)
+                {
+                    rp[1] = rp[1].Replace("%%K", "");
+                    rp[1] = rp[1].Replace("%UTC", "%TZ");
+                    rp[1] = rp[1].Replace("%EU", "%EE");
+                }
+
+                // 正規表現で --//! で始まる行を削除
+                data = Regex.Replace(data, @"^--//!.*$\n?", "", RegexOptions.Multiline);
+
+                // 新しいリストとして保存する場合
+                //https://claude.ai/chat/4b396f51-3b68-46c0-b142-5be690ae83be
+                string abbrsString = string.Join(",", tzTransitions.abbrs.Select(x => $"\"{x}\""));
+                List<double> convertedOffsets = tzTransitions.offsets.Select(x => x * -60).ToList();
+                List<long> convertedTrans = tzTransitions.transList.Select(x => x * 1000).ToList();
+                string UTC = "\"UTC\",";
+                string ut = "0,";
+                string comma = ",";
+                string y_st = Properties.Settings.Default.stfilter;
+                string y_en = Properties.Settings.Default.enfilter;
+                bool isUseFilter = Properties.Settings.Default.usefiler;
+                if (isUseFilter == false)
+                {
+                    y_st = "";
+                    y_en = "";
+                }
+                if (convertedTrans.Count < 2)
+                {
+                    UTC = "";
+                    ut = "";
+                    comma = "";
+                    y_st = "";
+                    y_en = "";
+                }
+
+                // Replace timezone abbreviations
+                data = data.Replace("{PST PDT}",
+                   "{" + $"{UTC}" + abbrsString.Trim('[', ']') + "}");
+
+                // Replace until values
+                data = data.Replace("{1520762400000 1541322000000}",
+                    "{" + string.Join(",", convertedTrans).Trim('[', ']') + $"{comma}math.huge" + "}");
+
+                // Replace offset values
+                data = data.Replace("{480,420}",
+                    "{" + $"{ut}" + string.Join(",", convertedOffsets) + "}");
+
+                // Replace empty objects and null values
+                data = data.Replace("{}", "{\"\"}")
+                    .Replace("null}", "math_huge}")
+                    .Replace("null", "nil");
+
+                // Replace timezone information
+                data = Regex.Replace(data, "%TIMEZONE",
+                    $"%TZ %SS %EE TZbinary {y_st} {y_en} {tzst} のみ移植されてます(実験的)");
+
+                return data;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return "";
+            }
+        }
+
+        private void 正月ミクさん_Click(object sender, EventArgs e)
+        {
+            正月ミクさん.Checked = true;
+            星屑ハンターの双子.Checked = false;
+            Properties.Settings.Default.syougautmiku = true;
+            Properties.Settings.Default.hosikuzuhunter = false;
+            でふぉるとにもどす正月みくToolStripMenuItem_Click(sender, e);
+        }
+
+        private void 星屑ハンターの双子_Click(object sender, EventArgs e)
+        {
+
+            星屑ハンターの双子.Checked = true;
+            正月ミクさん.Checked = false;
+            Properties.Settings.Default.syougautmiku = false;
+            Properties.Settings.Default.hosikuzuhunter = true;
+            でふぉるとにもどす正月みくToolStripMenuItem_Click(sender, e);
+        }
     }
+
 }
 
 

@@ -72,17 +72,24 @@ namespace neta.Properties {
         /// <summary>
         ///   /* ==UserStyle==
         ///@name         Claude.ai BGedit
-        ///@namespace    Claude.ai 
-        ///@author       your name
-        ///@description  change　BG data on your claude  Background image with Base64 JPEG by sokudon.s17.xrea.com/base64.html   /   github.com/sokudon/tzzone_ZIC_neta/tree/master/bin/Release/net8.0-windows7.0
-        ///@version      20250207
+        ///@namespace    Claude.ai BGedit
+        ///@author       -----
+        ///@description  change　BG data on your claude  Background image with Base64  by  github.com/sokudon/tzzone_ZIC_neta
+        ///@version      20250214
         ///==/UserStyle== */
+        ///
         ///@-moz-document url-prefix(&quot;https://claude.ai/chat&quot;) {
-        ///    .flex-row-reverse {
-        ///        /*アイコン */
-        ///        background-color: #17f0cf26 !important
-        ///    }
-        ///    .bg-bg-200  [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///.flex-row-reverse {
+        ///    /*アイコン */
+        ///    background-color: #0359c7c9 !important
+        ///}
+        ///.bg-bg-200 {
+        ///    /*サイドメニュー */
+        ///    background-color: #2e50d826 !important
+        ///}
+        ///.flex_col {
+        ///    /*アイコン右上 */
+        ///   [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string claude {
             get {
@@ -112,6 +119,16 @@ namespace neta.Properties {
         internal static string gemini {
             get {
                 return ResourceManager.GetString("gemini", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap hosikuzu {
+            get {
+                object obj = ResourceManager.GetObject("hosikuzu", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

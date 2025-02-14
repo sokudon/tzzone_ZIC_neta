@@ -98,9 +98,9 @@ namespace TZPASER
 
     public class TimeZoneTransitions
     {
-        private List<long> transList;
-        private List<double> offsets;
-        private List<string> abbrs;
+        public List<long> transList;
+        public List<double> offsets;
+        public List<string> abbrs;
 
         public TimeZoneTransitions(List<long> transList, List<double> offsets, List<string> abbrs)
         {
@@ -443,7 +443,7 @@ namespace TZPASER
                     bool use_zoneparse = neta.Properties.Settings.Default.local_chager;
 
 
-                    string format = "yyyy-MM-ddTHH:mm:sszzz";
+                    //string format = "yyyy-MM-ddTHH:mm:sszzz";
                     Regex iso = new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$"); // ISO 8601
                     if (iso.IsMatch(input)  || (use_zoneparse == false) ||　(utc == false && ms == false && tz == false && nd==false)
                         )

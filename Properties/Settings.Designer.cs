@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/02/07")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/02/14")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -494,7 +494,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool uihide {
             get {
                 return ((bool)(this["uihide"]));
@@ -993,6 +993,30 @@ namespace neta.Properties {
             }
             set {
                 this["locale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool syougautmiku {
+            get {
+                return ((bool)(this["syougautmiku"]));
+            }
+            set {
+                this["syougautmiku"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool hosikuzuhunter {
+            get {
+                return ((bool)(this["hosikuzuhunter"]));
+            }
+            set {
+                this["hosikuzuhunter"] = value;
             }
         }
     }

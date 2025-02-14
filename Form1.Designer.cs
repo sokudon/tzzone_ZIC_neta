@@ -60,15 +60,18 @@
             時刻設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             外部つーるへエクスポートToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             oBSタイマーToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            luascriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             pythonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            luascriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            luascripttzselectedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ぱいそんたいまーToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             wEBたいまーToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             wEBせかいどけいToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem7 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItem8 = new System.Windows.Forms.ToolStripMenuItem();
             netaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             色の設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            下パネルを隠すToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            下パネルを表示ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            hide_under_panel = new System.Windows.Forms.ToolStripMenuItem();
             クロマキー設定 = new System.Windows.Forms.ToolStripMenuItem();
             めにゅーの色に戻すToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             カラーキー今のメニューToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -78,12 +81,11 @@
             フォントToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             画像ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             でふぉるとにもどす正月みくToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            正月ミクさん = new System.Windows.Forms.ToolStripMenuItem();
+            星屑ハンターの双子 = new System.Windows.Forms.ToolStripMenuItem();
             画像を選択ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             画像なしToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             ぱねる１似合わせるToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            imgtobase64 = new System.Windows.Forms.ToolStripMenuItem();
-            geminiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            claudeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
@@ -427,32 +429,38 @@
             // 
             // 外部つーるへエクスポートToolStripMenuItem
             // 
-            外部つーるへエクスポートToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { oBSタイマーToolStripMenuItem, ぱいそんたいまーToolStripMenuItem, wEBたいまーToolStripMenuItem, wEBせかいどけいToolStripMenuItem });
+            外部つーるへエクスポートToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { oBSタイマーToolStripMenuItem, ぱいそんたいまーToolStripMenuItem, wEBたいまーToolStripMenuItem, wEBせかいどけいToolStripMenuItem, toolStripMenuItem2 });
             外部つーるへエクスポートToolStripMenuItem.Name = "外部つーるへエクスポートToolStripMenuItem";
             外部つーるへエクスポートToolStripMenuItem.Size = new System.Drawing.Size(90, 24);
             外部つーるへエクスポートToolStripMenuItem.Text = "えくすぽーと";
             // 
             // oBSタイマーToolStripMenuItem
             // 
-            oBSタイマーToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { luascriptToolStripMenuItem, pythonToolStripMenuItem });
+            oBSタイマーToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { pythonToolStripMenuItem, luascriptToolStripMenuItem, luascripttzselectedToolStripMenuItem });
             oBSタイマーToolStripMenuItem.Name = "oBSタイマーToolStripMenuItem";
             oBSタイマーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
             oBSタイマーToolStripMenuItem.Text = "OBSたいまーぷらぐいん";
-            oBSタイマーToolStripMenuItem.Click += oBSタイマーToolStripMenuItem_Click;
-            // 
-            // luascriptToolStripMenuItem
-            // 
-            luascriptToolStripMenuItem.Name = "luascriptToolStripMenuItem";
-            luascriptToolStripMenuItem.Size = new System.Drawing.Size(148, 26);
-            luascriptToolStripMenuItem.Text = "luascript";
-            luascriptToolStripMenuItem.Click += luascriptToolStripMenuItem_Click;
             // 
             // pythonToolStripMenuItem
             // 
             pythonToolStripMenuItem.Name = "pythonToolStripMenuItem";
-            pythonToolStripMenuItem.Size = new System.Drawing.Size(148, 26);
+            pythonToolStripMenuItem.Size = new System.Drawing.Size(317, 26);
             pythonToolStripMenuItem.Text = "python";
             pythonToolStripMenuItem.Click += pythonToolStripMenuItem_Click;
+            // 
+            // luascriptToolStripMenuItem
+            // 
+            luascriptToolStripMenuItem.Name = "luascriptToolStripMenuItem";
+            luascriptToolStripMenuItem.Size = new System.Drawing.Size(317, 26);
+            luascriptToolStripMenuItem.Text = "luascript";
+            luascriptToolStripMenuItem.Click += luascriptToolStripMenuItem_Click;
+            // 
+            // luascripttzselectedToolStripMenuItem
+            // 
+            luascripttzselectedToolStripMenuItem.Name = "luascripttzselectedToolStripMenuItem";
+            luascripttzselectedToolStripMenuItem.Size = new System.Drawing.Size(317, 26);
+            luascripttzselectedToolStripMenuItem.Text = "luascript+tz_selected(bisect only))";
+            luascripttzselectedToolStripMenuItem.Click += luascripttzselectedToolStripMenuItem_Click;
             // 
             // ぱいそんたいまーToolStripMenuItem
             // 
@@ -475,35 +483,52 @@
             wEBせかいどけいToolStripMenuItem.Text = "WEBせかいどけい";
             wEBせかいどけいToolStripMenuItem.Click += wEBせかいどけいToolStripMenuItem_Click;
             // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItem7, toolStripMenuItem8 });
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new System.Drawing.Size(222, 26);
+            toolStripMenuItem2.Text = "base64に変換する";
+            toolStripMenuItem2.Click += imgtobase64_Click;
+            // 
+            // toolStripMenuItem7
+            // 
+            toolStripMenuItem7.Name = "toolStripMenuItem7";
+            toolStripMenuItem7.Size = new System.Drawing.Size(157, 26);
+            toolStripMenuItem7.Text = "gemini2.0";
+            toolStripMenuItem7.Click += gemini20ToolStripMenuItem_Click;
+            // 
+            // toolStripMenuItem8
+            // 
+            toolStripMenuItem8.Name = "toolStripMenuItem8";
+            toolStripMenuItem8.Size = new System.Drawing.Size(157, 26);
+            toolStripMenuItem8.Text = "claude3.5";
+            toolStripMenuItem8.Click += claude35ToolStripMenuItem_Click;
+            // 
             // netaToolStripMenuItem
             // 
             netaToolStripMenuItem.Name = "netaToolStripMenuItem";
-            netaToolStripMenuItem.Size = new System.Drawing.Size(201, 24);
-            netaToolStripMenuItem.Text = "tzdata_neta zic binary view";
+            netaToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+            netaToolStripMenuItem.Text = "tzdata_Tzif_binary view";
             netaToolStripMenuItem.Click += netaToolStripMenuItem_Click;
             // 
             // 色の設定ToolStripMenuItem
             // 
             色の設定ToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
-            色の設定ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 下パネルを隠すToolStripMenuItem, 下パネルを表示ToolStripMenuItem, クロマキー設定, めにゅーの色に戻すToolStripMenuItem, カラーキー今のメニューToolStripMenuItem, カラーキーなしToolStripMenuItem, 文字白ToolStripMenuItem, 文字黒ToolStripMenuItem, フォントToolStripMenuItem, 画像ToolStripMenuItem, toolStripMenuItem1, かすたむToolStripMenuItem, バーの表示ToolStripMenuItem, うえのいろToolStripMenuItem, もとに戻すToolStripMenuItem, えいがみくさんみたいな文字化けもーど謎ToolStripMenuItem });
+            色の設定ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { hide_under_panel, クロマキー設定, めにゅーの色に戻すToolStripMenuItem, カラーキー今のメニューToolStripMenuItem, カラーキーなしToolStripMenuItem, 文字白ToolStripMenuItem, 文字黒ToolStripMenuItem, フォントToolStripMenuItem, 画像ToolStripMenuItem, toolStripMenuItem1, かすたむToolStripMenuItem, バーの表示ToolStripMenuItem, うえのいろToolStripMenuItem, もとに戻すToolStripMenuItem, えいがみくさんみたいな文字化けもーど謎ToolStripMenuItem });
             色の設定ToolStripMenuItem.ForeColor = System.Drawing.Color.Black;
             色の設定ToolStripMenuItem.Name = "色の設定ToolStripMenuItem";
             色の設定ToolStripMenuItem.Size = new System.Drawing.Size(131, 24);
             色の設定ToolStripMenuItem.Text = "色/めにゅーの設定";
             // 
-            // 下パネルを隠すToolStripMenuItem
+            // hide_under_panel
             // 
-            下パネルを隠すToolStripMenuItem.Name = "下パネルを隠すToolStripMenuItem";
-            下パネルを隠すToolStripMenuItem.Size = new System.Drawing.Size(440, 26);
-            下パネルを隠すToolStripMenuItem.Text = "下パネルを隠す";
-            下パネルを隠すToolStripMenuItem.Click += 下パネルを隠すToolStripMenuItem_Click;
-            // 
-            // 下パネルを表示ToolStripMenuItem
-            // 
-            下パネルを表示ToolStripMenuItem.Name = "下パネルを表示ToolStripMenuItem";
-            下パネルを表示ToolStripMenuItem.Size = new System.Drawing.Size(440, 26);
-            下パネルを表示ToolStripMenuItem.Text = "下パネルを表示";
-            下パネルを表示ToolStripMenuItem.Click += 下パネルを表示ToolStripMenuItem_Click;
+            hide_under_panel.Checked = true;
+            hide_under_panel.CheckState = System.Windows.Forms.CheckState.Checked;
+            hide_under_panel.Name = "hide_under_panel";
+            hide_under_panel.Size = new System.Drawing.Size(440, 26);
+            hide_under_panel.Text = "下パネル表示";
+            hide_under_panel.Click += 下パネルを隠すToolStripMenuItem_Click;
             // 
             // クロマキー設定
             // 
@@ -556,7 +581,7 @@
             // 
             // 画像ToolStripMenuItem
             // 
-            画像ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { でふぉるとにもどす正月みくToolStripMenuItem, 画像を選択ToolStripMenuItem, 画像なしToolStripMenuItem1, ぱねる１似合わせるToolStripMenuItem, imgtobase64 });
+            画像ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { でふぉるとにもどす正月みくToolStripMenuItem, 画像を選択ToolStripMenuItem, 画像なしToolStripMenuItem1, ぱねる１似合わせるToolStripMenuItem });
             画像ToolStripMenuItem.Name = "画像ToolStripMenuItem";
             画像ToolStripMenuItem.Size = new System.Drawing.Size(440, 26);
             画像ToolStripMenuItem.Text = "画像";
@@ -564,22 +589,39 @@
             // 
             // でふぉるとにもどす正月みくToolStripMenuItem
             // 
+            でふぉるとにもどす正月みくToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 正月ミクさん, 星屑ハンターの双子 });
             でふぉるとにもどす正月みくToolStripMenuItem.Name = "でふぉるとにもどす正月みくToolStripMenuItem";
-            でふぉるとにもどす正月みくToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
-            でふぉるとにもどす正月みくToolStripMenuItem.Text = "でふぉるとにもどす（正月みく）";
+            でふぉるとにもどす正月みくToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            でふぉるとにもどす正月みくToolStripMenuItem.Text = "ぷりせっと画像";
             でふぉるとにもどす正月みくToolStripMenuItem.Click += でふぉるとにもどす正月みくToolStripMenuItem_Click;
+            // 
+            // 正月ミクさん
+            // 
+            正月ミクさん.Checked = true;
+            正月ミクさん.CheckState = System.Windows.Forms.CheckState.Checked;
+            正月ミクさん.Name = "正月ミクさん";
+            正月ミクさん.Size = new System.Drawing.Size(224, 26);
+            正月ミクさん.Text = "正月ミクさん";
+            正月ミクさん.Click += 正月ミクさん_Click;
+            // 
+            // 星屑ハンターの双子
+            // 
+            星屑ハンターの双子.Name = "星屑ハンターの双子";
+            星屑ハンターの双子.Size = new System.Drawing.Size(224, 26);
+            星屑ハンターの双子.Text = "星屑ハンターの双子";
+            星屑ハンターの双子.Click += 星屑ハンターの双子_Click;
             // 
             // 画像を選択ToolStripMenuItem
             // 
             画像を選択ToolStripMenuItem.Name = "画像を選択ToolStripMenuItem";
-            画像を選択ToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
+            画像を選択ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             画像を選択ToolStripMenuItem.Text = "画像を選択";
             画像を選択ToolStripMenuItem.Click += 画像ToolStripMenuItem_Click;
             // 
             // 画像なしToolStripMenuItem1
             // 
             画像なしToolStripMenuItem1.Name = "画像なしToolStripMenuItem1";
-            画像なしToolStripMenuItem1.Size = new System.Drawing.Size(276, 26);
+            画像なしToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
             画像なしToolStripMenuItem1.Text = "画像なし";
             画像なしToolStripMenuItem1.Click += 画像なしToolStripMenuItem_Click;
             // 
@@ -588,31 +630,9 @@
             ぱねる１似合わせるToolStripMenuItem.Checked = true;
             ぱねる１似合わせるToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             ぱねる１似合わせるToolStripMenuItem.Name = "ぱねる１似合わせるToolStripMenuItem";
-            ぱねる１似合わせるToolStripMenuItem.Size = new System.Drawing.Size(276, 26);
+            ぱねる１似合わせるToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             ぱねる１似合わせるToolStripMenuItem.Text = "ぱねる１似合わせる";
             ぱねる１似合わせるToolStripMenuItem.Click += ぱねる１似合わせるToolStripMenuItem_Click;
-            // 
-            // imgtobase64
-            // 
-            imgtobase64.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { geminiToolStripMenuItem, claudeToolStripMenuItem });
-            imgtobase64.Name = "imgtobase64";
-            imgtobase64.Size = new System.Drawing.Size(276, 26);
-            imgtobase64.Text = "base64に変換する";
-            imgtobase64.Click += imgtobase64_Click;
-            // 
-            // geminiToolStripMenuItem
-            // 
-            geminiToolStripMenuItem.Name = "geminiToolStripMenuItem";
-            geminiToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            geminiToolStripMenuItem.Text = "gemini2.0";
-            geminiToolStripMenuItem.Click += gemini20ToolStripMenuItem_Click;
-            // 
-            // claudeToolStripMenuItem
-            // 
-            claudeToolStripMenuItem.Name = "claudeToolStripMenuItem";
-            claudeToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            claudeToolStripMenuItem.Text = "claude3.5";
-            claudeToolStripMenuItem.Click += claude35ToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -772,8 +792,7 @@
         private System.Windows.Forms.ToolStripMenuItem luascriptToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pythonToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 色の設定ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 下パネルを隠すToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 下パネルを表示ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem hide_under_panel;
         private System.Windows.Forms.ToolStripMenuItem クロマキー設定;
         private System.Windows.Forms.ToolStripMenuItem カラーキー今のメニューToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem カラーキーなしToolStripMenuItem;
@@ -807,9 +826,12 @@
         private System.Windows.Forms.ToolStripMenuItem 縺化け戻し;
         private System.Windows.Forms.Label error;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.ToolStripMenuItem imgtobase64;
-        private System.Windows.Forms.ToolStripMenuItem geminiToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem claudeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem7;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem8;
+        private System.Windows.Forms.ToolStripMenuItem luascripttzselectedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 正月ミクさん;
+        private System.Windows.Forms.ToolStripMenuItem 星屑ハンターの双子;
     }
 }
 
