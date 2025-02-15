@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/02/14</Value>
+      <Value Profile="(Default)">2025/02/15</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -250,6 +250,24 @@
     </Setting>
     <Setting Name="hosikuzuhunter" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ipadress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.1.100</Value>
+    </Setting>
+    <Setting Name="port" Type="System.String" Scope="User">
+      <Value Profile="(Default)">4455</Value>
+    </Setting>
+    <Setting Name="scene_name" Type="System.String" Scope="User">
+      <Value Profile="(Default)">scene2</Value>
+    </Setting>
+    <Setting Name="source_name" Type="System.String" Scope="User">
+      <Value Profile="(Default)">yume</Value>
+    </Setting>
+    <Setting Name="script_name" Type="System.String" Scope="User">
+      <Value Profile="(Default)">obsduration_timer.py</Value>
+    </Setting>
+    <Setting Name="request" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

@@ -29,6 +29,9 @@
     <Compile Update="Form6.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Form7.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">

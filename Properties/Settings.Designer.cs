@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/02/14")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/02/15")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -1017,6 +1017,78 @@ namespace neta.Properties {
             }
             set {
                 this["hosikuzuhunter"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.100")]
+        public string ipadress {
+            get {
+                return ((string)(this["ipadress"]));
+            }
+            set {
+                this["ipadress"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4455")]
+        public string port {
+            get {
+                return ((string)(this["port"]));
+            }
+            set {
+                this["port"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("scene2")]
+        public string scene_name {
+            get {
+                return ((string)(this["scene_name"]));
+            }
+            set {
+                this["scene_name"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("yume")]
+        public string source_name {
+            get {
+                return ((string)(this["source_name"]));
+            }
+            set {
+                this["source_name"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("obsduration_timer.py")]
+        public string script_name {
+            get {
+                return ((string)(this["script_name"]));
+            }
+            set {
+                this["script_name"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string request {
+            get {
+                return ((string)(this["request"]));
+            }
+            set {
+                this["request"] = value;
             }
         }
     }

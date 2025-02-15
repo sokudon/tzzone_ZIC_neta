@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using NodaTime;
 using NodaTime.Text;
 using OBSWebsocketDotNet;
+using OBSWebsocketDotNet.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -23,6 +24,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Shapes;
 using TZPASER;
+using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace neta
 {
@@ -2365,8 +2368,8 @@ namespace neta
         private void でふぉるとにもどす正月みくToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            if (正月ミクさん.Checked) { panel1.BackgroundImage = Resources.syougtu_kurinuki; }     
-            if(星屑ハンターの双子.Checked){ panel1.BackgroundImage = Resources.hosikuzu;  }
+            if (正月ミクさん.Checked) { panel1.BackgroundImage = Resources.syougtu_kurinuki; }
+            if (星屑ハンターの双子.Checked) { panel1.BackgroundImage = Resources.hosikuzu; }
 
             panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
             panel1.BackColor = this.BackColor;
@@ -2621,8 +2624,8 @@ namespace neta
             ぱねる１似合わせるToolStripMenuItem.Checked = !ぱねる１似合わせるToolStripMenuItem.Checked;
             Properties.Settings.Default.image_Stretch = ぱねる１似合わせるToolStripMenuItem.Checked;
 
-            string ss=Properties.Settings.Default.lastimagefile;
-            if(ss =="null" || ss =="none")
+            string ss = Properties.Settings.Default.lastimagefile;
+            if (ss == "null" || ss == "none")
             {
                 return;
             }
@@ -2688,47 +2691,7 @@ namespace neta
 
         }
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            string obsAddress = "ws://localhost:4455"; // OBS WebSocketのアドレス
-            string password = ""; // 設定したパスワード（空でも可）
 
-            // OBS WebSocket クライアントを作成
-            OBSWebsocket obs = new OBSWebsocket();
-            obs.Connect(obsAddress, password);
-
-            if (obs.IsConnected)
-            {
-                Console.WriteLine("OBS WebSocket に接続しました！");
-
-                // OBS Luaスクリプトの設定を更新
-                SetScriptSettings(obs, "obsduration_timer_yumesute.lua", new
-                {
-                    start_text = startbox.Text,
-                    stop_text = endbox.Text,
-                    title_text = ibemei.Text
-                });
-
-                Console.WriteLine("設定を更新しました！");
-            }
-            else
-            {
-                Console.WriteLine("OBS WebSocket に接続できませんでした...");
-            }
-
-            obs.Disconnect();
-        }
-
-        static void SetScriptSettings(OBSWebsocket obs, string scriptName, object settings)
-        {
-            JObject parameters = new JObject
-        {
-            { "scriptName", scriptName },
-            { "settings", JObject.FromObject(settings) }
-        };
-
-            obs.SendRequest("SetScriptSettings", parameters);
-        }
 
 
 
@@ -3293,6 +3256,13 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             Properties.Settings.Default.syougautmiku = false;
             Properties.Settings.Default.hosikuzuhunter = true;
             でふぉるとにもどす正月みくToolStripMenuItem_Click(sender, e);
+        }
+
+        private void obssocket送信のみToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form7 = new Form7();
+            form7.ShowDialog(this);
+            form7.Dispose();
         }
     }
 
