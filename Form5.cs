@@ -4,6 +4,8 @@ using System.Windows.Forms;
 using System.IO;
 using Force.Crc32;
 using System.Security.Cryptography;
+using System.Web;
+using NodaTime;
 
 
 namespace neta
@@ -18,9 +20,16 @@ namespace neta
         private void Form5_Load(object sender, EventArgs e)
         {
 
+            android_tzseek.Text = Properties.Settings.Default.android_tzseek;
+
+            android_tz.Checked = Properties.Settings.Default.android_tz;
+
+            tzutc.Checked = Properties.Settings.Default.cv_unixtime;
+
         }
 
-        public byte[] Bigval64(byte[] bs,int pos) {
+        public byte[] Bigval64(byte[] bs, int pos)
+        {
             byte[] swapbin = new byte[8];
             Array.ConstrainedCopy(bs, pos, swapbin, 0, 8);
             Array.Reverse(swapbin);
@@ -35,6 +44,89 @@ namespace neta
             return swapbin;
         }
 
+        //https://android.googlesource.com/platform/libcore/+/jb-mr2-release/luni/src/main/java/libcore/util/ZoneInfoDB.java
+        //https://github.com/RumovZ/android-tzdata/blob/main/src/tzdata.rs
+        public int[] android_tzreader(string tzdata)
+        {
+            string filePath = tzdata;
+            int[] target = new int[2];
+            target[0] = -1;
+            target[1] = -1;
+
+            try
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    //fs.Seek(24, SeekOrigin.Begin);
+                    // 52バイトを610回読み込む
+                    byte[] buffer = new byte[52];
+                    fs.Read(buffer, 0, 24);
+
+                    int indexOffset= (int)(buffer[12] << 24 | buffer[13] << 16 | buffer[14] << 8 | buffer[15]);
+                    int dataOffset = (int)(buffer[16] << 24 | buffer[17] << 16 | buffer[18] << 8 | buffer[19]);
+                    int zonetabOffset = (int)(buffer[20] << 24 | buffer[21] << 16 | buffer[22] << 8 | buffer[23]);
+
+                    int indexSize = (dataOffset - indexOffset);
+                    int sectionCount = 0;
+                    int offset = 0;
+                    int maxSections = indexSize / 52;
+                    string tzname = "";
+                    string tznamebk = "";
+                    StringBuilder sb = new StringBuilder();
+
+                    sb.Append($"Section,");
+                    sb.Append($"tzname,");
+                    sb.Append($"offset,");
+                    sb.AppendLine($"tz_length");
+
+                    bool andseek= android_tz.Checked;
+                    string andseekst = android_tzseek.Text;
+
+                    while (fs.Read(buffer, 0, 52) == 52 && sectionCount < maxSections)
+                    {
+                        tzname = Encoding.ASCII.GetString(buffer, 0, 20).TrimEnd('\0');
+
+
+                        if (tzname == "TZif2")
+                        {
+                            break;
+                        }
+                        tznamebk = tzname;
+
+                        offset = (int)(buffer[40] << 24 | buffer[41] << 16 | buffer[42] << 8 | buffer[43]);
+                        string offsetHex = $"0x{offset:X8}";
+                        int tzLength = (int)(buffer[44] << 24 | buffer[45] << 16 | buffer[46] << 8 | buffer[47]);
+
+                        sb.AppendLine($"{sectionCount + 1},{tzname},{offsetHex},{tzLength}");
+
+                        if (andseek == true && tzname == andseekst) {
+                            target[0] = offset;
+                            target[1] = tzLength;
+                        }
+
+                        sectionCount++;
+                    }
+                    int Tzif_pos = sectionCount * 52 + 24;
+                    sb.AppendLine($"Total sections parsed: {sectionCount},zonetab_size:{zonetabOffset}");
+                    sb.AppendLine($"1stTzif pos: 0x{Tzif_pos:X8}");
+                    sb.AppendLine($"{tznamebk}_pos is 1stTzif: 0x{Tzif_pos + offset:X8}");
+                    sb.AppendLine();
+                    textBox1.Text = sb.ToString();
+
+                    if (target[1] > 0)
+                    {
+                        target[0] += Tzif_pos;
+                    }
+                    return target;
+                }
+            }
+            catch (Exception ex)
+            {
+                textBox1.Text += $"Error: {ex.Message}\r\n";
+                return target;
+            }
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             try
@@ -47,6 +139,7 @@ namespace neta
                 //ダイアログを表示する
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
+                    textBox1.Text = "";
                     //python dateutil一部をC#ぽくしただけのもの 下にgoogle colabでうごくやつも貼っとく 
                     //zicバイナリの情報　https://tex2e.github.io/rfc-translater/html/rfc8536.html
                     string tzdata = ofd.FileName;// "Tokyo";
@@ -56,15 +149,33 @@ namespace neta
                         byte[] bs = new byte[fs.Length];
                         fs.Read(bs, 0, bs.Length);
                         fs.Close();
+                        StringBuilder sb = new StringBuilder();
                         var encoding = Encoding.GetEncoding(0);
                         var header = encoding.GetString(bs).Substring(0, 4);
+
+                        if (header == "tzda")
+                        {
+
+                            int[] target = new int[2];
+                            target=android_tzreader(tzdata);
+                            if (target[0] == -1)
+                            {
+                                return;
+                            }
+                            var tzver = encoding.GetString(bs).Substring(0, 12).TrimEnd('\0');
+                            byte[] bss = new byte[target[1]];
+                            Array.ConstrainedCopy(bs, target[0], bss, 0, target[1]);
+                            bs = bss;
+                            sb.AppendLine($"Android tzdata binary reader success\r\n" +
+                                $"tzver:{tzver},target: {tzdata} pos:{target[0]},size{target[1]}");
+                            header = encoding.GetString(bs).Substring(0, 4);
+                        }
                         string footer = "";
                         int nexttzpos = -1;
                         int finalpos = -1;
-                        string versionn="";
-                        bool tzcv= tzutc.Checked;
+                        string versionn = "";
+                        bool tzcv = tzutc.Checked;
 
-                        StringBuilder sb = new StringBuilder();
 
                         try
                         {
@@ -184,7 +295,7 @@ namespace neta
 
                                             transitions_next_zero[0][1] = Convert.ToString(Convert.ToDouble(local_time_types_gmt[type]) / 3600);
                                         }
-                                        
+
                                         sb.Append("null");
                                         sb.Append(",");
                                         sb.Append(transitions_next_zero[0][1]);
@@ -560,144 +671,163 @@ namespace neta
                             }
                             Properties.Settings.Default.lasttzdatapath = System.IO.Path.GetDirectoryName(tzdata);
                         }
-                        catch (Exception ex) {
+                        catch (Exception ex)
+                        {
                             sb.AppendLine(ex.ToString());
                         }
-                        textBox1.Text = sb.ToString();
+                        textBox1.Text += sb.ToString();
 
                     }
                 }
             }
             catch (Exception ex)
             {
-                textBox1.Text = ex.ToString();
+                textBox1.Text += ex.ToString();
                 throw;
             }
         }
 
-            static string TerminateAtNull(char[] charArray)
+        static string TerminateAtNull(char[] charArray)
+        {
+            int length = 0;
+            while (length < charArray.Length && charArray[length] != '\0')
             {
-                int length = 0;
-                while (length < charArray.Length && charArray[length] != '\0')
-                {
-                    length++;
-                }
-
-                return new string(charArray, 0, length);
+                length++;
             }
 
-            static char[] ByteArrayToCharArray(byte[] byteArray, Encoding encoding)
-            {
-                // byte配列を文字列に変換
-                string str = encoding.GetString(byteArray);
-
-                // 文字列をchar配列に変換
-                return str.ToCharArray();
-            }
-
-
-
- /*  python demo  googleのcolabで動くはず python dateutilの改変
-#https://colab.research.google.com/?hl=ja GOOGLE colabで貼り付けて　tzdatabaseの内容を表示 ＋　JSON化
-#tzdata自体はzone imfomation complier(ZIC) で作成されて　unix系だとman zdump で表示できる
-#pythonでdateutilの一部を改変してzdumpもどきともいう（）
-#dateutil/pytzのパーサーが古いレガシーのTZifしかたいおうしてないので
-#適切なメンテナンスをしないと2038年問題が起きる可能性がある transition_timeが32bitのため
-
-from io import DEFAULT_BUFFER_SIZE
-import json
-from datetime import datetime
-from dateutil import tz
-from dateutil.tz.tz import tzfile
-import struct
-
-tzname="Asia/Tokyo"
-
-def read_tzif(tzfile_path):
-    with open(tzfile_path, 'rb') as f:
-        # Read the header
-        header = f.read(44)  # TZif headers are 44 bytes
-        (magic, version, tzh_ttisgmtcnt, tzh_ttisstdcnt, tzh_leapcnt,
-         tzh_timecnt, tzh_typecnt, tzh_charcnt) = struct.unpack('>4s c 15x 6I', header)
-
-        if magic != b'TZif':
-            raise ValueError('Invalid TZif file')
-
-        # Read the transition times
-        if tzh_timecnt:
-            transition_times = struct.unpack('>%dl' % tzh_timecnt, f.read(tzh_timecnt * 4))
-        else:
-            transition_times = []
-
-        # Read the transition types
-        if tzh_timecnt:
-             transition_types = struct.unpack(">%dB" % tzh_timecnt,
-                                          f.read(tzh_timecnt))
-        else:
-             transition_types =[]
-
-        # Read the local time types
-        local_time_types = []
-        for i in range(tzh_typecnt):
-            local_time_types.append(struct.unpack(">lbb", f.read(6)))
-
-        abbr = f.read(tzh_charcnt).decode()
-
-
-        # Create a list of transitions
-        transitions = []
-        for i in range(tzh_timecnt):
-            transition_time = transition_times[i]
-            local_time_type = local_time_types[transition_types[i]]
-            gmtoff, isdst, abbrind = local_time_type
-            transitions.append({
-                'transition_time': transition_time,
-                'gmt_offset': gmtoff/3600,   #//raw だとgmtoffのまま
-                "local" :cvt_local(transition_time),
-                'isdst': isdst,
-                "abbr": abbr[abbrind:abbr.find('\x00', abbrind)],
-                #"abbra": abbr
-            })
-
-        return {
-            'version': version.decode(),
-            'transitions': transitions
+            return new string(charArray, 0, length);
         }
 
-def cvt_local(sec):
-    global tzname
-    dt_utc = datetime.utcfromtimestamp(sec)
-    jst = tz.gettz(tzname)
-    dt_jst = dt_utc.replace(tzinfo=tz.UTC).astimezone(jst)
-    return dt_jst.strftime('%Y-%m-%dT%X%z')
+        static char[] ByteArrayToCharArray(byte[] byteArray, Encoding encoding)
+        {
+            // byte配列を文字列に変換
+            string str = encoding.GetString(byteArray);
 
-# パスを指定して、TZifファイルを読み込む
-tzif_path = '/usr/share/zoneinfo/'+tzname  # タイムゾーンファイルのパス
-tzif_data = read_tzif(tzif_path)
-
-for item in tzif_data["transitions"]:
-    print(item)
-
-json_str = json.dumps(tzif_data)
-print(json_str)
-
-
-##出力結果
-#{'transition_time': -2147483648, 'gmt_offset': 9.0, 'local': '1901-12-14T05:45:52+0900', 'isdst': 0, 'abbr': 'JST'}
-#{'transition_time': -683802000, 'gmt_offset': 10.0, 'local': '1948-05-02T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
-#{'transition_time': -672310800, 'gmt_offset': 9.0, 'local': '1948-09-12T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
-#{'transition_time': -654771600, 'gmt_offset': 10.0, 'local': '1949-04-03T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
-#{'transition_time': -640861200, 'gmt_offset': 9.0, 'local': '1949-09-11T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
-#{'transition_time': -620298000, 'gmt_offset': 10.0, 'local': '1950-05-07T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
-#{'transition_time': -609411600, 'gmt_offset': 9.0, 'local': '1950-09-10T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
-#{'transition_time': -588848400, 'gmt_offset': 10.0, 'local': '1951-05-06T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
-#{'transition_time': -577962000, 'gmt_offset': 9.0, 'local': '1951-09-09T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
-
-#{"version": "2", "transitions": [{"transition_time": -2147483648, "gmt_offset": 9.0, "local": "1901-12-14T05:45:52+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -683802000, "gmt_offset": 10.0, "local": "1948-05-02T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -672310800, "gmt_offset": 9.0, "local": "1948-09-12T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -654771600, "gmt_offset": 10.0, "local": "1949-04-03T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -640861200, "gmt_offset": 9.0, "local": "1949-09-11T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -620298000, "gmt_offset": 10.0, "local": "1950-05-07T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -609411600, "gmt_offset": 9.0, "local": "1950-09-10T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -588848400, "gmt_offset": 10.0, "local": "1951-05-06T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -577962000, "gmt_offset": 9.0, "local": "1951-09-09T00:00:00+0900", "isdst": 0, "abbr": "JST"}]}
-
-             */
-
-
+            // 文字列をchar配列に変換
+            return str.ToCharArray();
         }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+           Properties.Settings.Default.android_tzseek = android_tzseek.Text;
+        }
+
+        private void android_tz_CheckedChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.android_tz = android_tz.Checked;
+            android_tzseek.Enabled= android_tz.Checked;
+        }
+
+        private void tzutc_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.cv_unixtime = tzutc.Checked;
+        }
+
+
+
+        /*  python demo  googleのcolabで動くはず python dateutilの改変
+       #https://colab.research.google.com/?hl=ja GOOGLE colabで貼り付けて　tzdatabaseの内容を表示 ＋　JSON化
+       #tzdata自体はzone imfomation complier(ZIC) で作成されて　unix系だとman zdump で表示できる
+       #pythonでdateutilの一部を改変してzdumpもどきともいう（）
+       #dateutil/pytzのパーサーが古いレガシーのTZifしかたいおうしてないので
+       #適切なメンテナンスをしないと2038年問題が起きる可能性がある transition_timeが32bitのため
+
+       from io import DEFAULT_BUFFER_SIZE
+       import json
+       from datetime import datetime
+       from dateutil import tz
+       from dateutil.tz.tz import tzfile
+       import struct
+
+       tzname="Asia/Tokyo"
+
+       def read_tzif(tzfile_path):
+           with open(tzfile_path, 'rb') as f:
+               # Read the header
+               header = f.read(44)  # TZif headers are 44 bytes
+               (magic, version, tzh_ttisgmtcnt, tzh_ttisstdcnt, tzh_leapcnt,
+                tzh_timecnt, tzh_typecnt, tzh_charcnt) = struct.unpack('>4s c 15x 6I', header)
+
+               if magic != b'TZif':
+                   raise ValueError('Invalid TZif file')
+
+               # Read the transition times
+               if tzh_timecnt:
+                   transition_times = struct.unpack('>%dl' % tzh_timecnt, f.read(tzh_timecnt * 4))
+               else:
+                   transition_times = []
+
+               # Read the transition types
+               if tzh_timecnt:
+                    transition_types = struct.unpack(">%dB" % tzh_timecnt,
+                                                 f.read(tzh_timecnt))
+               else:
+                    transition_types =[]
+
+               # Read the local time types
+               local_time_types = []
+               for i in range(tzh_typecnt):
+                   local_time_types.append(struct.unpack(">lbb", f.read(6)))
+
+               abbr = f.read(tzh_charcnt).decode()
+
+
+               # Create a list of transitions
+               transitions = []
+               for i in range(tzh_timecnt):
+                   transition_time = transition_times[i]
+                   local_time_type = local_time_types[transition_types[i]]
+                   gmtoff, isdst, abbrind = local_time_type
+                   transitions.append({
+                       'transition_time': transition_time,
+                       'gmt_offset': gmtoff/3600,   #//raw だとgmtoffのまま
+                       "local" :cvt_local(transition_time),
+                       'isdst': isdst,
+                       "abbr": abbr[abbrind:abbr.find('\x00', abbrind)],
+                       #"abbra": abbr
+                   })
+
+               return {
+                   'version': version.decode(),
+                   'transitions': transitions
+               }
+
+       def cvt_local(sec):
+           global tzname
+           dt_utc = datetime.utcfromtimestamp(sec)
+           jst = tz.gettz(tzname)
+           dt_jst = dt_utc.replace(tzinfo=tz.UTC).astimezone(jst)
+           return dt_jst.strftime('%Y-%m-%dT%X%z')
+
+       # パスを指定して、TZifファイルを読み込む
+       tzif_path = '/usr/share/zoneinfo/'+tzname  # タイムゾーンファイルのパス
+       tzif_data = read_tzif(tzif_path)
+
+       for item in tzif_data["transitions"]:
+           print(item)
+
+       json_str = json.dumps(tzif_data)
+       print(json_str)
+
+
+       ##出力結果
+       #{'transition_time': -2147483648, 'gmt_offset': 9.0, 'local': '1901-12-14T05:45:52+0900', 'isdst': 0, 'abbr': 'JST'}
+       #{'transition_time': -683802000, 'gmt_offset': 10.0, 'local': '1948-05-02T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
+       #{'transition_time': -672310800, 'gmt_offset': 9.0, 'local': '1948-09-12T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
+       #{'transition_time': -654771600, 'gmt_offset': 10.0, 'local': '1949-04-03T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
+       #{'transition_time': -640861200, 'gmt_offset': 9.0, 'local': '1949-09-11T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
+       #{'transition_time': -620298000, 'gmt_offset': 10.0, 'local': '1950-05-07T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
+       #{'transition_time': -609411600, 'gmt_offset': 9.0, 'local': '1950-09-10T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
+       #{'transition_time': -588848400, 'gmt_offset': 10.0, 'local': '1951-05-06T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
+       #{'transition_time': -577962000, 'gmt_offset': 9.0, 'local': '1951-09-09T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
+
+       #{"version": "2", "transitions": [{"transition_time": -2147483648, "gmt_offset": 9.0, "local": "1901-12-14T05:45:52+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -683802000, "gmt_offset": 10.0, "local": "1948-05-02T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -672310800, "gmt_offset": 9.0, "local": "1948-09-12T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -654771600, "gmt_offset": 10.0, "local": "1949-04-03T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -640861200, "gmt_offset": 9.0, "local": "1949-09-11T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -620298000, "gmt_offset": 10.0, "local": "1950-05-07T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -609411600, "gmt_offset": 9.0, "local": "1950-09-10T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -588848400, "gmt_offset": 10.0, "local": "1951-05-06T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -577962000, "gmt_offset": 9.0, "local": "1951-09-09T00:00:00+0900", "isdst": 0, "abbr": "JST"}]}
+
+                    */
+
+
     }
+}
 

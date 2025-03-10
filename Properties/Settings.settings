@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/02/15</Value>
+      <Value Profile="(Default)">2025/03/10</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -268,6 +268,15 @@
     </Setting>
     <Setting Name="request" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="android_tz" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="android_tzseek" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Asia/Tokyo</Value>
+    </Setting>
+    <Setting Name="cv_unixtime" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>
