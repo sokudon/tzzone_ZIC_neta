@@ -44,9 +44,10 @@ namespace neta
             return swapbin;
         }
 
+        
         //https://android.googlesource.com/platform/libcore/+/jb-mr2-release/luni/src/main/java/libcore/util/ZoneInfoDB.java
         //https://github.com/RumovZ/android-tzdata/blob/main/src/tzdata.rs
-        public int[] android_tzreader(string tzdata)
+        public static int[] android_tzreader(string tzdata,bool andseek,string andseekst)
         {
             string filePath = tzdata;
             int[] target = new int[2];
@@ -79,8 +80,6 @@ namespace neta
                     sb.Append($"offset,");
                     sb.AppendLine($"tz_length");
 
-                    bool andseek= android_tz.Checked;
-                    string andseekst = android_tzseek.Text;
 
                     while (fs.Read(buffer, 0, 52) == 52 && sectionCount < maxSections)
                     {
@@ -111,7 +110,7 @@ namespace neta
                     sb.AppendLine($"1stTzif pos: 0x{Tzif_pos:X8}");
                     sb.AppendLine($"{tznamebk}_pos is 1stTzif: 0x{Tzif_pos + offset:X8}");
                     sb.AppendLine();
-                    textBox1.Text = sb.ToString();
+                    Properties.Settings.Default.android_tzfie_info = sb.ToString();
 
                     if (target[1] > 0)
                     {
@@ -122,7 +121,7 @@ namespace neta
             }
             catch (Exception ex)
             {
-                textBox1.Text += $"Error: {ex.Message}\r\n";
+                Properties.Settings.Default.android_tzfie_info = $"Error: {ex.Message}\r\n";
                 return target;
             }
         }
@@ -155,19 +154,24 @@ namespace neta
 
                         if (header == "tzda")
                         {
+                            Properties.Settings.Default.android_tzfie_info = "";
 
                             int[] target = new int[2];
-                            target=android_tzreader(tzdata);
+                            target=android_tzreader(tzdata,android_tz.Checked, android_tzseek.Text);
                             if (target[0] == -1)
                             {
+                                sb.Append(Properties.Settings.Default.android_tzfie_info);
+                                textBox1.Text += sb.ToString();
                                 return;
                             }
                             var tzver = encoding.GetString(bs).Substring(0, 12).TrimEnd('\0');
                             byte[] bss = new byte[target[1]];
                             Array.ConstrainedCopy(bs, target[0], bss, 0, target[1]);
                             bs = bss;
+                            sb.Append(Properties.Settings.Default.android_tzfie_info);
                             sb.AppendLine($"Android tzdata binary reader success\r\n" +
                                 $"tzver:{tzver},target: {tzdata} pos:{target[0]},size{target[1]}");
+                            sb.AppendLine();
                             header = encoding.GetString(bs).Substring(0, 4);
                         }
                         string footer = "";

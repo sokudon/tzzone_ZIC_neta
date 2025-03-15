@@ -28,26 +28,26 @@
         /// </summary>
         private void InitializeComponent()
         {
-            label1 = new System.Windows.Forms.Label();
+            time_span = new System.Windows.Forms.Label();
             panel1 = new System.Windows.Forms.Panel();
             panel4 = new System.Windows.Forms.Panel();
             invaid_ambigous = new System.Windows.Forms.CheckBox();
             custom_local = new System.Windows.Forms.CheckBox();
             noda_timezone_items = new System.Windows.Forms.ComboBox();
             noda_timezone = new System.Windows.Forms.CheckBox();
-            label10 = new System.Windows.Forms.Label();
+            TIMEZONE_MODE = new System.Windows.Forms.Label();
             panel3 = new System.Windows.Forms.Panel();
+            tzbinary_path = new System.Windows.Forms.ComboBox();
             label5 = new System.Windows.Forms.Label();
             tzbinary_dir_select = new System.Windows.Forms.Button();
             tzbinary_timezone = new System.Windows.Forms.CheckBox();
             tzbinary_tzst = new System.Windows.Forms.ComboBox();
-            tzbinary_dir = new System.Windows.Forms.TextBox();
             ms_utcoffset = new System.Windows.Forms.CheckBox();
             ms_utcoffset_items = new System.Windows.Forms.ComboBox();
             ms_timezone = new System.Windows.Forms.CheckBox();
             ms_timezone_items = new System.Windows.Forms.ComboBox();
             panel5 = new System.Windows.Forms.Panel();
-            label14 = new System.Windows.Forms.Label();
+            locale = new System.Windows.Forms.Label();
             localeBox = new System.Windows.Forms.ComboBox();
             elapst_left = new System.Windows.Forms.ComboBox();
             panel6 = new System.Windows.Forms.Panel();
@@ -55,31 +55,31 @@
             noda_dateformat = new System.Windows.Forms.ComboBox();
             normal_dateformat = new System.Windows.Forms.ComboBox();
             linkLabel1 = new System.Windows.Forms.LinkLabel();
-            label11 = new System.Windows.Forms.Label();
+            TIME_FORMAT = new System.Windows.Forms.Label();
             bar_length = new System.Windows.Forms.ComboBox();
-            label4 = new System.Windows.Forms.Label();
+            progressbar_length = new System.Windows.Forms.Label();
             panel2 = new System.Windows.Forms.Panel();
             button2 = new System.Windows.Forms.Button();
-            label2 = new System.Windows.Forms.Label();
+            key_value = new System.Windows.Forms.Label();
             change_baseurl = new System.Windows.Forms.CheckBox();
             baseurl_keyval = new System.Windows.Forms.TextBox();
             baseurl_txt = new System.Windows.Forms.TextBox();
             label13 = new System.Windows.Forms.Label();
             button3 = new System.Windows.Forms.Button();
-            button1 = new System.Windows.Forms.Button();
+            json_test = new System.Windows.Forms.Button();
             parse_target = new System.Windows.Forms.TextBox();
             custom_url_path = new System.Windows.Forms.ComboBox();
-            label7 = new System.Windows.Forms.Label();
-            label6 = new System.Windows.Forms.Label();
+            custom_uri = new System.Windows.Forms.Label();
+            target_path = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
             textBox3 = new System.Windows.Forms.TextBox();
             y_start = new System.Windows.Forms.ComboBox();
             y_end = new System.Windows.Forms.ComboBox();
-            checkBox4 = new System.Windows.Forms.CheckBox();
+            use_year_filter = new System.Windows.Forms.CheckBox();
             label8 = new System.Windows.Forms.Label();
             parse_test = new System.Windows.Forms.TextBox();
-            label9 = new System.Windows.Forms.Label();
-            label12 = new System.Windows.Forms.Label();
+            test_date = new System.Windows.Forms.Label();
+            INFOMATION = new System.Windows.Forms.Label();
             panel1.SuspendLayout();
             panel4.SuspendLayout();
             panel3.SuspendLayout();
@@ -88,16 +88,15 @@
             panel2.SuspendLayout();
             SuspendLayout();
             // 
-            // label1
+            // time_span
             // 
-            label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(5, 33);
-            label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(73, 20);
-            label1.TabIndex = 0;
-            label1.Text = "経過/残り:";
-            label1.Click += label1_Click;
+            time_span.AutoSize = true;
+            time_span.Location = new System.Drawing.Point(5, 33);
+            time_span.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            time_span.Name = "time_span";
+            time_span.Size = new System.Drawing.Size(73, 20);
+            time_span.TabIndex = 0;
+            time_span.Text = "経過/残り:";
             // 
             // panel1
             // 
@@ -117,7 +116,7 @@
             panel4.Controls.Add(custom_local);
             panel4.Controls.Add(noda_timezone_items);
             panel4.Controls.Add(noda_timezone);
-            panel4.Controls.Add(label10);
+            panel4.Controls.Add(TIMEZONE_MODE);
             panel4.Controls.Add(panel3);
             panel4.Controls.Add(ms_utcoffset);
             panel4.Controls.Add(ms_utcoffset_items);
@@ -174,26 +173,36 @@
             noda_timezone.UseVisualStyleBackColor = true;
             noda_timezone.CheckedChanged += noda_timezone_CheckedChanged;
             // 
-            // label10
+            // TIMEZONE_MODE
             // 
-            label10.AutoSize = true;
-            label10.Location = new System.Drawing.Point(4, 0);
-            label10.Name = "label10";
-            label10.Size = new System.Drawing.Size(147, 20);
-            label10.TabIndex = 6;
-            label10.Text = "[タイムゾーン設定モード]";
+            TIMEZONE_MODE.AutoSize = true;
+            TIMEZONE_MODE.Location = new System.Drawing.Point(4, 0);
+            TIMEZONE_MODE.Name = "TIMEZONE_MODE";
+            TIMEZONE_MODE.Size = new System.Drawing.Size(147, 20);
+            TIMEZONE_MODE.TabIndex = 6;
+            TIMEZONE_MODE.Text = "[タイムゾーン設定モード]";
             // 
             // panel3
             // 
+            panel3.Controls.Add(tzbinary_path);
             panel3.Controls.Add(label5);
             panel3.Controls.Add(tzbinary_dir_select);
             panel3.Controls.Add(tzbinary_timezone);
             panel3.Controls.Add(tzbinary_tzst);
-            panel3.Controls.Add(tzbinary_dir);
             panel3.Location = new System.Drawing.Point(8, 192);
             panel3.Name = "panel3";
             panel3.Size = new System.Drawing.Size(372, 73);
             panel3.TabIndex = 26;
+            // 
+            // tzbinary_path
+            // 
+            tzbinary_path.FormattingEnabled = true;
+            tzbinary_path.Location = new System.Drawing.Point(94, 3);
+            tzbinary_path.Name = "tzbinary_path";
+            tzbinary_path.Size = new System.Drawing.Size(215, 28);
+            tzbinary_path.TabIndex = 26;
+            tzbinary_path.SelectedIndexChanged += tzbinary_path_SelectedIndexChanged;
+            tzbinary_path.TextChanged += tzbinary_path_SelectedIndexChanged;
             // 
             // label5
             // 
@@ -241,15 +250,6 @@
             tzbinary_tzst.Size = new System.Drawing.Size(139, 28);
             tzbinary_tzst.TabIndex = 21;
             tzbinary_tzst.SelectedIndexChanged += comboBox4_SelectedIndexChanged;
-            // 
-            // tzbinary_dir
-            // 
-            tzbinary_dir.Location = new System.Drawing.Point(94, 3);
-            tzbinary_dir.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            tzbinary_dir.Name = "tzbinary_dir";
-            tzbinary_dir.Size = new System.Drawing.Size(215, 27);
-            tzbinary_dir.TabIndex = 22;
-            tzbinary_dir.TextChanged += textBox5_TextChanged;
             // 
             // ms_utcoffset
             // 
@@ -302,29 +302,29 @@
             // 
             // panel5
             // 
-            panel5.Controls.Add(label14);
+            panel5.Controls.Add(locale);
             panel5.Controls.Add(localeBox);
             panel5.Controls.Add(elapst_left);
             panel5.Controls.Add(panel6);
             panel5.Controls.Add(normal_dateformat);
             panel5.Controls.Add(linkLabel1);
-            panel5.Controls.Add(label11);
-            panel5.Controls.Add(label1);
+            panel5.Controls.Add(TIME_FORMAT);
+            panel5.Controls.Add(time_span);
             panel5.Controls.Add(bar_length);
-            panel5.Controls.Add(label4);
+            panel5.Controls.Add(progressbar_length);
             panel5.Location = new System.Drawing.Point(20, 3);
             panel5.Name = "panel5";
             panel5.Size = new System.Drawing.Size(333, 137);
             panel5.TabIndex = 28;
             // 
-            // label14
+            // locale
             // 
-            label14.AutoSize = true;
-            label14.Location = new System.Drawing.Point(163, 105);
-            label14.Name = "label14";
-            label14.Size = new System.Drawing.Size(53, 20);
-            label14.TabIndex = 32;
-            label14.Text = "ろけーる";
+            locale.AutoSize = true;
+            locale.Location = new System.Drawing.Point(163, 105);
+            locale.Name = "locale";
+            locale.Size = new System.Drawing.Size(53, 20);
+            locale.TabIndex = 32;
+            locale.Text = "ろけーる";
             // 
             // localeBox
             // 
@@ -405,14 +405,14 @@
             linkLabel1.Text = "現在時刻";
             linkLabel1.LinkClicked += linkLabel1_LinkClicked;
             // 
-            // label11
+            // TIME_FORMAT
             // 
-            label11.AutoSize = true;
-            label11.Location = new System.Drawing.Point(5, 5);
-            label11.Name = "label11";
-            label11.Size = new System.Drawing.Size(109, 20);
-            label11.TabIndex = 29;
-            label11.Text = "[時刻表示形式]";
+            TIME_FORMAT.AutoSize = true;
+            TIME_FORMAT.Location = new System.Drawing.Point(5, 5);
+            TIME_FORMAT.Name = "TIME_FORMAT";
+            TIME_FORMAT.Size = new System.Drawing.Size(109, 20);
+            TIME_FORMAT.TabIndex = 29;
+            TIME_FORMAT.Text = "[時刻表示形式]";
             // 
             // bar_length
             // 
@@ -428,30 +428,30 @@
             bar_length.SelectedIndexChanged += comboBox3_SelectedIndexChanged;
             bar_length.TextChanged += comboBox3_TextChanged;
             // 
-            // label4
+            // progressbar_length
             // 
-            label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(5, 105);
-            label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(98, 20);
-            label4.TabIndex = 10;
-            label4.Text = "進捗バーの長さ";
+            progressbar_length.AutoSize = true;
+            progressbar_length.Location = new System.Drawing.Point(5, 105);
+            progressbar_length.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            progressbar_length.Name = "progressbar_length";
+            progressbar_length.Size = new System.Drawing.Size(98, 20);
+            progressbar_length.TabIndex = 10;
+            progressbar_length.Text = "進捗バーの長さ";
             // 
             // panel2
             // 
             panel2.Controls.Add(button2);
-            panel2.Controls.Add(label2);
+            panel2.Controls.Add(key_value);
             panel2.Controls.Add(change_baseurl);
             panel2.Controls.Add(baseurl_keyval);
             panel2.Controls.Add(baseurl_txt);
             panel2.Controls.Add(label13);
             panel2.Controls.Add(button3);
-            panel2.Controls.Add(button1);
+            panel2.Controls.Add(json_test);
             panel2.Controls.Add(parse_target);
             panel2.Controls.Add(custom_url_path);
-            panel2.Controls.Add(label7);
-            panel2.Controls.Add(label6);
+            panel2.Controls.Add(custom_uri);
+            panel2.Controls.Add(target_path);
             panel2.Location = new System.Drawing.Point(21, 410);
             panel2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             panel2.Name = "panel2";
@@ -469,14 +469,14 @@
             button2.Visible = false;
             button2.Click += button2_Click_2;
             // 
-            // label2
+            // key_value
             // 
-            label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(235, 38);
-            label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(31, 20);
-            label2.TabIndex = 27;
-            label2.Text = "key";
+            key_value.AutoSize = true;
+            key_value.Location = new System.Drawing.Point(235, 38);
+            key_value.Name = "key_value";
+            key_value.Size = new System.Drawing.Size(31, 20);
+            key_value.TabIndex = 27;
+            key_value.Text = "key";
             // 
             // change_baseurl
             // 
@@ -526,16 +526,16 @@
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click_1;
             // 
-            // button1
+            // json_test
             // 
-            button1.Location = new System.Drawing.Point(324, 103);
-            button1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            button1.Name = "button1";
-            button1.Size = new System.Drawing.Size(39, 39);
-            button1.TabIndex = 16;
-            button1.Text = "🎄";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            json_test.Location = new System.Drawing.Point(324, 103);
+            json_test.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            json_test.Name = "json_test";
+            json_test.Size = new System.Drawing.Size(39, 39);
+            json_test.TabIndex = 16;
+            json_test.Text = "🎄";
+            json_test.UseVisualStyleBackColor = true;
+            json_test.Click += button1_Click;
             // 
             // parse_target
             // 
@@ -561,27 +561,27 @@
             custom_url_path.SelectedIndexChanged += comboBox5_SelectedIndexChanged;
             custom_url_path.TextChanged += comboBox5_TextChanged;
             // 
-            // label7
+            // custom_uri
             // 
-            label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(7, 77);
-            label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            label7.Name = "label7";
-            label7.Size = new System.Drawing.Size(109, 20);
-            label7.TabIndex = 14;
-            label7.Text = "かすたむパス/URI";
-            label7.Click += label6_Click;
+            custom_uri.AutoSize = true;
+            custom_uri.Location = new System.Drawing.Point(7, 77);
+            custom_uri.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            custom_uri.Name = "custom_uri";
+            custom_uri.Size = new System.Drawing.Size(109, 20);
+            custom_uri.TabIndex = 14;
+            custom_uri.Text = "かすたむパス/URI";
+            custom_uri.Click += label6_Click;
             // 
-            // label6
+            // target_path
             // 
-            label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(3, 115);
-            label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(72, 20);
-            label6.TabIndex = 14;
-            label6.Text = "パース対象";
-            label6.Click += label6_Click;
+            target_path.AutoSize = true;
+            target_path.Location = new System.Drawing.Point(3, 115);
+            target_path.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            target_path.Name = "target_path";
+            target_path.Size = new System.Drawing.Size(72, 20);
+            target_path.TabIndex = 14;
+            target_path.Text = "パース対象";
+            target_path.Click += label6_Click;
             // 
             // label3
             // 
@@ -624,16 +624,16 @@
             y_end.Text = "2037";
             y_end.SelectedIndexChanged += comboBox8_SelectedIndexChanged;
             // 
-            // checkBox4
+            // use_year_filter
             // 
-            checkBox4.AutoSize = true;
-            checkBox4.Location = new System.Drawing.Point(439, 579);
-            checkBox4.Name = "checkBox4";
-            checkBox4.Size = new System.Drawing.Size(98, 24);
-            checkBox4.TabIndex = 6;
-            checkBox4.Text = "年フィルター";
-            checkBox4.UseVisualStyleBackColor = true;
-            checkBox4.CheckedChanged += checkBox4_CheckedChanged;
+            use_year_filter.AutoSize = true;
+            use_year_filter.Location = new System.Drawing.Point(439, 579);
+            use_year_filter.Name = "use_year_filter";
+            use_year_filter.Size = new System.Drawing.Size(98, 24);
+            use_year_filter.TabIndex = 6;
+            use_year_filter.Text = "年フィルター";
+            use_year_filter.UseVisualStyleBackColor = true;
+            use_year_filter.CheckedChanged += checkBox4_CheckedChanged;
             // 
             // label8
             // 
@@ -653,34 +653,34 @@
             parse_test.Text = "2024/12/11";
             parse_test.TextChanged += textBox6_TextChanged;
             // 
-            // label9
+            // test_date
             // 
-            label9.AutoSize = true;
-            label9.Location = new System.Drawing.Point(748, 580);
-            label9.Name = "label9";
-            label9.Size = new System.Drawing.Size(73, 20);
-            label9.TabIndex = 9;
-            label9.Text = "日付てすと";
+            test_date.AutoSize = true;
+            test_date.Location = new System.Drawing.Point(748, 580);
+            test_date.Name = "test_date";
+            test_date.Size = new System.Drawing.Size(73, 20);
+            test_date.TabIndex = 9;
+            test_date.Text = "日付てすと";
             // 
-            // label12
+            // INFOMATION
             // 
-            label12.AutoSize = true;
-            label12.Location = new System.Drawing.Point(439, 22);
-            label12.Name = "label12";
-            label12.Size = new System.Drawing.Size(211, 20);
-            label12.TabIndex = 10;
-            label12.Text = "tzdatabaseのバイナリ情報の確認";
+            INFOMATION.AutoSize = true;
+            INFOMATION.Location = new System.Drawing.Point(439, 22);
+            INFOMATION.Name = "INFOMATION";
+            INFOMATION.Size = new System.Drawing.Size(211, 20);
+            INFOMATION.TabIndex = 10;
+            INFOMATION.Text = "tzdatabaseのバイナリ情報の確認";
             // 
             // dtformat
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(957, 615);
-            Controls.Add(label12);
-            Controls.Add(label9);
+            Controls.Add(INFOMATION);
+            Controls.Add(test_date);
             Controls.Add(parse_test);
             Controls.Add(label8);
-            Controls.Add(checkBox4);
+            Controls.Add(use_year_filter);
             Controls.Add(y_end);
             Controls.Add(y_start);
             Controls.Add(textBox3);
@@ -708,43 +708,42 @@
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label time_span;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.CheckBox ms_utcoffset;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox ms_utcoffset_items;
         private System.Windows.Forms.ComboBox ms_timezone_items;
         private System.Windows.Forms.CheckBox ms_timezone;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label progressbar_length;
         private System.Windows.Forms.ComboBox bar_length;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label target_path;
+        private System.Windows.Forms.Button json_test;
         public System.Windows.Forms.TextBox parse_target;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ComboBox tzbinary_tzst;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox tzbinary_dir;
         private System.Windows.Forms.Button tzbinary_dir_select;
         private System.Windows.Forms.CheckBox tzbinary_timezone;
-        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label custom_uri;
         private System.Windows.Forms.ComboBox custom_url_path;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.ComboBox y_start;
         private System.Windows.Forms.ComboBox y_end;
-        private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.CheckBox use_year_filter;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox parse_test;
-        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label test_date;
         private System.Windows.Forms.CheckBox custom_local;
         private System.Windows.Forms.Panel panel5;
-        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label TIME_FORMAT;
         private System.Windows.Forms.Panel panel4;
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label TIMEZONE_MODE;
         private System.Windows.Forms.CheckBox noda_timezone;
         private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label INFOMATION;
         private System.Windows.Forms.ComboBox noda_timezone_items;
         private System.Windows.Forms.Panel panel6;
         private System.Windows.Forms.ComboBox noda_dateformat;
@@ -755,10 +754,11 @@
         private System.Windows.Forms.TextBox baseurl_txt;
         private System.Windows.Forms.TextBox baseurl_keyval;
         private System.Windows.Forms.CheckBox change_baseurl;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label key_value;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.CheckBox invaid_ambigous;
-        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label locale;
         private System.Windows.Forms.ComboBox localeBox;
+        private System.Windows.Forms.ComboBox tzbinary_path;
     }
 }

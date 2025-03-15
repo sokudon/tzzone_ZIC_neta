@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/03/10")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/03/15")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -1125,6 +1125,30 @@ namespace neta.Properties {
             }
             set {
                 this["cv_unixtime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string use_android_tzdata {
+            get {
+                return ((string)(this["use_android_tzdata"]));
+            }
+            set {
+                this["use_android_tzdata"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string android_tzfie_info {
+            get {
+                return ((string)(this["android_tzfie_info"]));
+            }
+            set {
+                this["android_tzfie_info"] = value;
             }
         }
     }

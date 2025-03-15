@@ -609,7 +609,7 @@ namespace neta
                                 end_tmp = end_c + en.ToUniversalTime().AddHours(uo).ToString(format);
 
 
-                                mode = "TZif binay BisectR:" + tzst;
+                                mode = "TZif binay BisectR:" + Properties.Settings.Default.usetzdatabin;
                             }
                             else
                             {
@@ -631,6 +631,9 @@ namespace neta
                                 current_tmp = current_c + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
                                 start_tmp = start_c + TimeZoneInfo.ConvertTime(sst, tzi).ToString(formats);
                                 end_tmp = end_c + TimeZoneInfo.ConvertTime(een, tzi).ToString(formate);
+
+
+                                mode = "TZif binay BisectR:parse error,UTC mode";
                             }
                         }
 
