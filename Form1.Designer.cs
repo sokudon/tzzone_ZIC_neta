@@ -67,6 +67,7 @@
             wEBたいまーToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             wEBせかいどけいToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            画像をbas64に変換ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem7 = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem8 = new System.Windows.Forms.ToolStripMenuItem();
             netaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -480,23 +481,29 @@
             // 
             // toolStripMenuItem2
             // 
-            toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItem7, toolStripMenuItem8 });
+            toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 画像をbas64に変換ToolStripMenuItem, toolStripMenuItem7, toolStripMenuItem8 });
             toolStripMenuItem2.Name = "toolStripMenuItem2";
             toolStripMenuItem2.Size = new System.Drawing.Size(224, 26);
-            toolStripMenuItem2.Text = "base64に変換する";
-            toolStripMenuItem2.Click += imgtobase64_Click;
+            toolStripMenuItem2.Text = "かすたむcss";
+            // 
+            // 画像をbas64に変換ToolStripMenuItem
+            // 
+            画像をbas64に変換ToolStripMenuItem.Name = "画像をbas64に変換ToolStripMenuItem";
+            画像をbas64に変換ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            画像をbas64に変換ToolStripMenuItem.Text = "画像をbas64に変換";
+            画像をbas64に変換ToolStripMenuItem.Click += imgtobase64_Click;
             // 
             // toolStripMenuItem7
             // 
             toolStripMenuItem7.Name = "toolStripMenuItem7";
-            toolStripMenuItem7.Size = new System.Drawing.Size(157, 26);
+            toolStripMenuItem7.Size = new System.Drawing.Size(224, 26);
             toolStripMenuItem7.Text = "gemini2.0";
             toolStripMenuItem7.Click += gemini20ToolStripMenuItem_Click;
             // 
             // toolStripMenuItem8
             // 
             toolStripMenuItem8.Name = "toolStripMenuItem8";
-            toolStripMenuItem8.Size = new System.Drawing.Size(157, 26);
+            toolStripMenuItem8.Size = new System.Drawing.Size(224, 26);
             toolStripMenuItem8.Text = "claude3.5";
             toolStripMenuItem8.Click += claude35ToolStripMenuItem_Click;
             // 
@@ -827,6 +834,7 @@
         private System.Windows.Forms.ToolStripMenuItem 正月ミクさん;
         private System.Windows.Forms.ToolStripMenuItem 星屑ハンターの双子;
         private System.Windows.Forms.ToolStripMenuItem obssocket送信のみToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 画像をbas64に変換ToolStripMenuItem;
     }
 }
 

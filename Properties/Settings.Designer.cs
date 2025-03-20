@@ -1151,5 +1151,17 @@ namespace neta.Properties {
                 this["android_tzfie_info"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string posix_json {
+            get {
+                return ((string)(this["posix_json"]));
+            }
+            set {
+                this["posix_json"] = value;
+            }
+        }
     }
 }

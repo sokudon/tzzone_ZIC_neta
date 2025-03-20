@@ -15,6 +15,7 @@
           "Newtonsoft.Json": "13.0.3",
           "NodaTime": "3.2.1",
           "System.Drawing.Common": "9.0.1",
+          "TimeZoneConverter.Posix": "5.0.0",
           "obs-websocket-dotnet": "5.0.0.3",
           "System.Reactive.Reference": "4.3.0.0"
         },
@@ -103,6 +104,26 @@
       },
       "System.Reactive/4.3.2": {},
       "System.Threading.Channels/4.7.0": {},
+      "TimeZoneConverter/7.0.0": {
+        "runtime": {
+          "lib/net8.0/TimeZoneConverter.dll": {
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.0.0"
+          }
+        }
+      },
+      "TimeZoneConverter.Posix/5.0.0": {
+        "dependencies": {
+          "NodaTime": "3.2.1",
+          "TimeZoneConverter": "7.0.0"
+        },
+        "runtime": {
+          "lib/net8.0/TimeZoneConverter.Posix.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
+          }
+        }
+      },
       "Websocket.Client/4.4.43": {
         "dependencies": {
           "System.Reactive": "4.3.2",
@@ -221,6 +242,20 @@
       "sha512": "sha512-gdOOXBhtt2UpTxYJm1DRmoqNfYg5ypvhzhVt0vxKhzxXFjS81r8yIOSFsJYLRa1Jc14GBAqCnjxJstO3zBN7gg==",
       "path": "system.threading.channels/4.7.0",
       "hashPath": "system.threading.channels.4.7.0.nupkg.sha512"
+    },
+    "TimeZoneConverter/7.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-sFbY65N/5GdsHx7nkdHFHUG+5Ar4W0w6Aks7Y2X+Q4NOTw6XyX2Il7jm+4tPkc//4mA3nG0RdxI8gKgoJitdLw==",
+      "path": "timezoneconverter/7.0.0",
+      "hashPath": "timezoneconverter.7.0.0.nupkg.sha512"
+    },
+    "TimeZoneConverter.Posix/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-pq33oCC/cPeTv5+dmyzJxWhW4uQmb822edwUsXXo2Uy0UFYMZuk+a6MJgmzH5g9xlE2VK8NMxl7BtlgpdkKGEg==",
+      "path": "timezoneconverter.posix/5.0.0",
+      "hashPath": "timezoneconverter.posix.5.0.0.nupkg.sha512"
     },
     "Websocket.Client/4.4.43": {
       "type": "package",
