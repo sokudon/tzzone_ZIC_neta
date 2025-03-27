@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/03/15")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/03/28")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -1161,6 +1161,42 @@ namespace neta.Properties {
             }
             set {
                 this["posix_json"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string posix_testdate {
+            get {
+                return ((string)(this["posix_testdate"]));
+            }
+            set {
+                this["posix_testdate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool posix_test {
+            get {
+                return ((bool)(this["posix_test"]));
+            }
+            set {
+                this["posix_test"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool view_posix_info {
+            get {
+                return ((bool)(this["view_posix_info"]));
+            }
+            set {
+                this["view_posix_info"] = value;
             }
         }
     }

@@ -441,11 +441,12 @@ namespace TZPASER
                     bool tz = neta.Properties.Settings.Default.usetz;
                     bool nd = neta.Properties.Settings.Default.usenoda;
                     bool use_zoneparse = neta.Properties.Settings.Default.local_chager;
+                    bool use_posix = neta.Properties.Settings.Default.posix_test;
 
 
                     //string format = "yyyy-MM-ddTHH:mm:sszzz";
                     Regex iso = new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$"); // ISO 8601
-                    if (iso.IsMatch(input)  || (use_zoneparse == false) ||　(utc == false && ms == false && tz == false && nd==false)
+                    if (iso.IsMatch(input)  || (use_posix== true)|| (use_zoneparse == false) ||　(utc == false && ms == false && tz == false && nd==false)
                         )
                     {
                         return DateTime.TryParseExact(

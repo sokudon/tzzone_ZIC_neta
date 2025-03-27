@@ -15,6 +15,14 @@ using System.Globalization;
 using System.Text.Encodings.Web;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using System.Diagnostics.Tracing;
+using OBSWebsocketDotNet.Types;
+using static System.Windows.Forms.DataFormats;
+using System.Collections.Generic;
+using System.Linq;
+using TimeZoneConverter;
+using TimeZoneConverter.Posix;
+using NodaTime.TimeZones;
+using System.Security.Policy;
 
 
 namespace neta
@@ -28,13 +36,25 @@ namespace neta
 
         private void Form5_Load(object sender, EventArgs e)
         {
+            posix_list_add();
 
-            android_tzseek.Text = Properties.Settings.Default.android_tzseek;
+            androidTzSeek.Text = Properties.Settings.Default.android_tzseek;
 
             android_tz.Checked = Properties.Settings.Default.android_tz;
 
             tzutc.Checked = Properties.Settings.Default.cv_unixtime;
 
+            test_date.Text = Properties.Settings.Default.posix_testdate;
+
+            posix.Checked = Properties.Settings.Default.view_posix_info;
+
+            Properties.Settings.Default.posix_test = true;
+        }
+
+        private void ZIC_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
+            Properties.Settings.Default.posix_test = false;
         }
 
         public static byte[] Bigval64(byte[] bs, int pos)
@@ -704,7 +724,7 @@ namespace neta
                 string tzdata = ofd.FileName;// "Tokyo";
                 last_tzdata = ofd.FileName;
 
-                tmp = tzif_reader(tzdata, android_tzseek.Text, android_tz.Checked, tzutc.Checked, posix.Checked);
+                tmp = tzif_reader(tzdata, androidTzSeek.Text, android_tz.Checked, tzutc.Checked, posix.Checked);
             }
             textBox1.Text = tmp;
             if (posix.Checked)
@@ -736,21 +756,22 @@ namespace neta
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            Properties.Settings.Default.android_tzseek = android_tzseek.Text;
+            Properties.Settings.Default.android_tzseek = androidTzSeek.Text;
 
-            textBox1.Text = tzif_reader(last_tzdata, android_tzseek.Text, android_tz.Checked, tzutc.Checked, posix.Checked);
+            textBox1.Text = tzif_reader(last_tzdata, androidTzSeek.Text, android_tz.Checked, tzutc.Checked, posix.Checked);
 
             if (posix.Checked)
             {
                 ruletester();
             }
+
         }
 
         private void android_tz_CheckedChanged(object sender, EventArgs e)
         {
 
             Properties.Settings.Default.android_tz = android_tz.Checked;
-            android_tzseek.Enabled = android_tz.Checked;
+            androidTzSeek.Enabled = android_tz.Checked;
         }
 
         private void tzutc_CheckedChanged(object sender, EventArgs e)
@@ -758,15 +779,80 @@ namespace neta
             Properties.Settings.Default.cv_unixtime = tzutc.Checked;
         }
 
+        private void posix_list_add() {
+            /// コンボボックスのアイテムをリストに格納// android_tzseek のアイテムをリストに格納
+            List<string> ianaList = GetComboBoxItemsAsList(androidTzSeek);
+            // IANA を POSIX に変換したリストを作成（仮の変換ロジック）
+            List<string> posixList = ConvertIanaToPosix(ianaList);
+            // ソートと重複除去
+            posixList = posixList.Distinct()       // 重複を除去
+                                 .OrderBy(x => x)  // アルファベット順にソート
+                                 .ToList();
+            // posix_timezone コンボボックスにリストからアイテムを追加
+            AddListToComboBox(posixTimezone, posixList);
+
+            // 確認メッセージ
+            //MessageBox.Show($"POSIX コンボボックスに {posixList.Count} 件追加しました。");
+
+        }
+        private List<string> GetComboBoxItemsAsList(ComboBox comboBox)
+        {
+            // コンボボックスのアイテムをリストに変換
+            return comboBox.Items.Cast<object>().Select(item => item.ToString()).ToList();
+        }
+
+        private List<string> ConvertIanaToPosix(List<string> ianaList)
+        {
+            List<string> posixList = new List<string>();
+            var tzdb = DateTimeZoneProviders.Tzdb; // NodaTime の TZDB プロバイダ
+
+            foreach (var iana in ianaList)
+            {
+                try
+                {
+                    // IANA タイムゾーンが TZDB に存在するか確認
+                    var zone = tzdb.GetZoneOrNull(iana);
+                    if (zone == null)
+                    {
+                        Console.WriteLine($"スキップ: {iana} は NodaTime TZDB に存在しません。");
+                        continue; // 存在しない場合はスキップ
+                    }
+
+                    // TimeZoneConverter で POSIX に変換
+                    var tzInfo = TZConvert.GetTimeZoneInfo(iana);
+                    string posix = PosixTimeZone.FromIanaTimeZoneName(iana);
+                    posixList.Add(posix);
+                }
+                catch (DateTimeZoneNotFoundException ex)
+                {
+                    // NodaTime 例外が発生した場合もスキップ
+                    Console.WriteLine($"スキップ: {iana} - {ex.Message}");
+                }            }
+                return posixList;
+            } 
+        
+
+        private void AddListToComboBox(ComboBox comboBox, List<string> items)
+        {
+            // 既存アイテムをクリア（必要に応じてコメントアウト）
+            comboBox.Items.Clear();
+
+            // リストからコンボボックスにアイテムを追加
+            comboBox.Items.AddRange(items.ToArray());
+        }
+
+
+
+        //https://github.com/nayarsystems/posix_tz_db posiz_tz_dbのリストらしい
         private void button2_Click(object sender, EventArgs e)
         {
-            var stdMatch = Regex.Match(posix_timezone.Text, @"^(?:<(?<stdName>[^>]+)>|(?<stdName2>[A-Za-z]+))(?<stdOffset>[+-]?\d+(?::\d+)?)(?:(?:<(?<dstName>[^>]+)>|(?<dstName2>[A-Za-z]+))(?<dstOffset>[+-]?\d+(?::\d+)?))?");
+            var stdMatch = Regex.Match(posixTimezone.Text, @"^(?:<(?<stdName>[^>]+)>|(?<stdName2>[A-Za-z]+))(?<stdOffset>[+-]?\d+(?::\d+)?)(?:(?:<(?<dstName>[^>]+)>|(?<dstName2>[A-Za-z]+))(?<dstOffset>[+-]?\d+(?::\d+)?))?");
             if (!stdMatch.Success)
             {
-                textBox1.Text = $"Invalid posix_timezone format:{posix_timezone.Text} \r\nRegex:^(?:<(?<stdName>[^>]+)>|(?<stdName2>[A-Za-z]+))(?<stdOffset>[+-]?\\d+(?::\\d+)?)(?:(?:<(?<dstName>[^>]+)>|(?<dstName2>[A-Za-z]+))(?<dstOffset>[+-]?\\d+(?::\\d+)?))?\")";
+                textBox1.Text = $"Invalid posix_timezone format:{posixTimezone.Text} \r\nRegex:^(?:<(?<stdName>[^>]+)>|(?<stdName2>[A-Za-z]+))(?<stdOffset>[+-]?\\d+(?::\\d+)?)(?:(?:<(?<dstName>[^>]+)>|(?<dstName2>[A-Za-z]+))(?<dstOffset>[+-]?\\d+(?::\\d+)?))?\")";
                 return;
             }
-            string tmp= PosixTimeZoneParser.test(posix_timezone.Text);
+            string tmp = PosixTimeZoneParser.test(posixTimezone.Text);
             textBox1.Text = tmp;
 
             Properties.Settings.Default.posix_json = tmp;
@@ -896,13 +982,20 @@ namespace neta
                 // 3. Create Adjustment Rule (for the specified year)
                 int thisyear = DateTime.Now.Year;
                 // --- Time Conversion and Output ---
-                DateTime utcNow = DateTime.UtcNow;
-                DateTimeOffset localTimeOffset;
+                string date = Properties.Settings.Default.posix_testdate;
+                DateTimeOffset utcNowOffset;
+                if (date != "")
+                {
+                    utcNowOffset = DateTimeOffset.Parse(date);
+                }
+                else
+                {
+                    utcNowOffset = DateTimeOffset.UtcNow;
+                }
 
-                DateTimeOffset utcNowOffset = DateTimeOffset.UtcNow;
 
 
-                System.TimeZoneInfo.AdjustmentRule adjustmentRule; 
+                System.TimeZoneInfo.AdjustmentRule adjustmentRule;
                 System.TimeZoneInfo customTimeZone;
                 if (tzData.StartRule == null || tzData.EndRule == null)
                 {
@@ -912,7 +1005,7 @@ namespace neta
                         baseUtcOffset: standardOffset,
                         displayName: tzData.StandardName + standardOffset,  // Or construct as needed
                         standardDisplayName: tzData.StandardName ?? "Standard Time"
-                    );;
+                    ); ;
 
                 }
                 else
@@ -936,11 +1029,11 @@ namespace neta
                     );
                 }
 
-                localTimeOffset = System.TimeZoneInfo.ConvertTime(utcNowOffset, customTimeZone);
+                DateTimeOffset localTimeOffset = System.TimeZoneInfo.ConvertTime(utcNowOffset, customTimeZone);
                 DateTime dt = localTimeOffset.LocalDateTime;
-                this.textBox1.Text += $"UTC Now: {utcNowOffset:yyyy-MM-dd HH:mm:sszzz} UTC\r\n";
-                this.textBox1.Text += $"custom TimeZone Time: {localTimeOffset:yyyy-MM-dd HH:mm:sszzz}\r\n";
-                this.textBox1.Text += $"OS Local Time: {dt:yyyy-MM-dd HH:mm:sszzz}\r\n";
+                this.textBox1.Text += $"UTC Datetime: {utcNowOffset:yyyy-MM-dd HH:mm:sszzz} UTC\r\n";
+                this.textBox1.Text += $"posix TimeZone  Datetime: {localTimeOffset:yyyy-MM-dd HH:mm:sszzz}\r\n";
+                this.textBox1.Text += $"OS Localtime: {dt:yyyy-MM-dd HH:mm:sszzz}\r\n";
             }
             catch (Exception ex)
             {
@@ -1293,6 +1386,34 @@ namespace neta
                 return sb.ToString();
             }
         }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            string input = test_date.Text;
+            if (TryParseDateTimeCutom(input, out DateTime dt))
+            {
+                Properties.Settings.Default.posix_testdate = test_date.Text;
+            }
+        }
+
+        public static bool TryParseDateTimeCutom(string input, out DateTime dt)
+        {
+            dt = DateTime.MinValue;
+            if (TZPASER.FastDateTimeParsing.TryParseFastDateTime(input, out dt)
+                || TZPASER.RFC2822DateTimeParser.TryParseRFC2822DateTime(input, out dt)
+                || TZPASER.RFC2822DateTimeParser.YMDHMZ_to_ISO(input, out dt))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private void posix_CheckedChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.view_posix_info = posix.Checked;
+        }
+
 
 
         /*  python demo  googleのcolabで動くはず python dateutilの改変

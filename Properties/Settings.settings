@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/03/15</Value>
+      <Value Profile="(Default)">2025/03/28</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -286,6 +286,15 @@
     </Setting>
     <Setting Name="posix_json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="posix_testdate" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="posix_test" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="view_posix_info" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>
