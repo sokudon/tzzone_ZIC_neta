@@ -50,7 +50,7 @@
             locale = new System.Windows.Forms.Label();
             localeBox = new System.Windows.Forms.ComboBox();
             elapst_left = new System.Windows.Forms.ComboBox();
-            panel6 = new System.Windows.Forms.Panel();
+            nodatime_panel = new System.Windows.Forms.Panel();
             linkLabel2 = new System.Windows.Forms.LinkLabel();
             noda_dateformat = new System.Windows.Forms.ComboBox();
             normal_dateformat = new System.Windows.Forms.ComboBox();
@@ -84,7 +84,7 @@
             panel4.SuspendLayout();
             panel3.SuspendLayout();
             panel5.SuspendLayout();
-            panel6.SuspendLayout();
+            nodatime_panel.SuspendLayout();
             panel2.SuspendLayout();
             SuspendLayout();
             // 
@@ -305,7 +305,7 @@
             panel5.Controls.Add(locale);
             panel5.Controls.Add(localeBox);
             panel5.Controls.Add(elapst_left);
-            panel5.Controls.Add(panel6);
+            panel5.Controls.Add(nodatime_panel);
             panel5.Controls.Add(normal_dateformat);
             panel5.Controls.Add(linkLabel1);
             panel5.Controls.Add(TIME_FORMAT);
@@ -314,13 +314,13 @@
             panel5.Controls.Add(progressbar_length);
             panel5.Location = new System.Drawing.Point(20, 3);
             panel5.Name = "panel5";
-            panel5.Size = new System.Drawing.Size(333, 137);
+            panel5.Size = new System.Drawing.Size(377, 137);
             panel5.TabIndex = 28;
             // 
             // locale
             // 
             locale.AutoSize = true;
-            locale.Location = new System.Drawing.Point(163, 105);
+            locale.Location = new System.Drawing.Point(167, 105);
             locale.Name = "locale";
             locale.Size = new System.Drawing.Size(53, 20);
             locale.TabIndex = 32;
@@ -331,7 +331,7 @@
             localeBox.FormattingEnabled = true;
             localeBox.ImeMode = System.Windows.Forms.ImeMode.Disable;
             localeBox.Items.AddRange(new object[] { "ja-JP: 日本語 (日本)", "en-US: 英語 (アメリカ)", "en-GB: 英語 (イギリス)", "es-ES: スペイン語 (スペイン)", "fr-FR: フランス語 (フランス)", "de-DE: ドイツ語 (ドイツ)", "zh-CN: 中国語 (中国)", "ko-KR: 韓国語 (韓国)" });
-            localeBox.Location = new System.Drawing.Point(212, 102);
+            localeBox.Location = new System.Drawing.Point(226, 99);
             localeBox.Name = "localeBox";
             localeBox.Size = new System.Drawing.Size(118, 28);
             localeBox.TabIndex = 31;
@@ -343,26 +343,26 @@
             elapst_left.Items.AddRange(new object[] { "dd日hh時間mm分ss秒", "dd日hh時間mm分ss秒msミリ秒", "dd hh:mm:ss.ms", "dd hh:mm:ss", "HH:mm:ss", "MM:ss", "SS", "MS" });
             elapst_left.Location = new System.Drawing.Point(85, 28);
             elapst_left.Name = "elapst_left";
-            elapst_left.Size = new System.Drawing.Size(239, 28);
+            elapst_left.Size = new System.Drawing.Size(259, 28);
             elapst_left.TabIndex = 29;
             elapst_left.Text = "dd日hh時間mm分ss秒";
             elapst_left.SelectedIndexChanged += comboBox11_SelectedIndexChanged;
             elapst_left.TextChanged += comboBox11_SelectedIndexChanged;
             // 
-            // panel6
+            // nodatime_panel
             // 
-            panel6.Controls.Add(linkLabel2);
-            panel6.Controls.Add(noda_dateformat);
-            panel6.Location = new System.Drawing.Point(157, 57);
-            panel6.Name = "panel6";
-            panel6.Size = new System.Drawing.Size(339, 37);
-            panel6.TabIndex = 11;
-            panel6.Visible = false;
+            nodatime_panel.Controls.Add(linkLabel2);
+            nodatime_panel.Controls.Add(noda_dateformat);
+            nodatime_panel.Location = new System.Drawing.Point(0, 62);
+            nodatime_panel.Name = "nodatime_panel";
+            nodatime_panel.Size = new System.Drawing.Size(351, 37);
+            nodatime_panel.TabIndex = 11;
+            nodatime_panel.Visible = false;
             // 
             // linkLabel2
             // 
             linkLabel2.AutoSize = true;
-            linkLabel2.Location = new System.Drawing.Point(6, 9);
+            linkLabel2.Location = new System.Drawing.Point(5, 7);
             linkLabel2.Name = "linkLabel2";
             linkLabel2.Size = new System.Drawing.Size(66, 20);
             linkLabel2.TabIndex = 11;
@@ -374,9 +374,9 @@
             // 
             noda_dateformat.FormattingEnabled = true;
             noda_dateformat.Items.AddRange(new object[] { "HH':'mm", "MM'-'dd", "MM'-'dd HH':'mm", "yyyy'-'MM'-'dd HH':'mm", "yyyy'-'MM'-'dd'T'HH':'mm z", "yyyy'-'MM'-'dd'T'HH':'mm':'ss z", "yyyy'-'MM'-'dd'T'HH':'mm':'ss '('o<g>')'", "yyyy'-'MM'-'dd'T'HH':'mm':'ss z '('o<g>')'", "yyyy'-'MM'-'dd'T'HH':'mm':'ss;FFFFFFF z '('o<g>')'", "yyyy'年'MMMd日'('ddd')'HH':'mm':'ss", "G", "F" });
-            noda_dateformat.Location = new System.Drawing.Point(78, 6);
+            noda_dateformat.Location = new System.Drawing.Point(79, 3);
             noda_dateformat.Name = "noda_dateformat";
-            noda_dateformat.Size = new System.Drawing.Size(244, 28);
+            noda_dateformat.Size = new System.Drawing.Size(265, 28);
             noda_dateformat.TabIndex = 4;
             noda_dateformat.Text = "MM'-'dd HH':'mm";
             noda_dateformat.SelectedIndexChanged += noda_dateformat_SelectedIndexChanged;
@@ -386,9 +386,9 @@
             // 
             normal_dateformat.FormattingEnabled = true;
             normal_dateformat.Items.AddRange(new object[] { "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM/dd HH", "yyyy/MM/dd", "MM/dd HH:mm:ss", "MM/dd HH:mm", "MM/dd HH", "MM/dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH", "yyyy-MM-dd", "MM-dd HH:mm:ss", "MM-dd HH:mm", "MM-dd HH", "MM-dd", "dd MMM yyyy HH:mm", "yyyy年MMMd日(ddd) HH:mm:ss", "yyyy-MM-ddTHH:mm:ss z", "yyyy-MM-ddTHH:mm:ss zz", "yyyy-MM-ddTHH:mm:sszzz", "yyyy-MM-ddTHH:mm:ss K", "yyyy-MM-ddTHH:mm:ss %TZ %Z %z", "yyyy-MM-ddTHH:mm:ss K zzz %TZ %Z %z", "%PO" });
-            normal_dateformat.Location = new System.Drawing.Point(79, 66);
+            normal_dateformat.Location = new System.Drawing.Point(82, 68);
             normal_dateformat.Name = "normal_dateformat";
-            normal_dateformat.Size = new System.Drawing.Size(246, 28);
+            normal_dateformat.Size = new System.Drawing.Size(262, 28);
             normal_dateformat.TabIndex = 12;
             normal_dateformat.Text = "yyyy/MM/dd HH:mm";
             normal_dateformat.SelectedIndexChanged += comboBox10_SelectedIndexChanged;
@@ -698,8 +698,8 @@
             panel3.PerformLayout();
             panel5.ResumeLayout(false);
             panel5.PerformLayout();
-            panel6.ResumeLayout(false);
-            panel6.PerformLayout();
+            nodatime_panel.ResumeLayout(false);
+            nodatime_panel.PerformLayout();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
             ResumeLayout(false);
@@ -745,7 +745,7 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label INFOMATION;
         private System.Windows.Forms.ComboBox noda_timezone_items;
-        private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.Panel nodatime_panel;
         private System.Windows.Forms.ComboBox noda_dateformat;
         private System.Windows.Forms.ComboBox normal_dateformat;
         private System.Windows.Forms.LinkLabel linkLabel1;

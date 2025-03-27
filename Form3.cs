@@ -75,7 +75,7 @@ namespace neta
 
             invaid_ambigous.Checked = Properties.Settings.Default.noda_strict;
 
-            panel6.Location = new System.Drawing.Point(5, panel6.Location.Y);
+            nodatime_panel.Location = new System.Drawing.Point(5, nodatime_panel.Location.Y);
 
 
             change_baseurl.Checked = Properties.Settings.Default.change_baseurl;
@@ -89,6 +89,7 @@ namespace neta
             }
 
             tzbinary_path.Text = Properties.Settings.Default.lasttzdatapath_base_utc;
+
         }
 
         private string[] load_tzifbinary()
@@ -140,6 +141,14 @@ script_path() + "zoneinfo\\",
         private void noda_timezone_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.usenoda = noda_timezone.Checked;
+            if (noda_timezone.Checked == true)
+            {
+                nodatime_panel.Visible = true;
+            }
+            else
+            {
+                nodatime_panel.Visible =false;
+            }
         }
 
         static string select_tzdata()
@@ -1490,12 +1499,12 @@ script_path() + "zoneinfo\\",
             Properties.Settings.Default.usenoda = noda_timezone.Checked;
             if (noda_timezone.Checked)
             {
-                panel6.Visible = true;
+                nodatime_panel.Visible = true;
             }
             else
             {
 
-                panel6.Visible = false;
+                nodatime_panel.Visible = false;
             }
         }
 
