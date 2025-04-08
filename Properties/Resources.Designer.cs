@@ -150,6 +150,16 @@ namespace neta.Properties {
         }
         
         /// <summary>
+        ///   型 System.Byte[] のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static byte[] ohanami_mikusan {
+            get {
+                object obj = ResourceManager.GetObject("ohanami_mikusan", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
         internal static System.Drawing.Bitmap syougtu_kurinuki {

@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/03/28")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/04/08")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -1197,6 +1197,42 @@ namespace neta.Properties {
             }
             set {
                 this["view_posix_info"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool using_slideshow {
+            get {
+                return ((bool)(this["using_slideshow"]));
+            }
+            set {
+                this["using_slideshow"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3000")]
+        public int slidershow_interval {
+            get {
+                return ((int)(this["slidershow_interval"]));
+            }
+            set {
+                this["slidershow_interval"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ohanami_miku {
+            get {
+                return ((bool)(this["ohanami_miku"]));
+            }
+            set {
+                this["ohanami_miku"] = value;
             }
         }
     }

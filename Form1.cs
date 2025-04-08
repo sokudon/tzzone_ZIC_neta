@@ -4,8 +4,6 @@ using neta.Properties;
 using Newtonsoft.Json.Linq;
 using NodaTime;
 using NodaTime.Text;
-using OBSWebsocketDotNet;
-using OBSWebsocketDotNet.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -20,17 +18,20 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Shapes;
 using TZPASER;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace neta
 {
     public partial class NETA_TIMER : Form
     {
+        private System.Windows.Forms.Timer timer;
+        private string[] imageFiles;
+        private int currentImageIndex = 0;
+        private bool isSlideshowRunning = false;
+        private string folderPath = @"C:\Users\imasp\OneDrive\Desktop\aimiku\4-8"; // 初期値
+
         public NETA_TIMER()
         {
             InitializeComponent();
@@ -40,6 +41,13 @@ namespace neta
 
             this.SetStyle(ControlStyles.UserPaint, true);
             this.UpdateStyles();
+
+            // タイマーの設定
+            timer = new System.Windows.Forms.Timer
+            {
+                Interval = Properties.Settings.Default.slidershow_interval //3000
+            };
+            timer.Tick += Timer_Tick;
 
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -237,6 +245,7 @@ namespace neta
             hide_under_panel.Checked = Properties.Settings.Default.uihide;
 
             this.正月ミクさん.Checked = Properties.Settings.Default.syougautmiku;
+            this.お花見みくさん.Checked = Properties.Settings.Default.ohanami_miku;
             this.星屑ハンターの双子.Checked = Properties.Settings.Default.hosikuzuhunter;
 
 
@@ -277,6 +286,15 @@ namespace neta
 
                 button2_Click(sender, e);
             }
+
+
+            isSlideshowRunning = Properties.Settings.Default.using_slideshow;
+            if (isSlideshowRunning)
+            {
+                isSlideshowRunning = false;
+                ToggleButton_Click(sender, e);
+            }
+
             this_end_update();
 
             this.TransparencyKey = Properties.Settings.Default.colorkey;
@@ -2245,6 +2263,8 @@ namespace neta
 
                     Properties.Settings.Default.lastimagefile = s;
 
+                    LoadImages(Path.GetDirectoryName(s));
+
                     SaveIni();
                 }
             }
@@ -2368,10 +2388,45 @@ namespace neta
             }
         }
 
+        private Image convert_pictute(byte[] imageBytes)
+        {
+
+            if (imageBytes != null && imageBytes.Length > 0)
+            {
+                try
+                {
+                    // バイト配列からMemoryStreamを作成
+                    using (MemoryStream ms = new MemoryStream(imageBytes))
+                    {
+                        // MemoryStreamからImageオブジェクトを作成
+                        // FromStreamはストリームを閉じないオプション(leaveOpen=true)が推奨されることもありますが、
+                        // 多くの場合、Bitmapが内部でデータをコピーするため、usingを抜けても大丈夫です。
+                        Image img = Image.FromStream(ms);
+
+                        return img;
+                    }
+                }
+                catch (ArgumentException ex)
+                {
+                    // バイト配列が有効な画像データでない場合など
+                    MessageBox.Show("画像データの読み込みに失敗しました: " + ex.Message);
+                    return null;
+                }
+            }
+            else
+            {
+                // リソースが見つからない、または空の場合
+                MessageBox.Show("画像リソースが見つからないか、空です。");
+                return null;
+            }
+            return null;
+        }
+
         private void でふぉるとにもどす正月みくToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
             if (正月ミクさん.Checked) { panel1.BackgroundImage = Resources.syougtu_kurinuki; }
+            if (お花見みくさん.Checked) { panel1.BackgroundImage = convert_pictute(Resources.ohanami_mikusan); }
             if (星屑ハンターの双子.Checked) { panel1.BackgroundImage = Resources.hosikuzu; }
 
             panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
@@ -3245,8 +3300,21 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
         private void 正月ミクさん_Click(object sender, EventArgs e)
         {
             正月ミクさん.Checked = true;
+            お花見みくさん.Checked = false;
             星屑ハンターの双子.Checked = false;
             Properties.Settings.Default.syougautmiku = true;
+            Properties.Settings.Default.ohanami_miku = false;
+            Properties.Settings.Default.hosikuzuhunter = false;
+            でふぉるとにもどす正月みくToolStripMenuItem_Click(sender, e);
+        }
+
+        private void 花見みくさん_Click(object sender, EventArgs e)
+        {
+            正月ミクさん.Checked = false;
+            お花見みくさん.Checked = true;
+            星屑ハンターの双子.Checked = false;
+            Properties.Settings.Default.syougautmiku = false;
+            Properties.Settings.Default.ohanami_miku = true;            
             Properties.Settings.Default.hosikuzuhunter = false;
             でふぉるとにもどす正月みくToolStripMenuItem_Click(sender, e);
         }
@@ -3255,8 +3323,10 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
         {
 
             星屑ハンターの双子.Checked = true;
+            お花見みくさん.Checked = false;
             正月ミクさん.Checked = false;
             Properties.Settings.Default.syougautmiku = false;
+            Properties.Settings.Default.ohanami_miku = false;
             Properties.Settings.Default.hosikuzuhunter = true;
             でふぉるとにもどす正月みくToolStripMenuItem_Click(sender, e);
         }
@@ -3267,10 +3337,211 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             form7.ShowDialog(this);
             form7.Dispose();
         }
+
+        private void SetTimerInterval(int interval)
+        {
+            timer.Interval = interval; // タイマーの間隔を変更
+            if (isSlideshowRunning)
+            {
+                timer.Stop();
+                timer.Start(); // 間隔変更を即時反映
+            }
+        }
+
+
+        private void LoadImages(string folderPath)
+        {
+            try
+            {
+                if (!Directory.Exists(folderPath))
+                {
+                    MessageBox.Show("指定されたフォルダが存在しません: " + folderPath);
+                    timer.Stop();
+                    return;
+                }
+
+                imageFiles = Directory.GetFiles(folderPath, "*.jpg")
+                    .Concat(Directory.GetFiles(folderPath, "*.png"))
+                    .ToArray();
+
+                if (imageFiles.Length == 0)
+                {
+                    MessageBox.Show("指定フォルダに画像が見つかりません");
+                    timer.Stop();
+                    return;
+                }
+
+                currentImageIndex = 0; // インデックスをリセット
+                ShowImage();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"画像の読み込み中にエラーが発生しました: {ex.Message}");
+                timer.Stop();
+            }
+        }
+
+        private void ToggleButton_Click(object sender, EventArgs e)
+        {
+            if (imageFiles == null || imageFiles.Length == 0) return;
+
+            isSlideshowRunning = !isSlideshowRunning;
+            スライドショー.Checked = isSlideshowRunning;
+            Properties.Settings.Default.using_slideshow = isSlideshowRunning;
+
+            if (isSlideshowRunning)
+            {
+                timer.Start();
+                string folderPath = Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
+                LoadImages(folderPath); // 新しいフォルダの画像を読み込む
+            }
+            else
+            {
+                timer.Stop();
+            }
+        }
+
+
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            currentImageIndex++;
+            if (currentImageIndex >= imageFiles.Length)
+                currentImageIndex = 0;
+
+            ShowImage();
+        }
+
+        private void ShowImage()
+        {
+            if (Properties.Settings.Default.lastimagefile == "null" || Properties.Settings.Default.lastimagefile == "none")
+            {
+                return;
+            }
+
+            try
+            {
+                if (imageFiles != null && imageFiles.Length > 0)
+                {
+                    panel1.BackgroundImage?.Dispose();
+                    panel1.BackgroundImage = Image.FromFile(imageFiles[currentImageIndex]);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"画像の表示に失敗しました: {ex.Message}");
+            }
+        }
+
+        private void 表示間隔ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            var IntervalForm = new IntervalForm(timer.Interval);
+            IntervalForm.ShowDialog(this);
+            IntervalForm.Dispose();
+            timer.Interval = Properties.Settings.Default.slidershow_interval;
+            SetTimerInterval(timer.Interval);
+        }
+
     }
 
-}
 
+    public partial class IntervalForm : Form
+    {
+        private ComboBox intervalComboBox;
+        private Button okButton;
+        private Button cancelButton;
+
+        public int SelectedInterval { get; private set; } // 選択された間隔
+
+        public IntervalForm(int currentInterval)
+        {
+            InitializeComponent();
+            SetupControls(currentInterval);
+        }
+
+        private void SetupControls(int currentInterval)
+        {
+            this.Text = "タイマー間隔の設定";
+            this.Width = 300;
+            this.Height = 150;
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+
+            // ラベル
+            Label label = new Label
+            {
+                Text = "表示間隔を選択してください（ミリ秒）:",
+                Location = new Point(10, 20),
+                AutoSize = true
+            };
+
+            // コンボボックス
+            intervalComboBox = new ComboBox
+            {
+                Location = new Point(10, 50),
+                Width = 260,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            intervalComboBox.Items.AddRange(new object[] { "1000 (1秒)", "3000 (3秒)", "5000 (5秒)", "10000 (10秒)" });
+            intervalComboBox.SelectedIndex = GetIndexFromInterval(currentInterval);
+
+            // OKボタン
+            okButton = new Button
+            {
+                Text = "OK",
+                Location = new Point(110, 80),
+                DialogResult = DialogResult.OK
+            };
+            okButton.Click += OkButton_Click;
+
+            // キャンセルボタン
+            cancelButton = new Button
+            {
+                Text = "キャンセル",
+                Location = new Point(190, 80),
+                DialogResult = DialogResult.Cancel
+            };
+
+            // コントロールを追加
+            this.Controls.Add(label);
+            this.Controls.Add(intervalComboBox);
+            this.Controls.Add(okButton);
+            this.Controls.Add(cancelButton);
+
+            this.AcceptButton = okButton;
+            this.CancelButton = cancelButton;
+        }
+
+        private int GetIndexFromInterval(int interval)
+        {
+            switch (interval)
+            {
+                case 1000: return 0;
+                case 3000: return 1;
+                case 5000: return 2;
+                case 10000: return 3;
+                default: return 1; // デフォルトは3秒
+            }
+        }
+
+        private void OkButton_Click(object sender, EventArgs e)
+        {
+            string selectedText = intervalComboBox.SelectedItem.ToString();
+            SelectedInterval = int.Parse(selectedText.Split(' ')[0]); // "1000 (1秒)" から "1000" を抽出
+            Properties.Settings.Default.slidershow_interval = SelectedInterval;
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            this.ClientSize = new System.Drawing.Size(284, 111);
+            this.Name = "IntervalForm";
+            this.ResumeLayout(false);
+        }
+    }
+}
 
 
 
