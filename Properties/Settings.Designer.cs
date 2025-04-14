@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/04/08")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/04/14")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -1233,6 +1233,18 @@ namespace neta.Properties {
             }
             set {
                 this["ohanami_miku"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool use_numpad_hotkey {
+            get {
+                return ((bool)(this["use_numpad_hotkey"]));
+            }
+            set {
+                this["use_numpad_hotkey"] = value;
             }
         }
     }

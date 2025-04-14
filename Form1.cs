@@ -13,25 +13,25 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Forms;
+using System.Windows.Input;
 using TZPASER;
 
 namespace neta
 {
     public partial class NETA_TIMER : Form
     {
+        private Dictionary<int, (Keys Key, ModifierKeys Modifiers)> hotkeys =
+            new Dictionary<int, (Keys, ModifierKeys)>();
         private System.Windows.Forms.Timer timer;
         private string[] imageFiles;
         private int currentImageIndex = 0;
         private bool isSlideshowRunning = false;
         private string folderPath = @"C:\Users\imasp\OneDrive\Desktop\aimiku\4-8"; // 初期値
-
         public NETA_TIMER()
         {
             InitializeComponent();
@@ -51,6 +51,11 @@ namespace neta
 
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            this.KeyPreview = true;
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(Form1_KeyDown);
+
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -247,6 +252,7 @@ namespace neta
             this.正月ミクさん.Checked = Properties.Settings.Default.syougautmiku;
             this.お花見みくさん.Checked = Properties.Settings.Default.ohanami_miku;
             this.星屑ハンターの双子.Checked = Properties.Settings.Default.hosikuzuhunter;
+            numpadのコンボボックス連動.Checked = Properties.Settings.Default.use_numpad_hotkey;
 
 
             Properties.Settings.Default.system_tz = TimeZoneInfo.Local.Id;
@@ -2278,41 +2284,45 @@ namespace neta
 
         private void 画像ToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog
+            {
+                InitialDirectory = System.IO.Path.GetDirectoryName(Properties.Settings.Default.lastimagefile),
+                Filter = "すべての対応画像|*.bmp;*.jpg;*.jpeg;*.gif;*.png;*.tiff;*.ico|" +
+                         "BMP 画像 (*.bmp)|*.bmp|" +
+                         "JPEG 画像 (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
+                         "GIF 画像 (*.gif)|*.gif|" +
+                         "PNG 画像 (*.png)|*.png|" +
+                         "TIFF 画像 (*.tiff)|*.tiff|" +
+                         "ICO アイコン (*.ico)|*.ico",
+                FilterIndex = 1,
+                RestoreDirectory = true
+            };
 
-            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
-
-            //はじめに表示されるフォルダを指定する
-            //指定しない（空の文字列）の時は、現在のディレクトリが表示される
-            ofd.InitialDirectory = System.IO.Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
-
-            ofd.Filter = "すべての対応画像|*.bmp;*.jpg;*.jpeg;*.gif;*.png;*.tiff;*.ico|" +
-                     "BMP 画像 (*.bmp)|*.bmp|" +
-                     "JPEG 画像 (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
-                     "GIF 画像 (*.gif)|*.gif|" +
-                     "PNG 画像 (*.png)|*.png|" +
-                     "TIFF 画像 (*.tiff)|*.tiff|" +
-                     "ICO アイコン (*.ico)|*.ico";
-            //"WebP 画像 (*.webp)|*.webp";
-
-            ofd.FilterIndex = 1;
-            ofd.RestoreDirectory = true;
-
-
-            //ダイアログを表示する
             if (ofd.ShowDialog() == DialogResult.OK)
             {
+                panel1.BackgroundImage?.Dispose();
+                panel2.BackgroundImage?.Dispose();
 
+                string filePath = ofd.FileName;
+                string folderPath = Path.GetDirectoryName(filePath);
+                Properties.Settings.Default.lastimagefile = filePath;
 
-                panel1.BackgroundImage = null;
-                panel2.BackgroundImage = null;
+                // フォルダ全体の画像を読み込む
+                LoadImages(folderPath);
 
+                // 選択した画像を初期表示
+                currentImageIndex = Array.IndexOf(imageFiles, filePath);
+                if (currentImageIndex < 0) currentImageIndex = 0;
+                ShowImage();
 
-                string s = ofd.FileName;
-                string key = comboBox1.SelectedItem.ToString();
-                imagePaths[key] = ofd.FileName;
-                read_picture(s);
+                // INIファイルに保存
+                string key = comboBox1.SelectedItem?.ToString();
+                if (!string.IsNullOrEmpty(key))
+                {
+                    imagePaths[key] = filePath;
+                    SaveIni();
+                }
             }
-
         }
 
         private Dictionary<string, string> imagePaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -2413,12 +2423,8 @@ namespace neta
                     return null;
                 }
             }
-            else
-            {
-                // リソースが見つからない、または空の場合
-                MessageBox.Show("画像リソースが見つからないか、空です。");
-                return null;
-            }
+            // リソースが見つからない、または空の場合
+            MessageBox.Show("画像リソースが見つからないか、空です。");
             return null;
         }
 
@@ -3314,7 +3320,7 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             お花見みくさん.Checked = true;
             星屑ハンターの双子.Checked = false;
             Properties.Settings.Default.syougautmiku = false;
-            Properties.Settings.Default.ohanami_miku = true;            
+            Properties.Settings.Default.ohanami_miku = true;
             Properties.Settings.Default.hosikuzuhunter = false;
             でふぉるとにもどす正月みくToolStripMenuItem_Click(sender, e);
         }
@@ -3360,9 +3366,9 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
                     return;
                 }
 
-                imageFiles = Directory.GetFiles(folderPath, "*.jpg")
-                    .Concat(Directory.GetFiles(folderPath, "*.png"))
-                    .ToArray();
+                // サポートするすべての画像形式を取得
+                string[] extensions = new[] { "*.jpg", "*.jpeg", "*.png", "*.bmp", "*.gif", "*.tiff", "*.ico" };
+                imageFiles = extensions.SelectMany(ext => Directory.GetFiles(folderPath, ext)).ToArray();
 
                 if (imageFiles.Length == 0)
                 {
@@ -3383,7 +3389,13 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
 
         private void ToggleButton_Click(object sender, EventArgs e)
         {
-            if (imageFiles == null || imageFiles.Length == 0) return;
+            if (string.IsNullOrEmpty(Properties.Settings.Default.lastimagefile) ||
+                Properties.Settings.Default.lastimagefile == "null" ||
+                Properties.Settings.Default.lastimagefile == "none")
+            {
+                MessageBox.Show("画像フォルダが選択されていません。");
+                return;
+            }
 
             isSlideshowRunning = !isSlideshowRunning;
             スライドショー.Checked = isSlideshowRunning;
@@ -3391,13 +3403,15 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
 
             if (isSlideshowRunning)
             {
-                timer.Start();
                 string folderPath = Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
-                LoadImages(folderPath); // 新しいフォルダの画像を読み込む
+                LoadImages(folderPath); // フォルダの画像を読み込む
+                timer.Start();
             }
             else
             {
                 timer.Stop();
+                // スライドショー停止時に最後の画像を表示
+                ShowImage();
             }
         }
 
@@ -3405,26 +3419,48 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
 
         private void Timer_Tick(object sender, EventArgs e)
         {
+            if (imageFiles == null || imageFiles.Length == 0)
+            {
+                timer.Stop();
+                return;
+            }
+
             currentImageIndex++;
             if (currentImageIndex >= imageFiles.Length)
+            {
                 currentImageIndex = 0;
+            }
 
             ShowImage();
         }
 
         private void ShowImage()
         {
-            if (Properties.Settings.Default.lastimagefile == "null" || Properties.Settings.Default.lastimagefile == "none")
+            if (string.IsNullOrEmpty(Properties.Settings.Default.lastimagefile) ||
+                Properties.Settings.Default.lastimagefile == "null" ||
+                Properties.Settings.Default.lastimagefile == "none")
             {
                 return;
             }
 
             try
             {
-                if (imageFiles != null && imageFiles.Length > 0)
+                if (imageFiles != null && imageFiles.Length > 0 && currentImageIndex >= 0 && currentImageIndex < imageFiles.Length)
                 {
-                    panel1.BackgroundImage?.Dispose();
+                    // 現在の画像を破棄
+                    if (panel1.BackgroundImage != null)
+                    {
+                        panel1.BackgroundImage.Dispose();
+                        panel1.BackgroundImage = null;
+                    }
+
+                    // 新しい画像を読み込む
                     panel1.BackgroundImage = Image.FromFile(imageFiles[currentImageIndex]);
+                    Properties.Settings.Default.lastimagefile = imageFiles[currentImageIndex];
+                }
+                else
+                {
+                    MessageBox.Show("表示する画像がありません。");
                 }
             }
             catch (Exception ex)
@@ -3443,105 +3479,164 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             SetTimerInterval(timer.Interval);
         }
 
+
+        private void Form1_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            // Define the NumPad keys
+            Keys[] numPadKeys = { Keys.NumPad0, Keys.NumPad1, Keys.NumPad2, Keys.NumPad3, Keys.NumPad4,
+                          Keys.NumPad5, Keys.NumPad6, Keys.NumPad7, Keys.NumPad8, Keys.NumPad9 };
+
+            if (numpadのコンボボックス連動.Checked)
+            {
+                // Check if the pressed key is a NumPad key
+                int index = Array.IndexOf(numPadKeys, e.KeyCode);
+                if (index != -1)
+                {
+                    // Map NumPad1 to index 0 (comboBox1), NumPad0 to index 9 (comboBox10), etc.
+                    int comboBoxIndex;
+                    if (e.KeyCode == Keys.NumPad0)
+                    {
+                        comboBoxIndex = 9; // NumPad0 maps to comboBox10
+                    }
+                    else
+                    {
+                        comboBoxIndex = index - 1; // NumPad1 maps to 0, NumPad2 to 1, ..., NumPad9 to 8
+                        if (comboBoxIndex < 0) comboBoxIndex = 0; // Safeguard for NumPad1
+                    }
+
+                    // Update the comboBox if the index is valid
+                    if (comboBoxIndex >= 0 && comboBoxIndex < comboBox1.Items.Count)
+                    {
+                        comboBox1.SelectedIndex = comboBoxIndex;
+                        UpdatePictureBox();
+                    }
+
+                    // Prevent the key from being processed further (including TextBox input)
+                    e.Handled = true;
+                    e.SuppressKeyPress = true; // Explicitly suppress KeyPress for NumPad keys
+                }
+            }
+        }
+
+        // Optional: Handle KeyPress to block any residual numeric input (not strictly needed)
+        private void KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if(numpadのコンボボックス連動.Checked){
+                // Since NumPad keys are handled in KeyDown with SuppressKeyPress, this may not be reached
+                if (e.KeyChar >= '0' && e.KeyChar <= '9' && ActiveControl is TextBox)
+                {
+                    e.Handled = true; // Block numeric input in TextBox as a fallback
+                }
+            }
+        }
+
+
+        private void numpadのコンボボックス連動_Click(object sender, EventArgs e)
+        {
+            numpadのコンボボックス連動.Checked = !numpadのコンボボックス連動.Checked;
+            Properties.Settings.Default.use_numpad_hotkey = numpadのコンボボックス連動.Checked;
+        }
     }
 
 
     public partial class IntervalForm : Form
-    {
-        private ComboBox intervalComboBox;
-        private Button okButton;
-        private Button cancelButton;
-
-        public int SelectedInterval { get; private set; } // 選択された間隔
-
-        public IntervalForm(int currentInterval)
         {
-            InitializeComponent();
-            SetupControls(currentInterval);
-        }
+            private ComboBox intervalComboBox;
+            private Button okButton;
+            private Button cancelButton;
 
-        private void SetupControls(int currentInterval)
-        {
-            this.Text = "タイマー間隔の設定";
-            this.Width = 300;
-            this.Height = 150;
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
+            public int SelectedInterval { get; private set; } // 選択された間隔
 
-            // ラベル
-            Label label = new Label
+            public IntervalForm(int currentInterval)
             {
-                Text = "表示間隔を選択してください（ミリ秒）:",
-                Location = new Point(10, 20),
-                AutoSize = true
-            };
+                InitializeComponent();
+                SetupControls(currentInterval);
+            }
 
-            // コンボボックス
-            intervalComboBox = new ComboBox
+            private void SetupControls(int currentInterval)
             {
-                Location = new Point(10, 50),
-                Width = 260,
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            intervalComboBox.Items.AddRange(new object[] { "1000 (1秒)", "3000 (3秒)", "5000 (5秒)", "10000 (10秒)" });
-            intervalComboBox.SelectedIndex = GetIndexFromInterval(currentInterval);
+                this.Text = "タイマー間隔の設定";
+                this.Width = 300;
+                this.Height = 150;
+                this.FormBorderStyle = FormBorderStyle.FixedDialog;
+                this.MaximizeBox = false;
+                this.MinimizeBox = false;
 
-            // OKボタン
-            okButton = new Button
+                // ラベル
+                Label label = new Label
+                {
+                    Text = "表示間隔を選択してください（ミリ秒）:",
+                    Location = new Point(10, 20),
+                    AutoSize = true
+                };
+
+                // コンボボックス
+                intervalComboBox = new ComboBox
+                {
+                    Location = new Point(10, 50),
+                    Width = 260,
+                    DropDownStyle = ComboBoxStyle.DropDownList
+                };
+                intervalComboBox.Items.AddRange(new object[] { "1000 (1秒)", "3000 (3秒)", "5000 (5秒)", "10000 (10秒)" });
+                intervalComboBox.SelectedIndex = GetIndexFromInterval(currentInterval);
+
+                // OKボタン
+                okButton = new Button
+                {
+                    Text = "OK",
+                    Location = new Point(110, 80),
+                    DialogResult = DialogResult.OK
+                };
+                okButton.Click += OkButton_Click;
+
+                // キャンセルボタン
+                cancelButton = new Button
+                {
+                    Text = "キャンセル",
+                    Location = new Point(190, 80),
+                    DialogResult = DialogResult.Cancel
+                };
+
+                // コントロールを追加
+                this.Controls.Add(label);
+                this.Controls.Add(intervalComboBox);
+                this.Controls.Add(okButton);
+                this.Controls.Add(cancelButton);
+
+                this.AcceptButton = okButton;
+                this.CancelButton = cancelButton;
+            }
+
+            private int GetIndexFromInterval(int interval)
             {
-                Text = "OK",
-                Location = new Point(110, 80),
-                DialogResult = DialogResult.OK
-            };
-            okButton.Click += OkButton_Click;
+                switch (interval)
+                {
+                    case 1000: return 0;
+                    case 3000: return 1;
+                    case 5000: return 2;
+                    case 10000: return 3;
+                    default: return 1; // デフォルトは3秒
+                }
+            }
 
-            // キャンセルボタン
-            cancelButton = new Button
+            private void OkButton_Click(object sender, EventArgs e)
             {
-                Text = "キャンセル",
-                Location = new Point(190, 80),
-                DialogResult = DialogResult.Cancel
-            };
+                string selectedText = intervalComboBox.SelectedItem.ToString();
+                SelectedInterval = int.Parse(selectedText.Split(' ')[0]); // "1000 (1秒)" から "1000" を抽出
+                Properties.Settings.Default.slidershow_interval = SelectedInterval;
+            }
 
-            // コントロールを追加
-            this.Controls.Add(label);
-            this.Controls.Add(intervalComboBox);
-            this.Controls.Add(okButton);
-            this.Controls.Add(cancelButton);
-
-            this.AcceptButton = okButton;
-            this.CancelButton = cancelButton;
-        }
-
-        private int GetIndexFromInterval(int interval)
-        {
-            switch (interval)
+            private void InitializeComponent()
             {
-                case 1000: return 0;
-                case 3000: return 1;
-                case 5000: return 2;
-                case 10000: return 3;
-                default: return 1; // デフォルトは3秒
+                this.SuspendLayout();
+                this.ClientSize = new System.Drawing.Size(284, 111);
+                this.Name = "IntervalForm";
+                this.ResumeLayout(false);
             }
         }
 
-        private void OkButton_Click(object sender, EventArgs e)
-        {
-            string selectedText = intervalComboBox.SelectedItem.ToString();
-            SelectedInterval = int.Parse(selectedText.Split(' ')[0]); // "1000 (1秒)" から "1000" を抽出
-            Properties.Settings.Default.slidershow_interval = SelectedInterval;
-        }
 
-        private void InitializeComponent()
-        {
-            this.SuspendLayout();
-            this.ClientSize = new System.Drawing.Size(284, 111);
-            this.Name = "IntervalForm";
-            this.ResumeLayout(false);
-        }
     }
-}
 
 
 
