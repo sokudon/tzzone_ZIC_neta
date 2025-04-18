@@ -26,6 +26,11 @@
         /// デザイナー サポートに必要なメソッドです。このメソッドの内容を
         /// コード エディターで変更しないでください。
         /// </summary>
+        /// 
+        // フィールド定義を変更
+
+        //public TransparentProgressBar progressBar1;
+
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
@@ -34,7 +39,7 @@
             endbox = new System.Windows.Forms.TextBox();
             elapsed = new System.Windows.Forms.Label();
             left = new System.Windows.Forms.Label();
-            panel1 = new System.Windows.Forms.Panel();
+            panel1 = new CustomPanel();
             contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(components);
             クリップへコピーToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             カラーキー今のメニューToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,14 +49,14 @@
             アプリ終了ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             error = new System.Windows.Forms.Label();
             parcent = new System.Windows.Forms.Label();
-            progressBar1 = new System.Windows.Forms.ProgressBar();
+            progressBar1 = new TransparentProgressBar();
             eventname = new System.Windows.Forms.Label();
             end = new System.Windows.Forms.Label();
             start = new System.Windows.Forms.Label();
             duration = new System.Windows.Forms.Label();
             button2 = new System.Windows.Forms.Button();
             ibemei = new System.Windows.Forms.TextBox();
-            panel2 = new System.Windows.Forms.Panel();
+            panel3 = new System.Windows.Forms.Panel();
             label2 = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             button3 = new System.Windows.Forms.Button();
@@ -81,7 +86,6 @@
             カラーキー今のメニューToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             カラーキーなしToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             文字白ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            文字黒ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             フォントToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             画像ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             でふぉるとにもどす正月みくToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,12 +96,20 @@
             画像なしToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             ぱねる１似合わせるToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             スライドショー = new System.Windows.Forms.ToolStripMenuItem();
+            カットToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            スライドToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            フェードToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             表示間隔ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
             かすたむToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             バーの表示ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            バーの設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            バー前景色ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            バー背景色ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            バー達成色ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            バー未達成色ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             うえのいろToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             もとに戻すToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             えいがみくさんみたいな文字化けもーど謎ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -109,7 +121,7 @@
             終了ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             panel1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
-            panel2.SuspendLayout();
+            panel3.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -261,7 +273,7 @@
             // 
             parcent.AutoSize = true;
             parcent.BackColor = System.Drawing.Color.Transparent;
-            parcent.Location = new System.Drawing.Point(547, 292);
+            parcent.Location = new System.Drawing.Point(535, 277);
             parcent.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             parcent.Name = "parcent";
             parcent.Size = new System.Drawing.Size(29, 20);
@@ -271,13 +283,15 @@
             // 
             // progressBar1
             // 
-            progressBar1.BackColor = System.Drawing.SystemColors.Menu;
-            progressBar1.ForeColor = System.Drawing.Color.Black;
+            progressBar1.BackColor = System.Drawing.Color.Transparent;
+            progressBar1.FilledColor = System.Drawing.Color.FromArgb(225, 192, 255, 192);
+            progressBar1.ForeColor = System.Drawing.Color.Transparent;
             progressBar1.Location = new System.Drawing.Point(7, 277);
             progressBar1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new System.Drawing.Size(532, 35);
+            progressBar1.Size = new System.Drawing.Size(520, 22);
             progressBar1.TabIndex = 10;
+            progressBar1.UnfilledColor = System.Drawing.Color.Transparent;
             progressBar1.Value = 90;
             // 
             // eventname
@@ -352,22 +366,22 @@
             ibemei.KeyDown += Form1_KeyDown;
             ibemei.KeyPress += KeyPress;
             // 
-            // panel2
+            // panel3
             // 
-            panel2.Controls.Add(label2);
-            panel2.Controls.Add(label1);
-            panel2.Controls.Add(button3);
-            panel2.Controls.Add(button1);
-            panel2.Controls.Add(comboBox1);
-            panel2.Controls.Add(ibemei);
-            panel2.Controls.Add(button2);
-            panel2.Controls.Add(startbox);
-            panel2.Controls.Add(endbox);
-            panel2.Location = new System.Drawing.Point(36, 389);
-            panel2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            panel2.Name = "panel2";
-            panel2.Size = new System.Drawing.Size(576, 167);
-            panel2.TabIndex = 9;
+            panel3.Controls.Add(label2);
+            panel3.Controls.Add(label1);
+            panel3.Controls.Add(button3);
+            panel3.Controls.Add(button1);
+            panel3.Controls.Add(comboBox1);
+            panel3.Controls.Add(ibemei);
+            panel3.Controls.Add(button2);
+            panel3.Controls.Add(startbox);
+            panel3.Controls.Add(endbox);
+            panel3.Location = new System.Drawing.Point(36, 389);
+            panel3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            panel3.Name = "panel3";
+            panel3.Size = new System.Drawing.Size(576, 167);
+            panel3.TabIndex = 9;
             // 
             // label2
             // 
@@ -553,7 +567,7 @@
             // 色の設定ToolStripMenuItem
             // 
             色の設定ToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
-            色の設定ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { hide_under_panel, クロマキー設定, めにゅーの色に戻すToolStripMenuItem, カラーキー今のメニューToolStripMenuItem, カラーキーなしToolStripMenuItem, 文字白ToolStripMenuItem, 文字黒ToolStripMenuItem, フォントToolStripMenuItem, 画像ToolStripMenuItem, toolStripMenuItem1, かすたむToolStripMenuItem, バーの表示ToolStripMenuItem, うえのいろToolStripMenuItem, もとに戻すToolStripMenuItem, えいがみくさんみたいな文字化けもーど謎ToolStripMenuItem, numpadのコンボボックス連動 });
+            色の設定ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { hide_under_panel, クロマキー設定, めにゅーの色に戻すToolStripMenuItem, カラーキー今のメニューToolStripMenuItem, カラーキーなしToolStripMenuItem, 文字白ToolStripMenuItem, フォントToolStripMenuItem, 画像ToolStripMenuItem, toolStripMenuItem1, かすたむToolStripMenuItem, バーの表示ToolStripMenuItem, バーの設定ToolStripMenuItem, うえのいろToolStripMenuItem, もとに戻すToolStripMenuItem, えいがみくさんみたいな文字化けもーど謎ToolStripMenuItem, numpadのコンボボックス連動 });
             色の設定ToolStripMenuItem.ForeColor = System.Drawing.Color.Black;
             色の設定ToolStripMenuItem.Name = "色の設定ToolStripMenuItem";
             色の設定ToolStripMenuItem.Size = new System.Drawing.Size(131, 24);
@@ -600,15 +614,8 @@
             // 
             文字白ToolStripMenuItem.Name = "文字白ToolStripMenuItem";
             文字白ToolStripMenuItem.Size = new System.Drawing.Size(440, 26);
-            文字白ToolStripMenuItem.Text = "文字　白";
+            文字白ToolStripMenuItem.Text = "文字色";
             文字白ToolStripMenuItem.Click += 文字白ToolStripMenuItem_Click;
-            // 
-            // 文字黒ToolStripMenuItem
-            // 
-            文字黒ToolStripMenuItem.Name = "文字黒ToolStripMenuItem";
-            文字黒ToolStripMenuItem.Size = new System.Drawing.Size(440, 26);
-            文字黒ToolStripMenuItem.Text = "文字　黒";
-            文字黒ToolStripMenuItem.Click += 文字黒ToolStripMenuItem_Click;
             // 
             // フォントToolStripMenuItem
             // 
@@ -681,11 +688,34 @@
             // 
             // スライドショー
             // 
-            スライドショー.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 表示間隔ToolStripMenuItem });
+            スライドショー.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { カットToolStripMenuItem, スライドToolStripMenuItem, フェードToolStripMenuItem, 表示間隔ToolStripMenuItem });
             スライドショー.Name = "スライドショー";
             スライドショー.Size = new System.Drawing.Size(210, 26);
             スライドショー.Text = "スライドショー";
             スライドショー.Click += ToggleButton_Click;
+            // 
+            // カットToolStripMenuItem
+            // 
+            カットToolStripMenuItem.Checked = true;
+            カットToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            カットToolStripMenuItem.Name = "カットToolStripMenuItem";
+            カットToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
+            カットToolStripMenuItem.Text = "カット";
+            カットToolStripMenuItem.Click += カットToolStripMenuItem_Click;
+            // 
+            // スライドToolStripMenuItem
+            // 
+            スライドToolStripMenuItem.Name = "スライドToolStripMenuItem";
+            スライドToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
+            スライドToolStripMenuItem.Text = "スライド";
+            スライドToolStripMenuItem.Click += スライドToolStripMenuItem_Click;
+            // 
+            // フェードToolStripMenuItem
+            // 
+            フェードToolStripMenuItem.Name = "フェードToolStripMenuItem";
+            フェードToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
+            フェードToolStripMenuItem.Text = "フェード";
+            フェードToolStripMenuItem.Click += フェードToolStripMenuItem_Click;
             // 
             // 表示間隔ToolStripMenuItem
             // 
@@ -731,6 +761,41 @@
             バーの表示ToolStripMenuItem.Size = new System.Drawing.Size(440, 26);
             バーの表示ToolStripMenuItem.Text = "バーの表示";
             バーの表示ToolStripMenuItem.Click += バーの表示ToolStripMenuItem_Click;
+            // 
+            // バーの設定ToolStripMenuItem
+            // 
+            バーの設定ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { バー前景色ToolStripMenuItem, バー背景色ToolStripMenuItem, バー達成色ToolStripMenuItem, バー未達成色ToolStripMenuItem });
+            バーの設定ToolStripMenuItem.Name = "バーの設定ToolStripMenuItem";
+            バーの設定ToolStripMenuItem.Size = new System.Drawing.Size(440, 26);
+            バーの設定ToolStripMenuItem.Text = "バーの設定";
+            // 
+            // バー前景色ToolStripMenuItem
+            // 
+            バー前景色ToolStripMenuItem.Name = "バー前景色ToolStripMenuItem";
+            バー前景色ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            バー前景色ToolStripMenuItem.Text = "前景色 (枠線)";
+            バー前景色ToolStripMenuItem.Click += バーの大きさ色ToolStripMenuItem_Click;
+            // 
+            // バー背景色ToolStripMenuItem
+            // 
+            バー背景色ToolStripMenuItem.Name = "バー背景色ToolStripMenuItem";
+            バー背景色ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            バー背景色ToolStripMenuItem.Text = "背景色";
+            バー背景色ToolStripMenuItem.Click += バーの大きさ色ToolStripMenuItem_Click;
+            // 
+            // バー達成色ToolStripMenuItem
+            // 
+            バー達成色ToolStripMenuItem.Name = "バー達成色ToolStripMenuItem";
+            バー達成色ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            バー達成色ToolStripMenuItem.Text = "達成色";
+            バー達成色ToolStripMenuItem.Click += バーの大きさ色ToolStripMenuItem_Click;
+            // 
+            // バー未達成色ToolStripMenuItem
+            // 
+            バー未達成色ToolStripMenuItem.Name = "バー未達成色ToolStripMenuItem";
+            バー未達成色ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            バー未達成色ToolStripMenuItem.Text = "未達成色";
+            バー未達成色ToolStripMenuItem.Click += バーの大きさ色ToolStripMenuItem_Click;
             // 
             // うえのいろToolStripMenuItem
             // 
@@ -803,7 +868,7 @@
             BackColor = System.Drawing.SystemColors.Control;
             BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             ClientSize = new System.Drawing.Size(638, 578);
-            Controls.Add(panel2);
+            Controls.Add(panel3);
             Controls.Add(panel1);
             Controls.Add(menuStrip1);
             DoubleBuffered = true;
@@ -818,8 +883,8 @@
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             contextMenuStrip1.ResumeLayout(false);
-            panel2.ResumeLayout(false);
-            panel2.PerformLayout();
+            panel3.ResumeLayout(false);
+            panel3.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);
@@ -833,13 +898,13 @@
         private System.Windows.Forms.TextBox endbox;
         private System.Windows.Forms.Label elapsed;
         private System.Windows.Forms.Label left;
-        private System.Windows.Forms.Panel panel1;
+        private CustomPanel panel1;
         private System.Windows.Forms.Label start;
         private System.Windows.Forms.Label duration;
         private System.Windows.Forms.Label end;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TextBox ibemei;
-        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Label eventname;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Timer timer1;
@@ -847,7 +912,6 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem 時刻設定ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem バージョンToolStripMenuItem;
-        public System.Windows.Forms.ProgressBar progressBar1;
         public System.Windows.Forms.Label parcent;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.ToolStripMenuItem 外部つーるへエクスポートToolStripMenuItem;
@@ -864,7 +928,6 @@
         private System.Windows.Forms.ToolStripMenuItem カラーキー今のメニューToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem カラーキーなしToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 文字白ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 文字黒ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem フォントToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem めにゅーの色に戻すToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 画像ToolStripMenuItem;
@@ -907,6 +970,15 @@
         private System.Windows.Forms.ToolStripMenuItem うえのめにゅーも色適用ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem numpadのコンボボックス連動;
         private System.Windows.Forms.ToolStripMenuItem アプリ終了ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem カットToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem スライドToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem フェードToolStripMenuItem;
+        public TransparentProgressBar progressBar1;
+        private System.Windows.Forms.ToolStripMenuItem バーの設定ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem バー前景色ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem バー背景色ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem バー達成色ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem バー未達成色ToolStripMenuItem;
     }
 }
 

@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/04/14")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/04/18")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -1245,6 +1245,90 @@ namespace neta.Properties {
             }
             set {
                 this["use_numpad_hotkey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool slide_cut {
+            get {
+                return ((bool)(this["slide_cut"]));
+            }
+            set {
+                this["slide_cut"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool slide_fade {
+            get {
+                return ((bool)(this["slide_fade"]));
+            }
+            set {
+                this["slide_fade"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool slide_slide {
+            get {
+                return ((bool)(this["slide_slide"]));
+            }
+            set {
+                this["slide_slide"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0, 0, 0")]
+        public global::System.Drawing.Color progbar_forecolor {
+            get {
+                return ((global::System.Drawing.Color)(this["progbar_forecolor"]));
+            }
+            set {
+                this["progbar_forecolor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0, 0, 0")]
+        public global::System.Drawing.Color progbar_backcolor {
+            get {
+                return ((global::System.Drawing.Color)(this["progbar_backcolor"]));
+            }
+            set {
+                this["progbar_backcolor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("225, 192, 255, 192")]
+        public global::System.Drawing.Color progbar_filledcolor {
+            get {
+                return ((global::System.Drawing.Color)(this["progbar_filledcolor"]));
+            }
+            set {
+                this["progbar_filledcolor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0, 0, 0")]
+        public global::System.Drawing.Color progbar_unfilledcolor {
+            get {
+                return ((global::System.Drawing.Color)(this["progbar_unfilledcolor"]));
+            }
+            set {
+                this["progbar_unfilledcolor"] = value;
             }
         }
     }

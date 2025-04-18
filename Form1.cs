@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using TZPASER;
+using static System.TimeZoneInfo;
 
 namespace neta
 {
@@ -32,6 +33,31 @@ namespace neta
         private int currentImageIndex = 0;
         private bool isSlideshowRunning = false;
         private string folderPath = @"C:\Users\imasp\OneDrive\Desktop\aimiku\4-8"; // 初期値
+
+        //private CustomPanel panel1; // フォームデザイナーで定義済み
+        private CustomPanel panel2; // アニメーション用のパネル
+        private float fadeOpacity = 0f; // フェードの透明度
+        private int slideOffset = 0; // スライドのオフセット
+        private bool isAnimating = false; // アニメーション中フラグ
+        private enum TransitionType { Cut, Fade, Slide }
+        private TransitionType currentTransition = TransitionType.Cut;
+        private System.Windows.Forms.Timer fadeTimer; // フェード専用タイマー
+        private System.Windows.Forms.Timer slideTimer; // スライド専用タイマー
+        private Bitmap slideBuffer; // スライドアニメーション用のバッファ
+
+
+        // カスタムパネルクラス
+        private class CustomPanel : Panel
+        {
+            public CustomPanel()
+            {
+                // ダブルバッファリングを有効化
+                this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
+                this.UpdateStyles();
+            }
+        }
+
+
         public NETA_TIMER()
         {
             InitializeComponent();
@@ -54,6 +80,25 @@ namespace neta
 
             this.KeyPreview = true;
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(Form1_KeyDown);
+
+            // フェードとスライド用のタイマー初期化
+            fadeTimer = new System.Windows.Forms.Timer();
+            slideTimer = new System.Windows.Forms.Timer();
+            // panel2の初期化
+            panel2 = new CustomPanel
+            {
+                Size = panel1.Size,
+                Location = panel1.Location,
+                BackgroundImageLayout = ImageLayout.Stretch,
+                Visible = false
+            };
+            panel2.Paint += panel2_Paint;
+            this.Controls.Add(panel2);
+            panel2.BringToFront(); // panel1より前面に
+
+            // スライドバッファの初期化
+            slideBuffer = new Bitmap(panel1.Width, panel1.Height);
+
 
 
         }
@@ -224,13 +269,13 @@ namespace neta
             }
 
 
-            this.comboBox1.Text = Properties.Settings.Default.goog;
+
             this.startbox.Text = Properties.Settings.Default.st;
             this.endbox.Text = Properties.Settings.Default.en;
             this.ibemei.Text = Properties.Settings.Default.ibe;
             this.parcent.Left = Properties.Settings.Default.parcent;
 
-            this.progressBar1.Width = Properties.Settings.Default.barlen;
+            progressBar1.Width = Properties.Settings.Default.barlen;
 
             this.Font = Properties.Settings.Default.uifont;
             this.ForeColor = Properties.Settings.Default.uicolor;
@@ -245,7 +290,7 @@ namespace neta
             this.current.ForeColor = Properties.Settings.Default.uicolor;
             panel1.ForeColor = Properties.Settings.Default.uicolor;
 
-            this.panel2.Visible = Properties.Settings.Default.uihide;
+            this.panel3.Visible = Properties.Settings.Default.uihide;
             ぱねる１似合わせるToolStripMenuItem.Checked = Properties.Settings.Default.image_Stretch;
             hide_under_panel.Checked = Properties.Settings.Default.uihide;
 
@@ -253,9 +298,39 @@ namespace neta
             this.お花見みくさん.Checked = Properties.Settings.Default.ohanami_miku;
             this.星屑ハンターの双子.Checked = Properties.Settings.Default.hosikuzuhunter;
             numpadのコンボボックス連動.Checked = Properties.Settings.Default.use_numpad_hotkey;
+            カットToolStripMenuItem.Checked = Properties.Settings.Default.slide_cut;
+            フェードToolStripMenuItem.Checked = Properties.Settings.Default.slide_fade;
+            スライドToolStripMenuItem.Checked = Properties.Settings.Default.slide_slide;
 
+            if (カットToolStripMenuItem.Checked)
+            {
+                カットToolStripMenuItem_Click(sender, e);
+            }
+            if (フェードToolStripMenuItem.Checked)
+            {
+                フェードToolStripMenuItem_Click(sender, e);
+            }
+            if (スライドToolStripMenuItem.Checked) { スライドToolStripMenuItem_Click(sender, e); }
+
+            // スライドショーの状態を復元
+            isSlideshowRunning = Properties.Settings.Default.using_slideshow;
+            if (isSlideshowRunning)
+            {
+                isSlideshowRunning = false; // 一旦リセットしてToggleButton_Clickで正しく状態を設定
+                ToggleButton_Click(sender, e);
+            }
+
+            this.comboBox1.Text = Properties.Settings.Default.goog;
 
             Properties.Settings.Default.system_tz = TimeZoneInfo.Local.Id;
+
+
+
+            progressBar1.FilledColor = Properties.Settings.Default.progbar_filledcolor;
+            progressBar1.UnfilledColor = Properties.Settings.Default.progbar_unfilledcolor;
+
+            progressBar1.ForeColor = Properties.Settings.Default.progbar_forecolor;
+            progressBar1.BackColor = Properties.Settings.Default.progbar_backcolor;
 
             LoadIni();
 
@@ -294,12 +369,6 @@ namespace neta
             }
 
 
-            isSlideshowRunning = Properties.Settings.Default.using_slideshow;
-            if (isSlideshowRunning)
-            {
-                isSlideshowRunning = false;
-                ToggleButton_Click(sender, e);
-            }
 
             this_end_update();
 
@@ -332,16 +401,43 @@ namespace neta
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-
             Properties.Settings.Default.st = this.startbox.Text;
             Properties.Settings.Default.en = this.endbox.Text;
             Properties.Settings.Default.ibe = this.ibemei.Text;
             Properties.Settings.Default.goog = this.comboBox1.Text;
 
             Properties.Settings.Default.Save();
-            // using Microsoft.Win32;
-            // イベントハンドラを削除（削除しないとメモリリークが発生する）
+
+            // イベントハンドラを削除
             SystemEvents.TimeChanged -= new EventHandler(SystemEvents_TimeChanged);
+
+            // スライドバッファを破棄
+            if (slideBuffer != null)
+            {
+                slideBuffer.Dispose();
+                slideBuffer = null;
+            }
+
+            // タイマーを停止
+            timer?.Stop();
+            fadeTimer?.Stop();
+            slideTimer?.Stop();
+
+            // パネルの画像を破棄
+            if (panel1.BackgroundImage != null)
+            {
+                panel1.BackgroundImage.Dispose();
+                panel1.BackgroundImage = null;
+            }
+            if (panel2.BackgroundImage != null)
+            {
+                panel2.BackgroundImage.Dispose();
+                panel2.BackgroundImage = null;
+            }
+
+            // 透明度をリセット
+            fadeOpacity = 0f;
+            currentImageOpacity = 1f;
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -934,7 +1030,6 @@ namespace neta
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-
             if (comboBox1.SelectedItem != null)
             {
                 string key = comboBox1.SelectedItem.ToString();
@@ -945,9 +1040,32 @@ namespace neta
                 }
                 else
                 {
-                    panel1.BackgroundImage = null;          // 背景画像を削除
+                    if (panel1.BackgroundImage != null)
+                    {
+                        panel1.BackgroundImage.Dispose();
+                        panel1.BackgroundImage = null;
+                    }
                     panel1.BackColor = this.BackColor;
-                    panel1.Invalidate();                    // 再描画をリクエスト
+                    panel1.Invalidate(); // 再描画をリクエスト
+
+                    // スライドショー用の画像リストをクリア
+                    imageFiles = null;
+                    currentImageIndex = 0;
+
+                    // スライドショーが実行中でない場合、タイマーを開始しない
+                    if (isSlideshowRunning)
+                    {
+                        isSlideshowRunning = true;
+                        スライドショー.Checked = true;
+                        Properties.Settings.Default.using_slideshow = true;
+                        timer?.Start();
+                    }
+                    else
+                    {
+                        isSlideshowRunning = false;
+                        スライドショー.Checked = false;
+                        Properties.Settings.Default.using_slideshow = false;
+                    }
                 }
             }
 
@@ -965,8 +1083,6 @@ namespace neta
                 return;
             }
 
-
-
             try
             {
                 var url2 = url;
@@ -975,7 +1091,6 @@ namespace neta
                 if (text == "")
                 {
                     WebClient wc = new WebClient();
-
                     wc.Encoding = Encoding.UTF8;
                     text = wc.DownloadString(url2);
                     wc.Dispose();
@@ -989,7 +1104,6 @@ namespace neta
                     "/data/" + game[selecter] + "/end";
 
                 get_json_parse(url2, text, path, false);
-
             }
             catch (WebException exc)
             {
@@ -1628,9 +1742,9 @@ namespace neta
 
         private void 下パネルを隠すToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.uihide = !panel2.Visible;
-            hide_under_panel.Checked = !panel2.Visible;
-            panel2.Visible = !panel2.Visible;
+            Properties.Settings.Default.uihide = !panel3.Visible;
+            hide_under_panel.Checked = !panel3.Visible;
+            panel3.Visible = !panel3.Visible;
         }
 
 
@@ -2118,11 +2232,42 @@ namespace neta
 
         private void 文字白ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.ForeColor = Color.White;
-            this.eventname.ForeColor = Color.White;
-            this.current.ForeColor = Color.White;
-            panel1.ForeColor = Color.White;
-            Properties.Settings.Default.uicolor = Color.White;
+
+            using (ColorDialog colorDialog = new ColorDialog())
+            {
+
+                colorDialog.Color = this.ForeColor;
+                // カスタム色を有効化
+                colorDialog.AllowFullOpen = true;
+                colorDialog.FullOpen = true;
+                // ダイアログを表示
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // アルファ値の入力ダイアログを表示
+                    string alphaInput = Microsoft.VisualBasic.Interaction.InputBox(
+                        "アルファ値 (0～255) を入力してください:",
+                        "アルファ値の設定",
+                        "255", // デフォルト値
+                        -1, -1
+                    );
+
+                    int alpha;
+                    if (!int.TryParse(alphaInput, out alpha) || alpha < 0 || alpha > 255)
+                    {
+                        MessageBox.Show("無効なアルファ値です。0～255の範囲で入力してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // 選択された色にアルファ値を適用
+                    Color selectedColor = Color.FromArgb(alpha, colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B);
+
+                    this.ForeColor = selectedColor;
+                    this.eventname.ForeColor = selectedColor;
+                    this.current.ForeColor = selectedColor;
+                    panel1.ForeColor = selectedColor;
+                    Properties.Settings.Default.uicolor = selectedColor;
+                }
+            }
         }
 
         private void 文字黒ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2149,7 +2294,7 @@ namespace neta
             //横書きフォントだけを表示する
             fd.AllowVerticalFonts = false;
             //色を選択できるようにする
-            fd.ShowColor = true;
+            fd.ShowColor = false;
             //取り消し線、下線、テキストの色などのオプションを指定可能にする
             //デフォルトがTrueのため必要はない
             fd.ShowEffects = true;
@@ -2237,47 +2382,87 @@ namespace neta
         {
             try
             {
+                // スライドショーの状態を保存
+                bool wasSlideshowRunning = isSlideshowRunning;
+
+                // アニメーションを停止
+                timer?.Stop();
+                if (fadeTimer != null) fadeTimer.Stop();
+                if (slideTimer != null) slideTimer.Stop();
+                isAnimating = false;
+                panel2.Visible = false;
+
                 if (s == "null")
                 {
                     if (正月ミクさん.Checked) { panel1.BackgroundImage = Resources.syougtu_kurinuki; }
                     if (星屑ハンターの双子.Checked) { panel1.BackgroundImage = Resources.hosikuzu; }
-                    panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                    if (お花見みくさん.Checked) { panel1.BackgroundImage = convert_pictute(Resources.ohanami_mikusan); }
+                    panel1.BackgroundImageLayout = ImageLayout.Stretch;
                     panel1.BackColor = this.BackColor;
-                    panel1.Invalidate();                    // 再描画をリクエスト
+                    panel1.Invalidate();
+
+                    // スライドショー用の画像リストをクリア
+                    imageFiles = null;
+                    currentImageIndex = 0;
+
+                    // スライドショーが実行中だった場合のみ再開
+                    if (wasSlideshowRunning)
+                    {
+                        isSlideshowRunning = true;
+                        スライドショー.Checked = true;
+                        Properties.Settings.Default.using_slideshow = true;
+                    }
                     return;
                 }
                 if (s == "none")
                 {
-                    panel1.BackgroundImage = null;          // 背景画像を削除
+                    if (panel1.BackgroundImage != null)
+                    {
+                        panel1.BackgroundImage.Dispose();
+                        panel1.BackgroundImage = null;
+                    }
                     panel1.BackColor = this.BackColor;
-                    panel1.Invalidate();                    // 再描画をリクエスト
+                    panel1.Invalidate();
+
+                    // スライドショー用の画像リストをクリア
+                    imageFiles = null;
+                    currentImageIndex = 0;
+
+                    // スライドショーが実行中だった場合のみ再開
+                    if (wasSlideshowRunning)
+                    {
+                        isSlideshowRunning = true;
+                        スライドショー.Checked = true;
+                        Properties.Settings.Default.using_slideshow = true;
+                    }
                     return;
                 }
                 if (File.Exists(s))
                 {
                     // 画像を直接パネルの背景として設定
+                    if (panel1.BackgroundImage != null)
+                    {
+                        panel1.BackgroundImage.Dispose();
+                    }
                     panel1.BackgroundImage = System.Drawing.Image.FromFile(s);
-                    if (ぱねる１似合わせるToolStripMenuItem.Checked)
-                    {
-                        panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
-                    }
-                    else
-                    {
-                        panel1.BackgroundImageLayout = ImageLayout.Tile;
-
-                    }
-
+                    panel1.BackgroundImageLayout = ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile;
                     Properties.Settings.Default.lastimagefile = s;
 
                     LoadImages(Path.GetDirectoryName(s));
-
                     SaveIni();
+
+                    // スライドショーが実行中だった場合のみ再開
+                    if (wasSlideshowRunning)
+                    {
+                        isSlideshowRunning = true;
+                        スライドショー.Checked = true;
+                        Properties.Settings.Default.using_slideshow = true;
+                        timer?.Start();
+                    }
                 }
             }
             catch (Exception ex)
             {
-
-
                 MessageBox.Show(ex.ToString());
             }
         }
@@ -2301,7 +2486,7 @@ namespace neta
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 panel1.BackgroundImage?.Dispose();
-                panel2.BackgroundImage?.Dispose();
+                panel3.BackgroundImage?.Dispose();
 
                 string filePath = ofd.FileName;
                 string folderPath = Path.GetDirectoryName(filePath);
@@ -2597,7 +2782,7 @@ namespace neta
         {
             this.SuspendLayout(); // レイアウト更新を一時停止
             panel1.SuspendLayout();
-            panel2.SuspendLayout();
+            panel3.SuspendLayout();
 
 
         }
@@ -2605,10 +2790,10 @@ namespace neta
         {
             this.ResumeLayout(false); // レイアウト更新を再開
             panel1.ResumeLayout(false); // レイアウト更新を再開
-            panel2.ResumeLayout(false); // レイアウト更新を再開
+            panel3.ResumeLayout(false); // レイアウト更新を再開
 
             panel1.Invalidate(); // 必要な部分だけを再描画
-            panel2.Invalidate(); // 必要な部分だけを再描画
+            panel3.Invalidate(); // 必要な部分だけを再描画
 
         }
 
@@ -3359,10 +3544,13 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
         {
             try
             {
+                // スライドショーの状態を保存
+                bool wasSlideshowRunning = isSlideshowRunning;
+
                 if (!Directory.Exists(folderPath))
                 {
                     MessageBox.Show("指定されたフォルダが存在しません: " + folderPath);
-                    timer.Stop();
+                    timer?.Stop();
                     return;
                 }
 
@@ -3373,17 +3561,38 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
                 if (imageFiles.Length == 0)
                 {
                     MessageBox.Show("指定フォルダに画像が見つかりません");
-                    timer.Stop();
+                    timer?.Stop();
                     return;
                 }
 
                 currentImageIndex = 0; // インデックスをリセット
+                isAnimating = false; // アニメーション状態をリセット
+                if (fadeTimer != null) fadeTimer.Stop();
+                if (slideTimer != null) slideTimer.Stop();
+                panel2.Visible = false;
+
+                // スライドバッファを再初期化
+                if (slideBuffer != null)
+                {
+                    slideBuffer.Dispose();
+                }
+                slideBuffer = new Bitmap(panel1.Width, panel1.Height);
+
                 ShowImage();
+
+                // スライドショーが実行中だった場合のみ再開
+                if (wasSlideshowRunning)
+                {
+                    isSlideshowRunning = true;
+                    スライドショー.Checked = true;
+                    Properties.Settings.Default.using_slideshow = true;
+                    timer?.Start();
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"画像の読み込み中にエラーが発生しました: {ex.Message}");
-                timer.Stop();
+                timer?.Stop();
             }
         }
 
@@ -3405,13 +3614,16 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             {
                 string folderPath = Path.GetDirectoryName(Properties.Settings.Default.lastimagefile);
                 LoadImages(folderPath); // フォルダの画像を読み込む
-                timer.Start();
+                timer?.Start();
             }
             else
             {
-                timer.Stop();
-                // スライドショー停止時に最後の画像を表示
-                ShowImage();
+                timer?.Stop();
+                if (fadeTimer != null) fadeTimer.Stop();
+                if (slideTimer != null) slideTimer.Stop();
+                isAnimating = false;
+                panel2.Visible = false;
+                ShowImage(); // 停止時に現在の画像を表示
             }
         }
 
@@ -3434,6 +3646,12 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             ShowImage();
         }
 
+
+        private void SetTransitionType(TransitionType type)
+        {
+            currentTransition = type;
+        }
+
         private void ShowImage()
         {
             if (string.IsNullOrEmpty(Properties.Settings.Default.lastimagefile) ||
@@ -3443,31 +3661,248 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
                 return;
             }
 
+            if (imageFiles == null || imageFiles.Length == 0 || currentImageIndex < 0 || currentImageIndex >= imageFiles.Length)
+            {
+                MessageBox.Show("表示する画像がありません。");
+                timer?.Stop();
+                return;
+            }
+
+            if (isAnimating)
+            {
+                return; // アニメーション中はスキップ
+            }
+
             try
             {
-                if (imageFiles != null && imageFiles.Length > 0 && currentImageIndex >= 0 && currentImageIndex < imageFiles.Length)
-                {
-                    // 現在の画像を破棄
-                    if (panel1.BackgroundImage != null)
-                    {
-                        panel1.BackgroundImage.Dispose();
-                        panel1.BackgroundImage = null;
-                    }
+                // 既存のタイマーを安全に停止
+                if (fadeTimer != null) fadeTimer.Stop();
+                if (slideTimer != null) slideTimer.Stop();
 
-                    // 新しい画像を読み込む
-                    panel1.BackgroundImage = Image.FromFile(imageFiles[currentImageIndex]);
-                    Properties.Settings.Default.lastimagefile = imageFiles[currentImageIndex];
-                }
-                else
+                switch (currentTransition)
                 {
-                    MessageBox.Show("表示する画像がありません。");
+                    case TransitionType.Cut:
+                        ShowImageCut();
+                        break;
+                    case TransitionType.Fade:
+                        ShowImageFade();
+                        break;
+                    case TransitionType.Slide:
+                        ShowImageSlide();
+                        break;
                 }
+
+                Properties.Settings.Default.lastimagefile = imageFiles[currentImageIndex];
+                panel1.Invalidate(); // panel1を再描画
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"画像の表示に失敗しました: {ex.Message}");
+                isAnimating = false;
+                timer?.Stop();
             }
         }
+
+
+
+        private void ShowImageCut()
+        {
+            // 現在の画像を破棄
+            if (panel1.BackgroundImage != null)
+            {
+                panel1.BackgroundImage.Dispose();
+                panel1.BackgroundImage = null;
+            }
+
+            // 新しい画像を読み込む
+            panel1.BackgroundImage = Image.FromFile(imageFiles[currentImageIndex]);
+        }
+
+        //private float fadeOpacity = 0f; // 次の画像の透明度（0.0 → 1.0）
+        private float currentImageOpacity = 1f; // 現在の画像の透明度（1.0 → 0.0）
+
+        private void ShowImageFade()
+        {
+            isAnimating = true;
+            fadeOpacity = 0f; // 次の画像の透明度（0.0から開始）
+            currentImageOpacity = 1f; // 現在の画像の透明度（1.0から開始）
+
+            // panel2に次の画像をセット
+            if (panel2.BackgroundImage != null)
+            {
+                panel2.BackgroundImage.Dispose();
+                panel2.BackgroundImage = null;
+            }
+            panel2.BackgroundImage = Image.FromFile(imageFiles[currentImageIndex]);
+            panel2.BackgroundImageLayout = ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile;
+            panel2.Visible = true;
+            panel2.BringToFront();
+
+            // フェード用のタイマー
+            if (fadeTimer == null) fadeTimer = new System.Windows.Forms.Timer();
+            fadeTimer.Interval = 25; // 25msごとに更新（より滑らかに）
+            fadeTimer.Tick -= FadeTimer_Tick; // 既存のハンドラをクリア
+            fadeTimer.Tick += FadeTimer_Tick;
+            fadeTimer.Start();
+        }
+
+        private void FadeTimer_Tick(object sender, EventArgs e)
+        {
+            fadeOpacity += 0.0167f; // 透明度の変化を細かく（0.0167刻み）
+            currentImageOpacity -= 0.0167f; // 現在の画像の透明度を下げる
+
+            if (fadeOpacity >= 1f)
+            {
+                fadeOpacity = 1f;
+                currentImageOpacity = 0f;
+                fadeTimer?.Stop();
+                isAnimating = false;
+
+                // panel1に次の画像をセット
+                if (panel1.BackgroundImage != null)
+                {
+                    panel1.BackgroundImage.Dispose();
+                }
+                panel1.BackgroundImage = panel2.BackgroundImage;
+                panel1.BackgroundImageLayout = panel2.BackgroundImageLayout;
+                panel2.BackgroundImage = null;
+                panel2.Visible = false;
+                panel1.Invalidate();
+
+                // 透明度をリセット
+                currentImageOpacity = 1f;
+            }
+            panel2.Invalidate(); // 再描画
+        }
+
+        private void ShowImageSlide()
+        {
+            isAnimating = true;
+            slideOffset = panel1.Width; // 右端からスタート
+
+            // panel2に次の画像をセット
+            if (panel2.BackgroundImage != null)
+            {
+                panel2.BackgroundImage.Dispose();
+                panel2.BackgroundImage = null;
+            }
+            panel2.BackgroundImage = Image.FromFile(imageFiles[currentImageIndex]);
+            panel2.BackgroundImageLayout = ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile;
+            panel2.Visible = true;
+            panel2.BringToFront();
+
+            // スライド用のタイマー
+            if (slideTimer == null) slideTimer = new System.Windows.Forms.Timer();
+            slideTimer.Interval = 50; // 50msごとに更新（ちらつき軽減のため間隔を拡大）
+            slideTimer.Tick -= SlideTimer_Tick; // 既存のハンドラをクリア
+            slideTimer.Tick += SlideTimer_Tick;
+            slideTimer.Start();
+        }
+
+        private void SlideTimer_Tick(object sender, EventArgs e)
+        {
+            slideOffset -= panel1.Width / 20; // 20フレームでスライド
+            if (slideOffset <= 0)
+            {
+                slideOffset = 0;
+                slideTimer?.Stop();
+                isAnimating = false;
+
+                // panel1に次の画像をセット
+                if (panel1.BackgroundImage != null)
+                {
+                    panel1.BackgroundImage.Dispose();
+                }
+                panel1.BackgroundImage = panel2.BackgroundImage;
+                panel1.BackgroundImageLayout = panel2.BackgroundImageLayout;
+                panel2.BackgroundImage = null;
+                panel2.Visible = false;
+                panel1.Invalidate();
+            }
+            panel2.Invalidate(); // 再描画
+        }
+
+        private void panel2_Paint(object sender, PaintEventArgs e)
+        {
+            if (panel2.BackgroundImage == null || !panel2.Visible) return;
+
+            try
+            {
+                if (currentTransition == TransitionType.Fade)
+                {
+                    // 現在の画像（panel1）を描画（透明度を適用）
+                    if (panel1.BackgroundImage != null)
+                    {
+                        using (var attributes = new System.Drawing.Imaging.ImageAttributes())
+                        {
+                            attributes.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix { Matrix33 = currentImageOpacity });
+                            e.Graphics.DrawImage(
+                                panel1.BackgroundImage,
+                                new Rectangle(0, 0, panel2.Width, panel2.Height),
+                                0, 0, panel1.BackgroundImage.Width, panel1.BackgroundImage.Height,
+                                GraphicsUnit.Pixel,
+                                attributes
+                            );
+                        }
+                    }
+
+                    // 次の画像（panel2）を描画（透明度を適用）
+                    if (panel2.BackgroundImage != null)
+                    {
+                        using (var attributes = new System.Drawing.Imaging.ImageAttributes())
+                        {
+                            attributes.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix { Matrix33 = fadeOpacity });
+                            e.Graphics.DrawImage(
+                                panel2.BackgroundImage,
+                                new Rectangle(0, 0, panel2.Width, panel2.Height),
+                                0, 0, panel2.BackgroundImage.Width, panel2.BackgroundImage.Height,
+                                GraphicsUnit.Pixel,
+                                attributes
+                            );
+                        }
+                    }
+                }
+                else if (currentTransition == TransitionType.Slide)
+                {
+                    // バッファに描画してちらつきを軽減
+                    using (Graphics bufferGraphics = Graphics.FromImage(slideBuffer))
+                    {
+                        bufferGraphics.Clear(Color.Transparent); // バッファをクリア
+
+                        // 現在の画像（panel1）を左にずらして描画
+                        if (panel1.BackgroundImage != null)
+                        {
+                            bufferGraphics.DrawImage(
+                                panel1.BackgroundImage,
+                                new Rectangle(slideOffset - panel1.Width, 0, panel1.Width, panel1.Height),
+                                0, 0, panel1.BackgroundImage.Width, panel1.BackgroundImage.Height,
+                                GraphicsUnit.Pixel
+                            );
+                        }
+
+                        // 次の画像（panel2）をスライド位置に描画
+                        if (panel2.BackgroundImage != null)
+                        {
+                            bufferGraphics.DrawImage(
+                                panel2.BackgroundImage,
+                                new Rectangle(slideOffset, 0, panel2.Width, panel2.Height),
+                                0, 0, panel2.BackgroundImage.Width, panel2.BackgroundImage.Height,
+                                GraphicsUnit.Pixel
+                            );
+                        }
+                    }
+
+                    // バッファを画面に描画
+                    e.Graphics.DrawImage(slideBuffer, 0, 0);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"panel2_Paintエラー: {ex.Message}");
+            }
+        }
+
+
 
         private void 表示間隔ToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -3521,7 +3956,8 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
         // Optional: Handle KeyPress to block any residual numeric input (not strictly needed)
         private void KeyPress(object sender, KeyPressEventArgs e)
         {
-            if(numpadのコンボボックス連動.Checked){
+            if (numpadのコンボボックス連動.Checked)
+            {
                 // Since NumPad keys are handled in KeyDown with SuppressKeyPress, this may not be reached
                 if (e.KeyChar >= '0' && e.KeyChar <= '9' && ActiveControl is TextBox)
                 {
@@ -3536,10 +3972,133 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             numpadのコンボボックス連動.Checked = !numpadのコンボボックス連動.Checked;
             Properties.Settings.Default.use_numpad_hotkey = numpadのコンボボックス連動.Checked;
         }
+
+        //https://grok.com/chat/6b362b60-bfa6-40f1-b790-5be1fad8ceb3
+        private void カットToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetTransitionType(TransitionType.Cut);
+
+            // 他のチェックボックスをオフにする
+            フェードToolStripMenuItem.Checked = false;
+            スライドToolStripMenuItem.Checked = false;
+
+            // 現在のチェックボックスをオンにする
+            カットToolStripMenuItem.Checked = true; setting_slide();
+        }
+
+        private void スライドToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetTransitionType(TransitionType.Slide);
+
+            // 他のチェックボックスをオフにする
+            カットToolStripMenuItem.Checked = false;
+            フェードToolStripMenuItem.Checked = false;
+
+            // 現在のチェックボックスをオンにする
+            スライドToolStripMenuItem.Checked = true; setting_slide();
+        }
+
+        private void フェードToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetTransitionType(TransitionType.Fade);
+
+            // 他のチェックボックスをオフにする
+            カットToolStripMenuItem.Checked = false;
+            スライドToolStripMenuItem.Checked = false;
+
+            // 現在のチェックボックスをオンにする
+            フェードToolStripMenuItem.Checked = true; setting_slide();
+        }
+
+        private void setting_slide()
+        {
+            Properties.Settings.Default.slide_cut = カットToolStripMenuItem.Checked;
+            Properties.Settings.Default.slide_slide = スライドToolStripMenuItem.Checked;
+            Properties.Settings.Default.slide_fade = フェードToolStripMenuItem.Checked;
+
+        }
+
+        private void バーの大きさ色ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem menuItem = sender as ToolStripMenuItem;
+            if (menuItem == null) return;
+
+            using (ColorDialog colorDialog = new ColorDialog())
+            {
+                // 現在の色を設定（選択肢に応じて）
+                if (menuItem.Name == "バー前景色ToolStripMenuItem")
+                {
+                    colorDialog.Color = progressBar1.ForeColor;
+                }
+                else if (menuItem.Name == "バー背景色ToolStripMenuItem")
+                {
+                    colorDialog.Color = progressBar1.BackColor;
+                }
+                else if (menuItem.Name == "バー達成色ToolStripMenuItem")
+                {
+                    colorDialog.Color = progressBar1.FilledColor;
+                }
+                else if (menuItem.Name == "バー未達成色ToolStripMenuItem")
+                {
+                    colorDialog.Color = progressBar1.UnfilledColor;
+                }
+
+                // カスタム色を有効化
+                colorDialog.AllowFullOpen = true;
+                colorDialog.FullOpen = true;
+
+                // ダイアログを表示
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // アルファ値の入力ダイアログを表示
+                    string alphaInput = Microsoft.VisualBasic.Interaction.InputBox(
+                        "アルファ値 (0～255) を入力してください:",
+                        "アルファ値の設定",
+                        "255", // デフォルト値
+                        -1, -1
+                    );
+
+                    int alpha;
+                    if (!int.TryParse(alphaInput, out alpha) || alpha < 0 || alpha > 255)
+                    {
+                        MessageBox.Show("無効なアルファ値です。0～255の範囲で入力してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // 選択された色にアルファ値を適用
+                    Color selectedColor = Color.FromArgb(alpha, colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B);
+
+                    // 選択された色を適用
+                    if (menuItem.Name == "バー前景色ToolStripMenuItem")
+                    {
+                        progressBar1.ForeColor = selectedColor;
+                        Properties.Settings.Default.progbar_forecolor = selectedColor;
+                    }
+                    else if (menuItem.Name == "バー背景色ToolStripMenuItem")
+                    {
+                        progressBar1.BackColor = selectedColor;
+                        Properties.Settings.Default.progbar_backcolor = selectedColor;
+                    }
+                    else if (menuItem.Name == "バー達成色ToolStripMenuItem")
+                    {
+                        progressBar1.FilledColor = selectedColor;
+                        Properties.Settings.Default.progbar_filledcolor = selectedColor;
+                    }
+                    else if (menuItem.Name == "バー未達成色ToolStripMenuItem")
+                    {
+                        progressBar1.UnfilledColor = selectedColor;
+                        Properties.Settings.Default.progbar_unfilledcolor = selectedColor;
+                    }
+
+                    // プログレスバーを再描画
+                    progressBar1.Invalidate();
+                }
+            }
+        }
     }
 
-
-    public partial class IntervalForm : Form
+    
+public partial class IntervalForm : Form
         {
             private ComboBox intervalComboBox;
             private Button okButton;
@@ -3635,61 +4194,72 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             }
         }
 
+    // 透過可能なProgressBarクラス（NETA_TIMERクラスの外に移動）
+    public class TransparentProgressBar : ProgressBar
+    {
+        // カスタムプロパティ：達成部分の色（ARGB）
+        public Color FilledColor { get; set; } = Color.FromArgb(100, 0, 255, 0); // 半透明の緑
 
+        // カスタムプロパティ：未達成部分の色（ARGB）
+        public Color UnfilledColor { get; set; } = Color.FromArgb(50, 255, 0, 0); // 半透明の赤
+
+        public TransparentProgressBar()
+        {
+            // カスタム描画を有効化
+            this.SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            // 背景を指定したARGB値で塗りつぶし
+            using (SolidBrush backgroundBrush = new SolidBrush(BackColor))
+            {
+                e.Graphics.FillRectangle(backgroundBrush, 0, 0, Width, Height);
+            }
+
+            // 達成部分と未達成部分を描画
+            if (Maximum > 0)
+            {
+                int fillWidth = (int)((double)Value / Maximum * Width);
+
+                // 達成部分（FilledColorで描画）
+                if (fillWidth > 0)
+                {
+                    using (SolidBrush filledBrush = new SolidBrush(FilledColor))
+                    {
+                        e.Graphics.FillRectangle(filledBrush, 0, 0, fillWidth, Height);
+                    }
+                }
+
+                // 未達成部分（UnfilledColorで描画）
+                if (fillWidth < Width)
+                {
+                    using (SolidBrush unfilledBrush = new SolidBrush(UnfilledColor))
+                    {
+                        e.Graphics.FillRectangle(unfilledBrush, fillWidth, 0, Width - fillWidth, Height);
+                    }
+                }
+            }
+
+            // 枠線を描画
+            using (Pen pen = new Pen(Color.Black, 1))
+            {
+                e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
+            }
+        }
+
+        // 透過をサポートするために必要
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x20; // WS_EX_TRANSPARENT
+                return cp;
+            }
+        }
     }
-
-
-
-//public class CustomTransparentPanel : Form
-//{
-//    private Panel panel1;
-//    private MenuStrip mainMenu;
-
-//    public CustomTransparentPanel()
-//    {
-//        InitializeComponent();
-//    }
-
-//    private void InitializeComponent()
-//    {
-//        // フォームの設定
-//        this.Size = new Size(800, 600);
-//        this.Text = "透過パネルの例";
-
-//        // メインメニューの作成
-//        mainMenu = new MenuStrip();
-//        mainMenu.Text = "メインメニュー";
-
-//        // パネル1の作成（透過）
-//        panel1 = new Panel();
-//        panel1.Location = new Point(50, 100);
-//        panel1.Size = new Size(300, 200);
-//        panel1.BackColor = Color.FromArgb(100, Color.Green); // 透過設定
-
-//        // メニューの作成（透過なし）
-//        MenuStrip menuStrip = new MenuStrip();
-//        menuStrip.Items.Add(new ToolStripMenuItem("ファイル"));
-//        menuStrip.Items.Add(new ToolStripMenuItem("編集"));
-
-//        // コントロールの追加
-//        this.Controls.Add(panel1);
-//        this.Controls.Add(menuStrip);
-//        this.MainMenuStrip = menuStrip;
-//    }
-
-//    // パネル1の透過メソッド
-//    private void SetPanelTransparency()
-//    {
-//        // アルファ値を調整して透過度を設定
-//        panel1.BackColor = Color.FromArgb(100, Color.Blue); // 透過率40%
-//    }
-
-//    // 透過度を動的に変更するメソッド
-//    public void AdjustTransparency(int alphaValue)
-//    {
-//        // alphaValue: 0(完全透過)から255(不透明)の間の値
-//        panel1.BackColor = Color.FromArgb(alphaValue, Color.Green);
-//    }
-//}
+}
 
 

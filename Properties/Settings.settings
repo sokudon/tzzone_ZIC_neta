@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/04/14</Value>
+      <Value Profile="(Default)">2025/04/18</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -307,6 +307,27 @@
     </Setting>
     <Setting Name="use_numpad_hotkey" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="slide_cut" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="slide_fade" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="slide_slide" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="progbar_forecolor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">0, 0, 0, 0</Value>
+    </Setting>
+    <Setting Name="progbar_backcolor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">0, 0, 0, 0</Value>
+    </Setting>
+    <Setting Name="progbar_filledcolor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">225, 192, 255, 192</Value>
+    </Setting>
+    <Setting Name="progbar_unfilledcolor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">0, 0, 0, 0</Value>
     </Setting>
   </Settings>
 </SettingsFile>
