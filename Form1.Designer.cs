@@ -78,6 +78,8 @@
             画像をbas64に変換ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem7 = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem8 = new System.Windows.Forms.ToolStripMenuItem();
+            カレンダー作成ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            旧アウトルック用のボタンを隠すToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             netaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             色の設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             hide_under_panel = new System.Windows.Forms.ToolStripMenuItem();
@@ -423,6 +425,7 @@
             button1.TabIndex = 10;
             button1.Text = "カレンダ-作成";
             button1.UseVisualStyleBackColor = true;
+            button1.Visible = false;
             button1.Click += button1_Click_1;
             // 
             // comboBox1
@@ -468,7 +471,7 @@
             // 
             // 外部つーるへエクスポートToolStripMenuItem
             // 
-            外部つーるへエクスポートToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { oBSタイマーToolStripMenuItem, ぱいそんたいまーToolStripMenuItem, wEBたいまーToolStripMenuItem, wEBせかいどけいToolStripMenuItem, toolStripMenuItem2 });
+            外部つーるへエクスポートToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { oBSタイマーToolStripMenuItem, ぱいそんたいまーToolStripMenuItem, wEBたいまーToolStripMenuItem, wEBせかいどけいToolStripMenuItem, toolStripMenuItem2, カレンダー作成ToolStripMenuItem });
             外部つーるへエクスポートToolStripMenuItem.Name = "外部つーるへエクスポートToolStripMenuItem";
             外部つーるへエクスポートToolStripMenuItem.Size = new System.Drawing.Size(90, 24);
             外部つーるへエクスポートToolStripMenuItem.Text = "えくすぽーと";
@@ -477,7 +480,7 @@
             // 
             oBSタイマーToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { pythonToolStripMenuItem, luascriptToolStripMenuItem, luascripttzselectedToolStripMenuItem, obssocket送信のみToolStripMenuItem });
             oBSタイマーToolStripMenuItem.Name = "oBSタイマーToolStripMenuItem";
-            oBSタイマーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            oBSタイマーToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             oBSタイマーToolStripMenuItem.Text = "OBSたいまーぷらぐいん";
             // 
             // pythonToolStripMenuItem
@@ -511,21 +514,21 @@
             // ぱいそんたいまーToolStripMenuItem
             // 
             ぱいそんたいまーToolStripMenuItem.Name = "ぱいそんたいまーToolStripMenuItem";
-            ぱいそんたいまーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            ぱいそんたいまーToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             ぱいそんたいまーToolStripMenuItem.Text = "ぱいそんたいまー";
             ぱいそんたいまーToolStripMenuItem.Click += ぱいそんたいまーToolStripMenuItem_Click;
             // 
             // wEBたいまーToolStripMenuItem
             // 
             wEBたいまーToolStripMenuItem.Name = "wEBたいまーToolStripMenuItem";
-            wEBたいまーToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            wEBたいまーToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             wEBたいまーToolStripMenuItem.Text = "WEBたいまー";
             wEBたいまーToolStripMenuItem.Click += wEBたいまーToolStripMenuItem_Click;
             // 
             // wEBせかいどけいToolStripMenuItem
             // 
             wEBせかいどけいToolStripMenuItem.Name = "wEBせかいどけいToolStripMenuItem";
-            wEBせかいどけいToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            wEBせかいどけいToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             wEBせかいどけいToolStripMenuItem.Text = "WEBせかいどけい";
             wEBせかいどけいToolStripMenuItem.Click += wEBせかいどけいToolStripMenuItem_Click;
             // 
@@ -533,7 +536,7 @@
             // 
             toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 画像をbas64に変換ToolStripMenuItem, toolStripMenuItem7, toolStripMenuItem8 });
             toolStripMenuItem2.Name = "toolStripMenuItem2";
-            toolStripMenuItem2.Size = new System.Drawing.Size(222, 26);
+            toolStripMenuItem2.Size = new System.Drawing.Size(224, 26);
             toolStripMenuItem2.Text = "かすたむcss";
             // 
             // 画像をbas64に変換ToolStripMenuItem
@@ -556,6 +559,23 @@
             toolStripMenuItem8.Size = new System.Drawing.Size(214, 26);
             toolStripMenuItem8.Text = "claude3.5";
             toolStripMenuItem8.Click += claude35ToolStripMenuItem_Click;
+            // 
+            // カレンダー作成ToolStripMenuItem
+            // 
+            カレンダー作成ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { 旧アウトルック用のボタンを隠すToolStripMenuItem });
+            カレンダー作成ToolStripMenuItem.Name = "カレンダー作成ToolStripMenuItem";
+            カレンダー作成ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            カレンダー作成ToolStripMenuItem.Text = "カレンダー作成";
+            カレンダー作成ToolStripMenuItem.Click += button1_Click;
+            // 
+            // 旧アウトルック用のボタンを隠すToolStripMenuItem
+            // 
+            旧アウトルック用のボタンを隠すToolStripMenuItem.Checked = true;
+            旧アウトルック用のボタンを隠すToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            旧アウトルック用のボタンを隠すToolStripMenuItem.Name = "旧アウトルック用のボタンを隠すToolStripMenuItem";
+            旧アウトルック用のボタンを隠すToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
+            旧アウトルック用のボタンを隠すToolStripMenuItem.Text = "旧アウトルック用のボタンを隠す";
+            旧アウトルック用のボタンを隠すToolStripMenuItem.Click += 旧アウトルック用のボタンを隠すToolStripMenuItem_Click;
             // 
             // netaToolStripMenuItem
             // 
@@ -772,28 +792,28 @@
             // バー前景色ToolStripMenuItem
             // 
             バー前景色ToolStripMenuItem.Name = "バー前景色ToolStripMenuItem";
-            バー前景色ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            バー前景色ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             バー前景色ToolStripMenuItem.Text = "前景色 (枠線)";
             バー前景色ToolStripMenuItem.Click += バーの大きさ色ToolStripMenuItem_Click;
             // 
             // バー背景色ToolStripMenuItem
             // 
             バー背景色ToolStripMenuItem.Name = "バー背景色ToolStripMenuItem";
-            バー背景色ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            バー背景色ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             バー背景色ToolStripMenuItem.Text = "背景色";
             バー背景色ToolStripMenuItem.Click += バーの大きさ色ToolStripMenuItem_Click;
             // 
             // バー達成色ToolStripMenuItem
             // 
             バー達成色ToolStripMenuItem.Name = "バー達成色ToolStripMenuItem";
-            バー達成色ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            バー達成色ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             バー達成色ToolStripMenuItem.Text = "達成色";
             バー達成色ToolStripMenuItem.Click += バーの大きさ色ToolStripMenuItem_Click;
             // 
             // バー未達成色ToolStripMenuItem
             // 
             バー未達成色ToolStripMenuItem.Name = "バー未達成色ToolStripMenuItem";
-            バー未達成色ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            バー未達成色ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             バー未達成色ToolStripMenuItem.Text = "未達成色";
             バー未達成色ToolStripMenuItem.Click += バーの大きさ色ToolStripMenuItem_Click;
             // 
@@ -979,6 +999,8 @@
         private System.Windows.Forms.ToolStripMenuItem バー背景色ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem バー達成色ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem バー未達成色ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem カレンダー作成ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 旧アウトルック用のボタンを隠すToolStripMenuItem;
     }
 }
 

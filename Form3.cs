@@ -79,6 +79,9 @@ namespace neta
 
 
             change_baseurl.Checked = Properties.Settings.Default.change_baseurl;
+
+            baseurl_txt.Text=Properties.Settings.Default.alt_baseurl;
+
             localeBox.Text = Properties.Settings.Default.locale;
 
             // ここで string[] path の内容を tzbinary_path コンボボックスに追加
@@ -123,6 +126,7 @@ script_path() + "zoneinfo\\",
 
         private void dtformat_FormClosed(object sender, FormClosedEventArgs e)
         {
+
         }
 
 

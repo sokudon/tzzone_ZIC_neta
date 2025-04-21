@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -241,9 +242,6 @@ namespace neta
                     "/data/" + new_games[selecter] + "/end";
 
                 get_json_parse(url2, text, path, false);
-
-
-
                 Properties.Settings.Default.json = text;
 
             }
@@ -294,6 +292,9 @@ namespace neta
             ぱねる１似合わせるToolStripMenuItem.Checked = Properties.Settings.Default.image_Stretch;
             hide_under_panel.Checked = Properties.Settings.Default.uihide;
 
+            旧アウトルック用のボタンを隠すToolStripMenuItem.Checked = Properties.Settings.Default.view_old_outlook_calender;
+            button1.Visible = Properties.Settings.Default.view_old_outlook_calender;
+
             this.正月ミクさん.Checked = Properties.Settings.Default.syougautmiku;
             this.お花見みくさん.Checked = Properties.Settings.Default.ohanami_miku;
             this.星屑ハンターの双子.Checked = Properties.Settings.Default.hosikuzuhunter;
@@ -320,7 +321,6 @@ namespace neta
                 ToggleButton_Click(sender, e);
             }
 
-            this.comboBox1.Text = Properties.Settings.Default.goog;
 
             Properties.Settings.Default.system_tz = TimeZoneInfo.Local.Id;
 
@@ -332,20 +332,7 @@ namespace neta
             progressBar1.ForeColor = Properties.Settings.Default.progbar_forecolor;
             progressBar1.BackColor = Properties.Settings.Default.progbar_backcolor;
 
-            LoadIni();
-
-            if (comboBox1.SelectedItem != null)
-            {
-                string key = comboBox1.SelectedItem.ToString();
-                if (HasImagePath(key))
-                {
-                    read_picture(imagePaths[key].ToString());
-                    Properties.Settings.Default.lastimagefile = imagePaths[key];
-                }
-            }
-
-
-
+            
             if (Properties.Settings.Default.font_margn)
             {
                 menu_align(0, true);
@@ -364,9 +351,23 @@ namespace neta
 
             if (Properties.Settings.Default.change_baseurl)
             {
-
-                button2_Click(sender, e);
+                   var new_games = Properties.Settings.Default.alt_basekey.Split(",");
+                    UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
             }
+
+            this.comboBox1.Text = Properties.Settings.Default.goog;
+
+            if (comboBox1.SelectedItem != null)
+            {
+                string key = comboBox1.SelectedItem.ToString();
+                if (HasImagePath(key))
+                {
+                    read_picture(imagePaths[key].ToString());
+                    Properties.Settings.Default.lastimagefile = imagePaths[key];
+                }
+            }
+            LoadIni();
+
 
 
 
@@ -1085,9 +1086,25 @@ namespace neta
 
             try
             {
+                bool change_url = Properties.Settings.Default.change_baseurl;
                 var url2 = url;
+                string[] new_games = game;
+
+                if (change_url)
+                {
+                    new_games = Properties.Settings.Default.alt_basekey.Split(",");
+                    //UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
+                    url2 = Properties.Settings.Default.alt_baseurl;
+                }
+
                 string text = Properties.Settings.Default.json;
                 var selecter = comboBox1.SelectedIndex;
+                if (selecter > game_maxlen)
+                {
+                    return;
+                }
+
+
                 if (text == "")
                 {
                     WebClient wc = new WebClient();
@@ -1096,12 +1113,11 @@ namespace neta
                     wc.Dispose();
                     Properties.Settings.Default.json = text;
                 }
-                if (selecter > game_maxlen) { return; }
 
                 var obj = Codeplex.Data.DynamicJson.Parse(text);
-                string path = "/data/" + game[selecter] + "/name," +
-                    "/data/" + game[selecter] + "/start," +
-                    "/data/" + game[selecter] + "/end";
+                string path = "/data/" + new_games[selecter] + "/name," +
+                    "/data/" + new_games[selecter] + "/start," +
+                    "/data/" + new_games[selecter] + "/end";
 
                 get_json_parse(url2, text, path, false);
             }
@@ -1534,6 +1550,7 @@ namespace neta
             if (TryParseDateTimeCutom(startbox.Text, out st))
             {
                 sst = st.ToUniversalTime().ToString(format);
+                sst = Uri.EscapeDataString(sst) + ",";
             }
             if (TryParseDateTimeCutom(endbox.Text, out en))
             {
@@ -4095,10 +4112,17 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
                 }
             }
         }
+
+        private void 旧アウトルック用のボタンを隠すToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            button1.Visible = !button1.Visible;
+            旧アウトルック用のボタンを隠すToolStripMenuItem.Checked = button1.Visible;
+            Properties.Settings.Default.view_old_outlook_calender = button1.Visible;
+        }
     }
 
-    
-public partial class IntervalForm : Form
+
+    public partial class IntervalForm : Form
         {
             private ComboBox intervalComboBox;
             private Button okButton;

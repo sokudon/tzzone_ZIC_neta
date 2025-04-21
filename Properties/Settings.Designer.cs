@@ -1331,5 +1331,17 @@ namespace neta.Properties {
                 this["progbar_unfilledcolor"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool view_old_outlook_calender {
+            get {
+                return ((bool)(this["view_old_outlook_calender"]));
+            }
+            set {
+                this["view_old_outlook_calender"] = value;
+            }
+        }
     }
 }
