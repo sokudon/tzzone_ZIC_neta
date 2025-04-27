@@ -125,16 +125,18 @@
             // posixTimezone
             // 
             posixTimezone.FormattingEnabled = true;
+            posixTimezone.ImeMode = System.Windows.Forms.ImeMode.Disable;
             posixTimezone.Location = new System.Drawing.Point(97, 11);
             posixTimezone.Name = "posixTimezone";
             posixTimezone.Size = new System.Drawing.Size(208, 28);
             posixTimezone.TabIndex = 32;
             posixTimezone.Text = "PST8PDT,M3.2.0,M11.1.0";
+            posixTimezone.SelectedIndexChanged += posixTimezone_SelectedIndexChanged;
             posixTimezone.SelectedValueChanged += button2_Click;
             // 
             // test_date
             // 
-            test_date.ImeMode = System.Windows.Forms.ImeMode.Alpha;
+            test_date.ImeMode = System.Windows.Forms.ImeMode.Disable;
             test_date.Location = new System.Drawing.Point(167, 45);
             test_date.Name = "test_date";
             test_date.Size = new System.Drawing.Size(125, 27);
@@ -157,6 +159,7 @@
             panel1.Controls.Add(button2);
             panel1.Controls.Add(test_date);
             panel1.Controls.Add(posixTimezone);
+            panel1.ImeMode = System.Windows.Forms.ImeMode.Disable;
             panel1.Location = new System.Drawing.Point(470, 395);
             panel1.Name = "panel1";
             panel1.Size = new System.Drawing.Size(318, 111);

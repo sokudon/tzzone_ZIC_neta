@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/04/18")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/04/27")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -1341,6 +1341,18 @@ namespace neta.Properties {
             }
             set {
                 this["view_old_outlook_calender"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PST8PDT,M3.2.0,M11.1.0")]
+        public string posix_tester {
+            get {
+                return ((string)(this["posix_tester"]));
+            }
+            set {
+                this["posix_tester"] = value;
             }
         }
     }

@@ -23,6 +23,9 @@ using TimeZoneConverter;
 using TimeZoneConverter.Posix;
 using NodaTime.TimeZones;
 using System.Security.Policy;
+using System.Security.RightsManagement;
+using System.DirectoryServices.ActiveDirectory;
+using Newtonsoft.Json.Linq;
 
 
 namespace neta
@@ -49,6 +52,8 @@ namespace neta
             posix.Checked = Properties.Settings.Default.view_posix_info;
 
             Properties.Settings.Default.posix_test = true;
+
+            posixTimezone.Text = Properties.Settings.Default.posix_tester;
         }
 
         private void ZIC_FormClosing(object sender, FormClosingEventArgs e)
@@ -779,7 +784,8 @@ namespace neta
             Properties.Settings.Default.cv_unixtime = tzutc.Checked;
         }
 
-        private void posix_list_add() {
+        private void posix_list_add()
+        {
             /// コンボボックスのアイテムをリストに格納// android_tzseek のアイテムをリストに格納
             List<string> ianaList = GetComboBoxItemsAsList(androidTzSeek);
             // IANA を POSIX に変換したリストを作成（仮の変換ロジック）
@@ -801,6 +807,9 @@ namespace neta
             return comboBox.Items.Cast<object>().Select(item => item.ToString()).ToList();
         }
 
+
+
+
         private List<string> ConvertIanaToPosix(List<string> ianaList)
         {
             List<string> posixList = new List<string>();
@@ -820,17 +829,31 @@ namespace neta
 
                     // TimeZoneConverter で POSIX に変換
                     var tzInfo = TZConvert.GetTimeZoneInfo(iana);
-                    string posix = PosixTimeZone.FromIanaTimeZoneName(iana);
+                    if (tzInfo == null)
+                    {
+                        Console.WriteLine($"スキップ: {iana} は NodaTime TZDB に存在しません。");
+                        continue; // 存在しない場合はスキップ
+                    }
+
+                    var posix = PosixTimeZone.FromIanaTimeZoneName(iana);
                     posixList.Add(posix);
                 }
-                catch (DateTimeZoneNotFoundException ex)
+                catch (Exception ex)
                 {
                     // NodaTime 例外が発生した場合もスキップ
                     Console.WriteLine($"スキップ: {iana} - {ex.Message}");
-                }            }
-                return posixList;
-            } 
-        
+                }
+            }
+
+            string posix_old_fiji = "<+12>-12<+13>,M11.1.0,M1.2.1/147";
+            string posix_old_godthad = "<-03>3<-02>,M3.5.0/-2,M10.5.0/-1";
+
+            posixList.Add(posix_old_fiji);
+            posixList.Add(posix_old_godthad);
+
+            return posixList;
+        }
+
 
         private void AddListToComboBox(ComboBox comboBox, List<string> items)
         {
@@ -858,7 +881,7 @@ namespace neta
             Properties.Settings.Default.posix_json = tmp;
             if (posix.Checked)
             {
-                ruletester();
+                textBox1.Text += ruletester();
             }
         }
 
@@ -904,20 +927,25 @@ namespace neta
             [JsonPropertyName("Time")]
             public string? Time { get; set; }
 
+            [JsonPropertyName("TimeNegative")]
+            public string? TimeNegative { get; set; }
+
             [JsonPropertyName("CurrentYearDate")]
             public string? CurrentYearDate { get; set; }
+
+            [JsonPropertyName("dayOfMonth")]
+            public int? dayOfMonth { get; set; }
         }
 
 
-        private void ruletester()
+        private string ruletester()
         {
             try
             {
                 string json = Properties.Settings.Default.posix_json;
                 if (string.IsNullOrEmpty(json))
                 {
-                    this.textBox1.Text += "JSON data is missing.\r\n";
-                    return;
+                    return "JSON data is missing.\r\n";
                 }
 
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -925,8 +953,7 @@ namespace neta
 
                 if (tzData == null)
                 {
-                    this.textBox1.Text += "Failed to deserialize JSON.\r\n";
-                    return;
+                    return "Failed to deserialize JSON.\r\n";
                 }
 
                 // --- Microsoft Docs style TimeZoneInfo creation ---
@@ -934,8 +961,7 @@ namespace neta
                 // 1. Parse TimeSpans
                 if (!TimeSpan.TryParse(tzData.StandardOffset, out TimeSpan standardOffset))
                 {
-                    this.textBox1.Text += "Failed to parse StandardOffset.\r\n";
-                    return;
+                    return "Failed to parse StandardOffset.\r\n";
                 }
                 if (!TimeSpan.TryParse(tzData.DaylightOffset, out TimeSpan daylightDelta))
                 {
@@ -946,20 +972,96 @@ namespace neta
                 // 2. Get Transition Times
                 System.TimeZoneInfo.TransitionTime transitionRuleStart = default, transitionRuleEnd = default;
 
+                int dd = 0;
+                int hh = 0;
+                int mm = 0;
+                int ss = 0;
+                int dayOfMonth = 1;
+                int dow = 0;
+                int week = 0;
+                int month = 0;
+                int year = DateTime.Now.Year;
+                int ajust_week = 0; 
+
                 // --- Start Rule ---
                 if (tzData.StartRule != null)
                 {
                     if (!TimeSpan.TryParse(tzData.StartRule.Time, out TimeSpan startTime))
                     {
-                        this.textBox1.Text += "Failed to parse StartRule.Time.\r\n";
-                        return;
+                        return "Failed to parse StartRule.Time.\r\n";
+                    }
+                     dd = startTime.Days;
+                     hh = startTime.Hours;
+                     mm = startTime.Minutes;
+                     ss = startTime.Seconds;
+                     dayOfMonth = 1;
+                     dow = tzData.StartRule.DayOfWeek;
+                     week = tzData.StartRule.Week;
+                     month = tzData.StartRule.Month;
+
+                    DateTime month_1st = new DateTime(year, month, 1);
+                    int dow_1st = (int)month_1st.DayOfWeek;
+                    DateTime lastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                    int lastmonthday = Convert.ToInt32(lastDayOfMonth.ToString("dd"));
+                    ajust_week = (dow - dow_1st + 7) % 7;
+                     dayOfMonth += ajust_week;
+                    if (week > 1)
+                    {
+                        dayOfMonth += (week - 1) * 7;
+                        if (dayOfMonth > lastmonthday)
+                        {
+                            dayOfMonth -= 7;
+                        }
+                    }
+
+                    if (tzData.StartRule.TimeNegative == "True")
+                    {
+                        dayOfMonth -= dd;
+                        dow -= dd; if (dow < 0) { dow = (dow + 7) % 7; }
+                        if (startTime.Hours > 0 || startTime.Minutes > 0 || startTime.Seconds > 0)
+                        {
+                            int total = hh * 3600 + mm * 60 + ss;
+                            TimeSpan totals = TimeSpan.FromSeconds(total);
+                            TimeSpan daynega = new TimeSpan(1, 0, 0, 0);
+                            TimeSpan timeSpan = daynega - totals;
+                            hh = timeSpan.Hours;
+                            mm = timeSpan.Minutes;
+                            ss = timeSpan.Seconds;
+                            dayOfMonth -= 1;
+                            dow = (dow - 1 + 7) % 7;
+                        }
+                    }
+                    else
+                    {
+                        dayOfMonth += dd;
+                        dow = (dow + dd) % 7;
+                    }
+
+                    if (dayOfMonth < 0)
+                    {
+                        dayOfMonth += 7;
+                    }
+
+                    if (dayOfMonth > lastmonthday)
+                    {
+                        dayOfMonth -= 7;
+                    }
+
+                    tzData.StartRule.dayOfMonth = dayOfMonth; 
+                    if (dayOfMonth >= lastmonthday - 6)
+                    {
+                        week = 5;
+                    }
+                    else
+                    {
+                        week = (dayOfMonth - 1) / 7 + 1;
                     }
 
                     transitionRuleStart = System.TimeZoneInfo.TransitionTime.CreateFloatingDateRule(
-                        new DateTime(1, 1, 1, startTime.Hours, startTime.Minutes, startTime.Seconds),
-                        tzData.StartRule.Month,
-                        tzData.StartRule.Week,
-                        (DayOfWeek)tzData.StartRule.DayOfWeek
+                        new DateTime(1, 1, 1, hh, mm, ss),
+                        month,
+                        week,
+                        (DayOfWeek)dow
                     );
                 }
 
@@ -968,15 +1070,80 @@ namespace neta
                 {
                     if (!TimeSpan.TryParse(tzData.EndRule.Time, out TimeSpan endTime))
                     {
-                        this.textBox1.Text += "Failed to parse EndRule.Time.\r\n";
-                        return;
+                        return "Failed to parse EndRule.Time.\r\n";
                     }
-                    transitionRuleEnd = System.TimeZoneInfo.TransitionTime.CreateFloatingDateRule(
-                        new DateTime(1, 1, 1, endTime.Hours, endTime.Minutes, endTime.Seconds),
-                        tzData.EndRule.Month,
-                        tzData.EndRule.Week,
-                        (DayOfWeek)tzData.EndRule.DayOfWeek
-                    );
+
+                    dd = endTime.Days;
+                    hh = endTime.Hours;
+                    mm = endTime.Minutes;
+                    ss = endTime.Seconds;
+                    dayOfMonth = 1;
+                    dow = tzData.EndRule.DayOfWeek;
+                    week = tzData.EndRule.Week;
+                    month = tzData.EndRule.Month;
+                    DateTime month_1st = new DateTime(year, month, 1);
+                    int dow_1st = (int)month_1st.DayOfWeek;
+                    DateTime lastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                    int lastmonthday = Convert.ToInt32(lastDayOfMonth.ToString("dd"));
+                    ajust_week = (dow - dow_1st + 7) % 7;
+                    dayOfMonth += ajust_week;
+                    if (week > 1)
+                    {
+                        dayOfMonth += (week - 1) * 7;
+                        if (dayOfMonth > lastmonthday)
+                        {
+                            dayOfMonth -= 7;
+                        }
+                    }
+
+                    if (tzData.EndRule.TimeNegative == "True")
+                    {
+                        dayOfMonth -= dd;
+                        dow -= dd; if (dow < 0) { dow = (dow + 7) % 7; }
+                        if (endTime.Hours > 0 || endTime.Minutes > 0 || endTime.Seconds > 0)
+                        {
+                            int total = hh * 3600 + mm * 60 + ss;
+                            TimeSpan totals = TimeSpan.FromSeconds(total);
+                            TimeSpan daynega = new TimeSpan(1, 0, 0, 0);
+                            TimeSpan timeSpan = daynega - totals;
+                            hh = timeSpan.Hours;
+                            mm = timeSpan.Minutes;
+                            ss = timeSpan.Seconds;
+                            dayOfMonth -= 1;
+                            dow = (dow - 1 + 7) % 7;
+                        }
+                    }
+                    else
+                    {
+                        dayOfMonth += dd;
+                        dow = (dow + dd) % 7;
+                    }
+
+                    if (dayOfMonth < 0)
+                    {
+                        dayOfMonth += 7;
+                    }
+
+                    if (dayOfMonth > lastmonthday)
+                    {
+                        dayOfMonth -= 7;
+                    }
+
+                    tzData.EndRule.dayOfMonth = dayOfMonth;
+                    if(dayOfMonth>= lastmonthday - 6) {
+                        week = 5; 
+                    }
+                    else
+                    {
+                        week = (dayOfMonth - 1) / 7 + 1;
+                    }
+
+                        transitionRuleEnd = System.TimeZoneInfo.TransitionTime.CreateFloatingDateRule(
+                            new DateTime(1, 1, 1, hh, mm, ss),
+                            month,
+                            week,
+                            (DayOfWeek)dow
+                        );
                 }
 
                 // 3. Create Adjustment Rule (for the specified year)
@@ -992,8 +1159,6 @@ namespace neta
                 {
                     utcNowOffset = DateTimeOffset.UtcNow;
                 }
-
-
 
                 System.TimeZoneInfo.AdjustmentRule adjustmentRule;
                 System.TimeZoneInfo customTimeZone;
@@ -1028,16 +1193,20 @@ namespace neta
                         adjustmentRules: new[] { adjustmentRule } // Pass the single rule
                     );
                 }
+                utcNowOffset = utcNowOffset.ToUniversalTime();
+                StringBuilder sb = new StringBuilder();
 
                 DateTimeOffset localTimeOffset = System.TimeZoneInfo.ConvertTime(utcNowOffset, customTimeZone);
                 DateTime dt = localTimeOffset.LocalDateTime;
-                this.textBox1.Text += $"UTC Datetime: {utcNowOffset:yyyy-MM-dd HH:mm:sszzz} UTC\r\n";
-                this.textBox1.Text += $"posix TimeZone  Datetime: {localTimeOffset:yyyy-MM-dd HH:mm:sszzz}\r\n";
-                this.textBox1.Text += $"OS Localtime: {dt:yyyy-MM-dd HH:mm:sszzz}\r\n";
+                sb.Append( $"UTC Datetime: {utcNowOffset.UtcDateTime:yyyy-MM-dd HH:mm:sszzz} UTC\r\n");
+                sb.Append($"posix TimeZone  Datetime: {localTimeOffset:yyyy-MM-dd HH:mm:sszzz}\r\n");
+                sb.Append($"OS Localtime: {dt:yyyy-MM-dd HH:mm:sszzz}\r\n");
+
+                return sb.ToString();
             }
             catch (Exception ex)
             {
-                this.textBox1.Text += $"Error: {ex}\r\n";
+                return  $"Error: {ex}\r\n";
             }
         }
 
@@ -1087,9 +1256,10 @@ namespace neta
                 public int Week { get; set; }
                 public int DayOfWeek { get; set; }
                 public TimeSpan Time { get; set; }
+                public bool TimeNegative { get; set; }
 
                 [JsonIgnore]
-                public DateTimeOffset CurrentYearDateTimeOffset
+                public string CurrentYearDateTimeOffset
                 {
                     get
                     {
@@ -1127,14 +1297,27 @@ namespace neta
                             }
                         }
                         DateTimeOffset dt = new DateTimeOffset(dateTime);
+                        DateTimeOffset parsedDateTime;
                         var offset_st = offset.Hours.ToString("00") + ":" + offset.Minutes.ToString("00");
+                        //if(offset.Seconds !=0){
+                        //    offset_st +=    ":" + offset.Seconds.ToString("00");
+                        //}
                         if (offset >= TimeSpan.Zero)
                         {
                             offset_st = "+" + offset_st;
                         }
-                        string timest = dt.ToString("yyyy-MM-ddTHH:mm:ss" + offset_st);
 
-                        DateTimeOffset parsedDateTime = ParseIso8601(timest);
+                        string timest = dt.ToString("yyyy-MM-ddTHH:mm:ss" + offset_st);
+                        //if (offset.Seconds == 0)
+                        //{
+                        parsedDateTime = ParseIso8601(timest);
+                        //}
+                        //else
+                        //{
+                        //    timest = dt.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+                        //    parsedDateTime = ParseIso8601(timest);
+                        //}
+
                         Double offset_h = 0;
                         if (dst == false)
                         {
@@ -1146,9 +1329,27 @@ namespace neta
                         }
 
                         TimeSpan newOffset = TimeSpan.FromHours(offset_h);
-                        parsedDateTime = parsedDateTime.ToOffset(newOffset);
 
-                        return parsedDateTime;
+                        parsedDateTime = parsedDateTime.ToOffset(newOffset);
+                        return parsedDateTime.ToString("yyyy-MM-ddTHH:mm:sszzz"); // Use DateTimeOffset
+
+                        //}
+                        //else
+                        //{// カスタムフォーマット
+                        //    long unixTimestamp= parsedDateTime.ToUnixTimeSeconds();
+                        //    DateTimeOffset originalTime = DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).AddHours(offset_h);
+                        //    string sign = offset_h >= 0 ? "+" : "-";
+                        //    // HH と MM を取得
+                        //    TimeSpan utcOffset = TimeSpan.FromHours(offset_h);
+                        //    int hours = (int)Math.Abs(utcOffset.Hours); // 絶対値を取った整数部の時間
+                        //    int minutes = (int)Math.Abs(utcOffset.Minutes); // 絶対値を取った整数部の時間
+                        //    int seconds = (int)Math.Abs(utcOffset.Seconds); // 絶対値を取った整数部の時間
+
+                        //    string formattedOffset = $"{sign}{hours:00}:{minutes:00}:{seconds:00}";
+                        //    string formattedDate = $"{originalTime:yyyy-MM-ddTHH:mm:ss} {formattedOffset}";
+                        //    return formattedDate;
+                        //}
+
 
                     }
                 }
@@ -1188,45 +1389,73 @@ namespace neta
                     // Calculate the day of the month for the first occurrence of the target day of the week
                     int dayOfMonth = diff + 1;
 
+
+
                     // If it's not the first week, add the required number of weeks
                     if (rule.Week > 1)
                     {
                         dayOfMonth += (rule.Week - 1) * 7;
-                    }
-
-                    // Handle "last week" case (Week = 5)
-                    if (rule.Week == 5)
-                    {
-                        // Get the last day of the month.
-                        int lastDay = DateTime.DaysInMonth(year, rule.Month);
-
-                        // Create a date at the end of the month and work backwards.
-                        DateTime lastDayOfMonth = new DateTime(year, rule.Month, lastDay);
-                        int lastDayOfWeek = (int)lastDayOfMonth.DayOfWeek;
-
-                        int dayOffset = (lastDayOfWeek - rule.DayOfWeek + 7) % 7;
-                        dayOfMonth = lastDay - dayOffset;
-
-                        if (dayOfMonth < 1)  // Make sure the date remains within the month
+                        if (dayOfMonth > DateTime.DaysInMonth(year, rule.Month)) //Handle cases when days go over the month.
                         {
-                            dayOfMonth += 7;
+                            dayOfMonth -= 7;
                         }
-
                     }
-                    else if (dayOfMonth > DateTime.DaysInMonth(year, rule.Month)) //Handle cases when days go over the month.
+
+                    int h = rule.Time.Hours;
+                    int m = rule.Time.Minutes;
+                    int s = rule.Time.Seconds;
+                    int dow = rule.DayOfWeek;
+
+                    if (rule.TimeNegative)
+                    {
+                        dayOfMonth -= rule.Time.Days;
+                        if (rule.Time.Hours - rule.Time.Days != 0)
+                        {
+                            int total = h * 3600 + m * 60 + s;
+                            TimeSpan totals = TimeSpan.FromSeconds(total);
+                            TimeSpan daynega = new TimeSpan(1, 0, 0, 0);
+                            TimeSpan timeSpan = daynega - totals;
+                            h = timeSpan.Hours;
+                            m = timeSpan.Minutes;
+                            s = timeSpan.Seconds;
+                            dayOfMonth -= 1;
+                            dow = (dow - 1 + 7) % 7;
+                        }
+                    }
+                    else
+                    {
+                        dayOfMonth += rule.Time.Days;
+                    }
+
+
+                    
+                    if (dayOfMonth < 1)  // Make sure the date remains within the month
+                    {
+                        dayOfMonth += 7;
+                    }
+                    if (dayOfMonth > DateTime.DaysInMonth(year, rule.Month)) //Handle cases when days go over the month.
                     {
                         dayOfMonth -= 7;
                     }
 
                     // Construct the DateTime object
-                    return new DateTime(year, rule.Month, dayOfMonth, rule.Time.Hours, rule.Time.Minutes, rule.Time.Seconds, DateTimeKind.Utc);
+                    return new DateTime(year, rule.Month, dayOfMonth,
+                           h,
+                           m,
+                           s, DateTimeKind.Utc);
 
                 }
 
 
                 public override string ToString()
                 {
-                    return $"M{Month}.{Week}.{DayOfWeek}/{Time:hh\\:mm}";
+                    string negative = TimeNegative ? "-" : "";
+                    int HH = Time.Hours + 24 * Time.Days;
+                    if (Time.Days != 0)
+                    {
+                        return $"M{Month}.{Week}.{DayOfWeek}/{negative}{HH}{Time:\\:mm\\:ss}";
+                    }
+                    return $"M{Month}.{Week}.{DayOfWeek}/{negative}{Time:hh\\:mm\\:ss}";
                 }
             }
 
@@ -1237,7 +1466,7 @@ namespace neta
 
                 posixTz = posixTz.Trim();
 
-                var parts = posixTz.Split(',');
+                string[] parts = posixTz.Split(',');
                 if (parts.Length < 1 || parts.Length > 3)
                     throw new FormatException($"Invalid POSIX timezone format: {posixTz}");
 
@@ -1245,6 +1474,7 @@ namespace neta
                 TimeZoneInfo tzInfo = new TimeZoneInfo();
 
                 // More robust regex to handle all cases, including those with <>
+                //var stdMatch = Regex.Match(stdDstPart, @"^(?:<(?<stdName>[^>]+)>|(?<stdName2>[A-Za-z]+))(?<stdOffset>[+-]?\d+(?::\d+)?(?::\d+)?)(?:(?:<(?<dstName>[^>]+)>|(?<dstName2>[A-Za-z]+))(?<dstOffset>[+-]?\d+(?::\d+)?(?::\d+)?))?");
                 var stdMatch = Regex.Match(stdDstPart, @"^(?:<(?<stdName>[^>]+)>|(?<stdName2>[A-Za-z]+))(?<stdOffset>[+-]?\d+(?::\d+)?)(?:(?:<(?<dstName>[^>]+)>|(?<dstName2>[A-Za-z]+))(?<dstOffset>[+-]?\d+(?::\d+)?))?");
                 if (!stdMatch.Success)
                     throw new FormatException($"Invalid std/dst format: {stdDstPart}");
@@ -1276,23 +1506,32 @@ namespace neta
 
                 return tzInfo;
             }
+
             private static TimeSpan ParseOffset(string offsetStr)
             {
                 bool isNegative = offsetStr.StartsWith("-");
                 string cleanOffset = offsetStr.TrimStart('+', '-');
 
-                if (cleanOffset.Contains(":"))
+                var parts = cleanOffset.Split(':');
+                int hours = int.Parse(parts[0]);
+                int minutes = parts.Length > 1 ? int.Parse(parts[1]) : 0;
+                //int seconds = parts.Length > 2 ? int.Parse(parts[2]) : 0;
+                if (hours < 0 || hours > 23)
                 {
-                    var parts = cleanOffset.Split(':');
-                    int hours = int.Parse(parts[0]);
-                    int minutes = parts.Length > 1 ? int.Parse(parts[1]) : 0;
-                    return (TimeSpan.FromHours(hours) + TimeSpan.FromMinutes(minutes)) * (isNegative ? -1 : 1);
+                    throw new FormatException($"Transition rule values out of range. std/dst offset HH:MM:SS  0<=HH<=23");
                 }
-                else
+                if (minutes < 0 || minutes > 59)
                 {
-                    int hours = int.Parse(cleanOffset);
-                    return TimeSpan.FromHours(hours) * (isNegative ? -1 : 1);
+
+                    throw new FormatException($"Transition rule values out of range. std/dst offset HH:MM:SS  0<=MM<=59");
                 }
+                //    if (seconds < 0 || seconds > 59) {
+
+                //    throw new FormatException($"Transition rule values out of range. std/dst offset HH:MM:SS  0<=SS<=59");
+                //}
+                //return (TimeSpan.FromHours(hours) + TimeSpan.FromMinutes(minutes)+TimeSpan.FromSeconds(seconds)) * (isNegative ? -1 : 1);
+                return (TimeSpan.FromHours(hours) + TimeSpan.FromMinutes(minutes)) * (isNegative ? -1 : 1);
+
             }
 
             private static TimeSpan NegateOffset(TimeSpan offset)
@@ -1300,9 +1539,11 @@ namespace neta
                 return -offset;
             }
 
+            //J-9:59:58K-10:58:59,M3.1.0/-167:59:59,M11.5.0/167:59:59  XX
+            //J-9:59K-10:58,M3.1.0/-167:59:59,M11.5.0/167:59:59
             private static TransitionRule ParseTransitionRule(string rule, TimeZoneInfo tzInfo) // Add tzInfo parameter
             {
-                var match = Regex.Match(rule, @"^M(\d+)\.(\d+)\.(\d+)(?:/(\d+(?::\d+)?))?$");
+                var match = Regex.Match(rule, @"^M(\d+)\.(\d+)\.(\d+)(?:/(-?\d+(?::\d+)?(?::\d+)?))?$");
                 if (!match.Success)
                     throw new FormatException($"Invalid transition rule: {rule}");
 
@@ -1312,17 +1553,64 @@ namespace neta
                 string timeStr = match.Groups[4].Success ? match.Groups[4].Value : "2";
 
                 if (month < 1 || month > 12 || week < 1 || week > 5 || dayOfWeek < 0 || dayOfWeek > 6)
-                    throw new FormatException("Transition rule values out of range.");
+                    throw new FormatException("Transition rule values out of range.1<=m<=12,1<=week<=5,0(Sun)<=dayOfWeek<=6(Sat)");
 
-                TimeSpan time = timeStr.Contains(":") ? TimeSpan.Parse(timeStr) : TimeSpan.FromHours(int.Parse(timeStr));
+                TimeSpan time = posix_timestring_parse(timeStr);
+                bool nega = false;
+                double total_h = time.TotalHours;
+                if (total_h <= -168 || total_h >= 168)
+                {
+                    throw new FormatException("Transition rule values out of range./time HH:MM:SS should be range -167 <= HH <= 167");
+                }
+                if (total_h < 0)
+                {
+                    time = -time;
+                    nega = true;
+                }
+
                 return new TransitionRule
                 {
                     Month = month,
                     Week = week,
                     DayOfWeek = dayOfWeek,
                     Time = time,
+                    TimeNegative = nega,
                     _tzInfo = tzInfo  // Store the TimeZoneInfo
                 };
+            }
+
+            private static TimeSpan posix_timestring_parse(string timeStr)
+            {
+                int sigh = 1;
+                string[] times = timeStr.Split(":");
+                if (times[0].StartsWith("-"))
+                {
+                    sigh = -1;
+                }
+
+                TimeSpan HH = TimeSpan.FromHours(int.Parse(times[0].Replace("-", "")));
+                TimeSpan mm = TimeSpan.Zero;
+                TimeSpan ss = TimeSpan.Zero;
+                if (times.Length >= 2)
+                {
+                    int MM = int.Parse(times[1]);
+                    if (MM == null || MM >= 60 || MM < 0)
+                    {
+                        throw new FormatException("Transition rule values out of range./time HH:MM:SS should be range　0 <= MM <60");
+
+                    }
+                    mm = TimeSpan.FromMinutes(MM);
+                }
+                if (times.Length >= 3)
+                {
+                    int SS = int.Parse(times[2]);
+                    if (SS == null || SS >= 60 || SS < 0)
+                    {
+                        throw new FormatException("Transition rule values out of range./time HH:MM:SS should be range　0 <= SS <60");
+                    }
+                    ss = TimeSpan.FromSeconds(SS);
+                }
+                return sigh * (HH + mm + ss);
             }
 
             public class TransitionRuleConverter : JsonConverter<TransitionRule>
@@ -1338,8 +1626,18 @@ namespace neta
                     writer.WriteNumber("Month", value.Month);
                     writer.WriteNumber("Week", value.Week);
                     writer.WriteNumber("DayOfWeek", value.DayOfWeek);
-                    writer.WriteString("Time", value.Time.ToString("hh\\:mm\\:ss"));
-                    writer.WriteString("CurrentYearDate", value.CurrentYearDateTimeOffset.ToString("yyyy-MM-ddTHH:mm:sszzz")); // Use DateTimeOffset
+                    if (value.Time.Days != 0)
+                    {
+                        writer.WriteString("Time", value.Time.ToString("d\\.hh\\:mm\\:ss"));
+                    }
+                    else
+                    {
+                        writer.WriteString("Time", value.Time.ToString("hh\\:mm\\:ss"));
+                    }
+
+                    writer.WriteString("TimeNegative", value.TimeNegative.ToString());
+
+                    writer.WriteString("CurrentYearDate", value.CurrentYearDateTimeOffset);
                     writer.WriteEndObject();
                 }
             }
@@ -1414,109 +1712,14 @@ namespace neta
             Properties.Settings.Default.view_posix_info = posix.Checked;
         }
 
-
-
-        /*  python demo  googleのcolabで動くはず python dateutilの改変
-       #https://colab.research.google.com/?hl=ja GOOGLE colabで貼り付けて　tzdatabaseの内容を表示 ＋　JSON化
-       #tzdata自体はzone imfomation complier(ZIC) で作成されて　unix系だとman zdump で表示できる
-       #pythonでdateutilの一部を改変してzdumpもどきともいう（）
-       #dateutil/pytzのパーサーが古いレガシーのTZifしかたいおうしてないので
-       #適切なメンテナンスをしないと2038年問題が起きる可能性がある transition_timeが32bitのため
-
-       from io import DEFAULT_BUFFER_SIZE
-       import json
-       from datetime import datetime
-       from dateutil import tz
-       from dateutil.tz.tz import tzfile
-       import struct
-
-       tzname="Asia/Tokyo"
-
-       def read_tzif(tzfile_path):
-           with open(tzfile_path, 'rb') as f:
-               # Read the header
-               header = f.read(44)  # TZif headers are 44 bytes
-               (magic, version, tzh_ttisgmtcnt, tzh_ttisstdcnt, tzh_leapcnt,
-                tzh_timecnt, tzh_typecnt, tzh_charcnt) = struct.unpack('>4s c 15x 6I', header)
-
-               if magic != b'TZif':
-                   raise ValueError('Invalid TZif file')
-
-               # Read the transition times
-               if tzh_timecnt:
-                   transition_times = struct.unpack('>%dl' % tzh_timecnt, f.read(tzh_timecnt * 4))
-               else:
-                   transition_times = []
-
-               # Read the transition types
-               if tzh_timecnt:
-                    transition_types = struct.unpack(">%dB" % tzh_timecnt,
-                                                 f.read(tzh_timecnt))
-               else:
-                    transition_types =[]
-
-               # Read the local time types
-               local_time_types = []
-               for i in range(tzh_typecnt):
-                   local_time_types.append(struct.unpack(">lbb", f.read(6)))
-
-               abbr = f.read(tzh_charcnt).decode()
-
-
-               # Create a list of transitions
-               transitions = []
-               for i in range(tzh_timecnt):
-                   transition_time = transition_times[i]
-                   local_time_type = local_time_types[transition_types[i]]
-                   gmtoff, isdst, abbrind = local_time_type
-                   transitions.append({
-                       'transition_time': transition_time,
-                       'gmt_offset': gmtoff/3600,   #//raw だとgmtoffのまま
-                       "local" :cvt_local(transition_time),
-                       'isdst': isdst,
-                       "abbr": abbr[abbrind:abbr.find('\x00', abbrind)],
-                       #"abbra": abbr
-                   })
-
-               return {
-                   'version': version.decode(),
-                   'transitions': transitions
-               }
-
-       def cvt_local(sec):
-           global tzname
-           dt_utc = datetime.utcfromtimestamp(sec)
-           jst = tz.gettz(tzname)
-           dt_jst = dt_utc.replace(tzinfo=tz.UTC).astimezone(jst)
-           return dt_jst.strftime('%Y-%m-%dT%X%z')
-
-       # パスを指定して、TZifファイルを読み込む
-       tzif_path = '/usr/share/zoneinfo/'+tzname  # タイムゾーンファイルのパス
-       tzif_data = read_tzif(tzif_path)
-
-       for item in tzif_data["transitions"]:
-           print(item)
-
-       json_str = json.dumps(tzif_data)
-       print(json_str)
-
-
-       ##出力結果
-       #{'transition_time': -2147483648, 'gmt_offset': 9.0, 'local': '1901-12-14T05:45:52+0900', 'isdst': 0, 'abbr': 'JST'}
-       #{'transition_time': -683802000, 'gmt_offset': 10.0, 'local': '1948-05-02T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
-       #{'transition_time': -672310800, 'gmt_offset': 9.0, 'local': '1948-09-12T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
-       #{'transition_time': -654771600, 'gmt_offset': 10.0, 'local': '1949-04-03T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
-       #{'transition_time': -640861200, 'gmt_offset': 9.0, 'local': '1949-09-11T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
-       #{'transition_time': -620298000, 'gmt_offset': 10.0, 'local': '1950-05-07T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
-       #{'transition_time': -609411600, 'gmt_offset': 9.0, 'local': '1950-09-10T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
-       #{'transition_time': -588848400, 'gmt_offset': 10.0, 'local': '1951-05-06T01:00:00+1000', 'isdst': 1, 'abbr': 'JDT'}
-       #{'transition_time': -577962000, 'gmt_offset': 9.0, 'local': '1951-09-09T00:00:00+0900', 'isdst': 0, 'abbr': 'JST'}
-
-       #{"version": "2", "transitions": [{"transition_time": -2147483648, "gmt_offset": 9.0, "local": "1901-12-14T05:45:52+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -683802000, "gmt_offset": 10.0, "local": "1948-05-02T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -672310800, "gmt_offset": 9.0, "local": "1948-09-12T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -654771600, "gmt_offset": 10.0, "local": "1949-04-03T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -640861200, "gmt_offset": 9.0, "local": "1949-09-11T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -620298000, "gmt_offset": 10.0, "local": "1950-05-07T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -609411600, "gmt_offset": 9.0, "local": "1950-09-10T00:00:00+0900", "isdst": 0, "abbr": "JST"}, {"transition_time": -588848400, "gmt_offset": 10.0, "local": "1951-05-06T01:00:00+1000", "isdst": 1, "abbr": "JDT"}, {"transition_time": -577962000, "gmt_offset": 9.0, "local": "1951-09-09T00:00:00+0900", "isdst": 0, "abbr": "JST"}]}
-
-                    */
-
-
+        private void posixTimezone_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var tzInfo = Parse(posixTimezone.Text);
+            if (tzInfo != null)
+            {
+                Properties.Settings.Default.posix_tester = posixTimezone.Text;
+            }
+        }
     }
 }
 

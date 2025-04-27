@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/04/18</Value>
+      <Value Profile="(Default)">2025/04/27</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -331,6 +331,9 @@
     </Setting>
     <Setting Name="view_old_outlook_calender" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="posix_tester" Type="System.String" Scope="User">
+      <Value Profile="(Default)">PST8PDT,M3.2.0,M11.1.0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

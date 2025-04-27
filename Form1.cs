@@ -1,4 +1,5 @@
 ﻿using Codeplex.Data;
+using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using neta.Properties;
 using Newtonsoft.Json.Linq;
@@ -1657,10 +1658,9 @@ namespace neta
 
         private void netaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
-            var form5 = new ZIC();
-            form5.ShowDialog(this);
-            form5.Dispose();
+                var form5 = new ZIC();
+                form5.ShowDialog(this);
+                form5.Dispose();
         }
 
         private void luascriptToolStripMenuItem_Click(object sender, EventArgs e)
