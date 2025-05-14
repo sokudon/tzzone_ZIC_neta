@@ -41,6 +41,8 @@
             panel1 = new System.Windows.Forms.Panel();
             label2 = new System.Windows.Forms.Label();
             posix_tester = new System.Windows.Forms.Label();
+            split_android = new System.Windows.Forms.Button();
+            combine_android = new System.Windows.Forms.Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -183,11 +185,33 @@
             posix_tester.TabIndex = 36;
             posix_tester.Text = "posix_tester";
             // 
+            // split_android
+            // 
+            split_android.Location = new System.Drawing.Point(239, 438);
+            split_android.Name = "split_android";
+            split_android.Size = new System.Drawing.Size(166, 29);
+            split_android.TabIndex = 37;
+            split_android.Text = "androidTZ分離";
+            split_android.UseVisualStyleBackColor = true;
+            split_android.Click += split_android_Click;
+            // 
+            // combine_android
+            // 
+            combine_android.Location = new System.Drawing.Point(239, 403);
+            combine_android.Name = "combine_android";
+            combine_android.Size = new System.Drawing.Size(166, 29);
+            combine_android.TabIndex = 38;
+            combine_android.Text = "androidTZ合体";
+            combine_android.UseVisualStyleBackColor = true;
+            combine_android.Click += combine_android_Click;
+            // 
             // ZIC
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(800, 516);
+            Controls.Add(combine_android);
+            Controls.Add(split_android);
             Controls.Add(posix_tester);
             Controls.Add(panel1);
             Controls.Add(posix);
@@ -221,5 +245,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label posix_tester;
+        private System.Windows.Forms.Button split_android;
+        private System.Windows.Forms.Button combine_android;
     }
 }

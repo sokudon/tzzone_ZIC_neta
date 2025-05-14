@@ -51,15 +51,14 @@ namespace neta
 
             posix.Checked = Properties.Settings.Default.view_posix_info;
 
-            Properties.Settings.Default.posix_test = true;
-
             posixTimezone.Text = Properties.Settings.Default.posix_tester;
+
+            textBox1.Text = "";
         }
 
         private void ZIC_FormClosing(object sender, FormClosingEventArgs e)
         {
 
-            Properties.Settings.Default.posix_test = false;
         }
 
         public static byte[] Bigval64(byte[] bs, int pos)
@@ -117,7 +116,7 @@ namespace neta
 
                     while (fs.Read(buffer, 0, 52) == 52 && sectionCount < maxSections)
                     {
-                        tzname = Encoding.ASCII.GetString(buffer, 0, 20).TrimEnd('\0');
+                        tzname = Encoding.ASCII.GetString(buffer, 0, 40).TrimEnd('\0');
 
 
                         if (tzname == "TZif2")
@@ -202,6 +201,8 @@ namespace neta
                     int finalpos = -1;
                     string versionn = "";
                     bool tzcv = tzutc;
+                    int slimdb = 0;
+                    int slimdb64 = 0;
 
 
                     if (header.Contains("TZif") == false)
@@ -301,6 +302,7 @@ namespace neta
 
                             }
 
+                            slimdb += tzh_timecnt;
                             //UTCバイナリの場合　tzh_timecntはないがオフセット posixストリングはある
                             if (tzh_timecnt == 0)
                             {
@@ -328,7 +330,7 @@ namespace neta
                                 sb.Append(transitions_next_zero[0][2]);
                                 sb.Append(",");
                                 sb.AppendLine(transitions_next_zero[0][3]);
-                            }
+                            }                
 
                             string[][] transitions = new string[tzh_timecnt][];
                             for (int i = 0; i < tzh_timecnt; i++)
@@ -510,6 +512,7 @@ namespace neta
 
                                     }
 
+                                    slimdb64 += tzh_timecnt_next;
 
                                     //UTCバイナリの場合　tzh_timecntはないがオフセット posixストリングはある
                                     if (tzh_timecnt_next == 0)
@@ -637,6 +640,10 @@ namespace neta
                             {
                                 byte[] hashBytes2 = sha1.ComputeHash(bs);
                                 hashsha = BitConverter.ToString(hashBytes2).Replace("-", "").ToLowerInvariant();
+                            }
+                            if (slimdb64 > slimdb && slimdb == 0)
+                            {
+                                sb.AppendLine("※zic -b slim オプションで生成されたtzifバイナリは32bitが省略されます、64bitDBも2038年まで生成されないのでposixが適用");
                             }
 
                             sb.Append("tzdata name:");
@@ -981,7 +988,7 @@ namespace neta
                 int week = 0;
                 int month = 0;
                 int year = DateTime.Now.Year;
-                int ajust_week = 0; 
+                int ajust_week = 0;
 
                 // --- Start Rule ---
                 if (tzData.StartRule != null)
@@ -990,21 +997,21 @@ namespace neta
                     {
                         return "Failed to parse StartRule.Time.\r\n";
                     }
-                     dd = startTime.Days;
-                     hh = startTime.Hours;
-                     mm = startTime.Minutes;
-                     ss = startTime.Seconds;
-                     dayOfMonth = 1;
-                     dow = tzData.StartRule.DayOfWeek;
-                     week = tzData.StartRule.Week;
-                     month = tzData.StartRule.Month;
+                    dd = startTime.Days;
+                    hh = startTime.Hours;
+                    mm = startTime.Minutes;
+                    ss = startTime.Seconds;
+                    dayOfMonth = 1;
+                    dow = tzData.StartRule.DayOfWeek;
+                    week = tzData.StartRule.Week;
+                    month = tzData.StartRule.Month;
 
                     DateTime month_1st = new DateTime(year, month, 1);
                     int dow_1st = (int)month_1st.DayOfWeek;
                     DateTime lastDayOfMonth = new DateTime(year, month, DateTime.DaysInMonth(year, month));
                     int lastmonthday = Convert.ToInt32(lastDayOfMonth.ToString("dd"));
                     ajust_week = (dow - dow_1st + 7) % 7;
-                     dayOfMonth += ajust_week;
+                    dayOfMonth += ajust_week;
                     if (week > 1)
                     {
                         dayOfMonth += (week - 1) * 7;
@@ -1047,7 +1054,7 @@ namespace neta
                         dayOfMonth -= 7;
                     }
 
-                    tzData.StartRule.dayOfMonth = dayOfMonth; 
+                    tzData.StartRule.dayOfMonth = dayOfMonth;
                     if (dayOfMonth >= lastmonthday - 6)
                     {
                         week = 5;
@@ -1130,20 +1137,21 @@ namespace neta
                     }
 
                     tzData.EndRule.dayOfMonth = dayOfMonth;
-                    if(dayOfMonth>= lastmonthday - 6) {
-                        week = 5; 
+                    if (dayOfMonth >= lastmonthday - 6)
+                    {
+                        week = 5;
                     }
                     else
                     {
                         week = (dayOfMonth - 1) / 7 + 1;
                     }
 
-                        transitionRuleEnd = System.TimeZoneInfo.TransitionTime.CreateFloatingDateRule(
-                            new DateTime(1, 1, 1, hh, mm, ss),
-                            month,
-                            week,
-                            (DayOfWeek)dow
-                        );
+                    transitionRuleEnd = System.TimeZoneInfo.TransitionTime.CreateFloatingDateRule(
+                        new DateTime(1, 1, 1, hh, mm, ss),
+                        month,
+                        week,
+                        (DayOfWeek)dow
+                    );
                 }
 
                 // 3. Create Adjustment Rule (for the specified year)
@@ -1198,7 +1206,7 @@ namespace neta
 
                 DateTimeOffset localTimeOffset = System.TimeZoneInfo.ConvertTime(utcNowOffset, customTimeZone);
                 DateTime dt = localTimeOffset.LocalDateTime;
-                sb.Append( $"UTC Datetime: {utcNowOffset.UtcDateTime:yyyy-MM-dd HH:mm:sszzz} UTC\r\n");
+                sb.Append($"UTC Datetime: {utcNowOffset.UtcDateTime:yyyy-MM-dd HH:mm:sszzz} UTC\r\n");
                 sb.Append($"posix TimeZone  Datetime: {localTimeOffset:yyyy-MM-dd HH:mm:sszzz}\r\n");
                 sb.Append($"OS Localtime: {dt:yyyy-MM-dd HH:mm:sszzz}\r\n");
 
@@ -1206,7 +1214,7 @@ namespace neta
             }
             catch (Exception ex)
             {
-                return  $"Error: {ex}\r\n";
+                return $"Error: {ex}\r\n";
             }
         }
 
@@ -1428,7 +1436,7 @@ namespace neta
                     }
 
 
-                    
+
                     if (dayOfMonth < 1)  // Make sure the date remains within the month
                     {
                         dayOfMonth += 7;
@@ -1718,6 +1726,238 @@ namespace neta
             if (tzInfo != null)
             {
                 Properties.Settings.Default.posix_tester = posixTimezone.Text;
+            }
+        }
+
+        //https://grok.com/chat/3d483be9-af49-45a8-9b69-318710e307a8
+        private void split_android_Click(object sender, EventArgs e)
+        {
+            string tmp = "";
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lasttzdatapath);
+            ofd.Title = "android tzdataのバイナリふぁいるを選択してください";
+
+            //ダイアログを表示する
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                textBox1.Text = "";
+                //python dateutil一部をC#ぽくしただけのもの 下にgoogle colabでうごくやつも貼っとく 
+                //zicバイナリの情報　https://tex2e.github.io/rfc-translater/html/rfc8536.html
+                string tzdata = ofd.FileName;// "Tokyo";
+                last_tzdata = ofd.FileName;
+
+                SplitAndroidTzdata(tzdata, "out");
+            }
+        }
+
+        public static void SplitAndroidTzdata(string tzdata, string outputDirectory)
+        {
+
+            string filePath = tzdata;
+
+            try
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    //fs.Seek(24, SeekOrigin.Begin);
+                    byte[] buffer = new byte[52];
+                    fs.Read(buffer, 0, 24);
+
+                    int indexOffset = (int)(buffer[12] << 24 | buffer[13] << 16 | buffer[14] << 8 | buffer[15]);
+                    int dataOffset = (int)(buffer[16] << 24 | buffer[17] << 16 | buffer[18] << 8 | buffer[19]);
+                    int zonetabOffset = (int)(buffer[20] << 24 | buffer[21] << 16 | buffer[22] << 8 | buffer[23]);
+
+                    int indexSize = (dataOffset - indexOffset);
+                    int sectionCount = 0;
+                    int offset = 0;
+                    int maxSections = indexSize / 52;
+                    string tzname = "";
+                    string tznamebk = "";
+                    StringBuilder sb = new StringBuilder();
+
+                    string[] target_name = new string[maxSections];
+                    int[] target_offset = new int[maxSections];
+                    int[] target_size = new int[maxSections];
+
+                    sb.Append($"Section,");
+                    sb.Append($"tzname,");
+                    sb.Append($"offset,");
+                    sb.AppendLine($"tz_length");
+
+
+                    while (fs.Read(buffer, 0, 52) == 52 && sectionCount < maxSections)
+                    {
+                        tzname = Encoding.ASCII.GetString(buffer, 0, 40).TrimEnd('\0');
+
+
+                        if (tzname == "TZif2")
+                        {
+                            break;
+                        }
+                        tznamebk = tzname;
+
+                        offset = (int)(buffer[40] << 24 | buffer[41] << 16 | buffer[42] << 8 | buffer[43]);
+                        string offsetHex = $"0x{offset:X8}";
+                        int tzLength = (int)(buffer[44] << 24 | buffer[45] << 16 | buffer[46] << 8 | buffer[47]);
+
+                        sb.AppendLine($"{sectionCount + 1},{tzname},{offsetHex},{tzLength}");
+                        target_name[sectionCount] = tzname;
+                        target_offset[sectionCount] = offset;
+                        target_size[sectionCount] = tzLength;
+
+                        byte[] tzData = new byte[tzLength];
+                        long currentPosition = fs.Position; // 現在の位置を保存
+                        fs.Seek(offset + dataOffset, SeekOrigin.Begin); // データのオフセットに移動
+                        int bytesRead = fs.Read(tzData, 0, tzLength); // データを読み込み
+                        fs.Seek(currentPosition, SeekOrigin.Begin); // インデックス読み込み位置に戻す
+
+                        // ファイル名をサニタイズして出力
+                        string outputFile = Path.Combine(outputDirectory, tzname);
+                        string directory = Path.GetDirectoryName(outputFile);
+
+
+                        if (File.Exists(directory))
+                        {
+                            sb.AppendLine($"Error: Cannot create directory {directory} due to existing file.");
+                            continue;
+                        }
+                        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                        {
+                            Directory.CreateDirectory(directory);
+                        }
+
+                        File.WriteAllBytes(outputFile, tzData); // バイト列をファイルに書き込み
+
+                        sectionCount++;
+                    }
+                    int Tzif_pos = sectionCount * 52 + 24;
+                    sb.AppendLine($"Total sections parsed: {sectionCount},zonetab_size:{zonetabOffset}");
+                    sb.AppendLine($"1stTzif pos: 0x{Tzif_pos:X8}");
+                    sb.AppendLine($"{tznamebk}_pos is 1stTzif: 0x{Tzif_pos + offset:X8}");
+                    sb.AppendLine();
+                    Properties.Settings.Default.android_tzfie_info = sb.ToString();
+
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Properties.Settings.Default.android_tzfie_info = $"Error: {ex.Message}\r\n";
+            }
+        }
+
+        public static void CreateAndroidTzdata(string inputDirectory, string outputTzdataFile)
+        {
+            try
+            {// 拡張子のないファイルのみを再帰的に取得
+                var tzifFiles = Directory.GetFiles(inputDirectory, "*", SearchOption.AllDirectories)
+                    .Where(file => string.IsNullOrEmpty(Path.GetExtension(file)))
+                    .ToArray();
+                if (tzifFiles.Length == 0)
+                {
+                    Properties.Settings.Default.android_tzfie_info = "Error: No files without extension found in the input directory.\r\n";
+                    return;
+                }
+
+                StringBuilder log = new StringBuilder();
+                log.AppendLine("Section,tzname,offset,tz_length");
+
+                // タイムゾーン情報リスト
+                var tzEntries = new List<(string Name, byte[] Data)>();
+                int totalDataLength = 0;
+                int file_size = 0;
+
+                // 各TZifファイルを処理
+                foreach (var tzifFile in tzifFiles.OrderBy(f => f)) // ファイル名でソートして一貫性を確保
+                {
+                    // タイムゾーン名を取得（ディレクトリ構造から）
+                    string relativePath = Path.GetRelativePath(inputDirectory, tzifFile);
+                    string tzname = Path.ChangeExtension(relativePath, null).Replace("\\", "/"); // スラッシュを復元
+                    byte[] tzData = File.ReadAllBytes(tzifFile);
+
+                    tzEntries.Add((tzname, tzData));
+                    totalDataLength += tzData.Length;
+
+                    log.AppendLine($"{tzEntries.Count},{tzname},0x{totalDataLength - tzData.Length:X8},{tzData.Length}");
+                }
+
+                // ヘッダーとインデックスの準備
+                int indexOffset = 24; // ヘッダーサイズ
+                int dataOffset = indexOffset + (tzEntries.Count * 52); // インデックスサイズ
+                int zonetabOffset = dataOffset + totalDataLength;
+                int sectionCount = tzEntries.Count;
+                string tzVersion = "20XXx";
+
+                using (FileStream fs = new FileStream(outputTzdataFile, FileMode.Create, FileAccess.Write))
+                {
+                    // 1. ヘッダー (24バイト)
+                    byte[] header = new byte[24];
+                    Encoding.ASCII.GetBytes("tzdata").CopyTo(header, 0); // ヘッダーマジック
+                    Encoding.ASCII.GetBytes(tzVersion.PadRight(8, '\0')).CopyTo(header, 6); // バージョン
+                    WriteInt32BigEndian(header, 12, indexOffset); // インデックスオフセット
+                    WriteInt32BigEndian(header, 16, dataOffset); // データオフセット
+                    WriteInt32BigEndian(header, 20, zonetabOffset); // ゾーンタブオフセット
+                    fs.Write(header, 0, header.Length);
+
+                    // 2. インデックス
+                    int currentOffset=0;
+                    foreach (var entry in tzEntries)
+                    {
+                        byte[] indexEntry = new byte[52];
+                        byte[] nameBytes = Encoding.ASCII.GetBytes(entry.Name.PadRight(40, '\0')); // 20バイトの名前
+                        Array.Copy(nameBytes, 0, indexEntry, 0, Math.Min(nameBytes.Length, 40));
+
+                        WriteInt32BigEndian(indexEntry, 40, currentOffset); // データオフセット
+                        WriteInt32BigEndian(indexEntry, 44, entry.Data.Length); // データ長
+                        fs.Write(indexEntry, 0, indexEntry.Length);
+                        currentOffset += entry.Data.Length;
+                    }
+
+                    // 3. データ
+                    foreach (var entry in tzEntries)
+                    {
+                        fs.Write(entry.Data, 0, entry.Data.Length);
+                    }
+
+                    // ログにメタデータを追加
+                    log.AppendLine($"Total sections: {sectionCount}, zonetab_size: {fs.Position - zonetabOffset}");
+                    log.AppendLine($"Output file: {outputTzdataFile}");
+                    Properties.Settings.Default.android_tzfie_info = log.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                Properties.Settings.Default.android_tzfie_info = $"Error: {ex.Message}\r\n";
+            }
+        }
+
+        // ビッグエンディアンで4バイト整数を書き込むヘルパーメソッド
+        private static void WriteInt32BigEndian(byte[] buffer, int offset, int value)
+        {
+            buffer[offset] = (byte)(value >> 24);
+            buffer[offset + 1] = (byte)(value >> 16);
+            buffer[offset + 2] = (byte)(value >> 8);
+            buffer[offset + 3] = (byte)value;
+        }
+
+        private void combine_android_Click(object sender, EventArgs e)
+        {
+            string tmp = "";
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lasttzdatapath);
+            ofd.Title = "unix usr/share/tzinfoやpython pytz dateutilのtzdatabaseフォルダのバイナリふぁいるを選択してください";
+
+            //ダイアログを表示する
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                textBox1.Text = "";
+                //python dateutil一部をC#ぽくしただけのもの 下にgoogle colabでうごくやつも貼っとく 
+                //zicバイナリの情報　https://tex2e.github.io/rfc-translater/html/rfc8536.html
+                string tzdata = ofd.FileName;// "Tokyo";
+
+                string directory = Path.GetDirectoryName(tzdata);
+
+                CreateAndroidTzdata(directory, "make_andoroid_tzdata");
             }
         }
     }
