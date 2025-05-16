@@ -1,31 +1,19 @@
-﻿using System;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
-using Force.Crc32;
-using System.Security.Cryptography;
-using System.Web;
+﻿using Force.Crc32;
 using NodaTime;
-using System.Text.RegularExpressions;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static neta.ZIC.PosixTimeZoneParser;
-using System.Globalization;
-using System.Text.Encodings.Web;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
-using System.Diagnostics.Tracing;
-using OBSWebsocketDotNet.Types;
-using static System.Windows.Forms.DataFormats;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using TimeZoneConverter;
 using TimeZoneConverter.Posix;
-using NodaTime.TimeZones;
-using System.Security.Policy;
-using System.Security.RightsManagement;
-using System.DirectoryServices.ActiveDirectory;
-using Newtonsoft.Json.Linq;
+using static neta.ZIC.PosixTimeZoneParser;
 
 
 namespace neta
@@ -330,7 +318,7 @@ namespace neta
                                 sb.Append(transitions_next_zero[0][2]);
                                 sb.Append(",");
                                 sb.AppendLine(transitions_next_zero[0][3]);
-                            }                
+                            }
 
                             string[][] transitions = new string[tzh_timecnt][];
                             for (int i = 0; i < tzh_timecnt; i++)
@@ -725,7 +713,7 @@ namespace neta
             string tmp = "";
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lasttzdatapath);
-            ofd.Title = "unix usr/share/tzinfoやpython pytz dateutilのtzdatabaseフォルダのバイナリふぁいるを選択してください";
+            ofd.Title = "unix usr/share/tzinfoやpython pytz,dateutilのtzdatabaseフォルダのTZifバイナリふぁいるかandroid tzdataを選択してください";
 
             //ダイアログを表示する
             if (ofd.ShowDialog() == DialogResult.OK)
@@ -1746,14 +1734,17 @@ namespace neta
                 string tzdata = ofd.FileName;// "Tokyo";
                 last_tzdata = ofd.FileName;
 
-                SplitAndroidTzdata(tzdata, "out");
+                SplitAndroidTzdata(tzdata);
+
+                textBox1.Text = Properties.Settings.Default.android_tzfie_info;
             }
         }
 
-        public static void SplitAndroidTzdata(string tzdata, string outputDirectory)
+        public static void SplitAndroidTzdata(string tzdata)
         {
 
             string filePath = tzdata;
+            StringBuilder sb = new StringBuilder();
 
             try
             {
@@ -1771,9 +1762,9 @@ namespace neta
                     int sectionCount = 0;
                     int offset = 0;
                     int maxSections = indexSize / 52;
+                    string outputDirectory = Encoding.ASCII.GetString(buffer, 0, 12).TrimEnd('\0');
                     string tzname = "";
                     string tznamebk = "";
-                    StringBuilder sb = new StringBuilder();
 
                     string[] target_name = new string[maxSections];
                     int[] target_offset = new int[maxSections];
@@ -1842,94 +1833,253 @@ namespace neta
             }
             catch (Exception ex)
             {
-                Properties.Settings.Default.android_tzfie_info = $"Error: {ex.Message}\r\n";
+                Properties.Settings.Default.android_tzfie_info = sb.ToString() + $"Error: {ex.Message}\r\n";
             }
         }
 
+
+        //https://g.co/gemini/share/97924b12c50c grokのもとを改造
         public static void CreateAndroidTzdata(string inputDirectory, string outputTzdataFile)
         {
+            StringBuilder logCsv = new StringBuilder();
+            logCsv.AppendLine("EntryNo,tzname,IsDuplicate,OriginalTzNameIfDuplicate,FileSize,MD5Hash,CRC32Hash,SHA512Hash,FinalFileOffset,FinalFileLength");
+
             try
-            {// 拡張子のないファイルのみを再帰的に取得
-                var tzifFiles = Directory.GetFiles(inputDirectory, "*", SearchOption.AllDirectories)
+            {
+                var filesToProcess = Directory.GetFiles(inputDirectory, "*", SearchOption.AllDirectories)
                     .Where(file => string.IsNullOrEmpty(Path.GetExtension(file)))
+                    .OrderBy(f => f) // Sort by filename for consistent processing
                     .ToArray();
-                if (tzifFiles.Length == 0)
+
+                if (filesToProcess.Length == 0)
                 {
                     Properties.Settings.Default.android_tzfie_info = "Error: No files without extension found in the input directory.\r\n";
                     return;
                 }
 
-                StringBuilder log = new StringBuilder();
-                log.AppendLine("Section,tzname,offset,tz_length");
+                // Key: MD5 hash of the file content
+                // Value: (byte[] data, int fileOffsetInOutput, int length, string firstSeenTzName)
+                var uniqueFilesData = new Dictionary<string, (byte[] Data, int FileOffset, int Length, string FirstSeenTzName)>();
 
-                // タイムゾーン情報リスト
-                var tzEntries = new List<(string Name, byte[] Data)>();
-                int totalDataLength = 0;
-                int file_size = 0;
+                // (string tzname, string uniqueDataKey (MD5), bool isDuplicate, string originalTzNameIfAny, long fileSize, string crc32, string sha512)
+                var tzFileEntries = new List<(string TzName, string UniqueDataKey, bool IsDuplicate, string OriginalTzName, long FileSize, string Crc32, string Sha512)>();
 
-                // 各TZifファイルを処理
-                foreach (var tzifFile in tzifFiles.OrderBy(f => f)) // ファイル名でソートして一貫性を確保
+                // 1. Process all files, identify unique ones, and prepare entries
+                foreach (var filePath in filesToProcess)
                 {
-                    // タイムゾーン名を取得（ディレクトリ構造から）
-                    string relativePath = Path.GetRelativePath(inputDirectory, tzifFile);
-                    string tzname = Path.ChangeExtension(relativePath, null).Replace("\\", "/"); // スラッシュを復元
-                    byte[] tzData = File.ReadAllBytes(tzifFile);
+                    byte[] fileData = File.ReadAllBytes(filePath);
+                    long fileSize = fileData.Length;
 
-                    tzEntries.Add((tzname, tzData));
-                    totalDataLength += tzData.Length;
+                    // TZif Header Check
+                    if (fileSize < 4 || Encoding.ASCII.GetString(fileData, 0, 4) != "TZif")
+                    {
+                        // Log skipped non-TZif file (optional, depends on desired verbosity)
+                        Console.WriteLine($"Skipping non-TZif file: {filePath}");
+                        continue;
+                    }
 
-                    log.AppendLine($"{tzEntries.Count},{tzname},0x{totalDataLength - tzData.Length:X8},{tzData.Length}");
+                    string md5Hash = CalculateMD5(fileData);
+                    string crc32Hash = CalculateCRC32(fileData); // Ensure this is a proper CRC32 implementation
+                    string sha512Hash = CalculateSHA512(fileData);
+                    string tzname = Path.GetRelativePath(inputDirectory, filePath).Replace("\\", "/");
+
+                    if (uniqueFilesData.ContainsKey(md5Hash))
+                    {
+                        var originalEntry = uniqueFilesData[md5Hash];
+                        tzFileEntries.Add((tzname, md5Hash, true, originalEntry.FirstSeenTzName, fileSize, crc32Hash, sha512Hash));
+                    }
+                    else
+                    {
+                        // Offset and Length will be determined later
+                        uniqueFilesData.Add(md5Hash, (fileData, 0, fileData.Length, tzname));
+                        tzFileEntries.Add((tzname, md5Hash, false, null, fileSize, crc32Hash, sha512Hash));
+                    }
                 }
 
-                // ヘッダーとインデックスの準備
-                int indexOffset = 24; // ヘッダーサイズ
-                int dataOffset = indexOffset + (tzEntries.Count * 52); // インデックスサイズ
-                int zonetabOffset = dataOffset + totalDataLength;
-                int sectionCount = tzEntries.Count;
-                string tzVersion = "20XXx";
+                if (tzFileEntries.Count == 0)
+                {
+                    Properties.Settings.Default.android_tzfie_info = "Error: No valid TZif files found to process.\r\n";
+                    return;
+                }
+
+                // 2. Calculate offsets for unique data and update uniqueFilesData dictionary
+                int headerSize = 24;
+                int indexEntrySize = 52; // 40 (name) + 4 (offset) + 4 (length) + 4 (unused)
+
+                int indexTableOffset = headerSize;
+                int totalIndexSize = tzFileEntries.Count * indexEntrySize;
+                int dataSectionStartOffset = indexTableOffset + totalIndexSize;
+
+                int currentUniqueDataFileOffset = dataSectionStartOffset;
+                var updatedUniqueFilesData = new Dictionary<string, (byte[] Data, int FileOffset, int Length, string FirstSeenTzName)>();
+                var orderedUniqueDataKeys = new List<string>(); // To maintain write order for data blocks
+                int totalUniqueDataLength = 0;
+
+                // Assign file offsets to unique data blocks based on their first appearance in tzFileEntries
+                foreach (var entry in tzFileEntries)
+                {
+                    if (!updatedUniqueFilesData.ContainsKey(entry.UniqueDataKey))
+                    {
+                        var uniqueDataInfo = uniqueFilesData[entry.UniqueDataKey]; // Get the original data
+                        updatedUniqueFilesData.Add(entry.UniqueDataKey, (uniqueDataInfo.Data, currentUniqueDataFileOffset, uniqueDataInfo.Length, uniqueDataInfo.FirstSeenTzName));
+                        orderedUniqueDataKeys.Add(entry.UniqueDataKey);
+                        currentUniqueDataFileOffset += uniqueDataInfo.Length;
+                        totalUniqueDataLength += uniqueDataInfo.Length;
+                    }
+                }
+                uniqueFilesData = updatedUniqueFilesData; // Replace with offset-aware dictionary
+
+                int zonetabOffset = dataSectionStartOffset + totalUniqueDataLength;
+                string tzVersion = DateTime.UtcNow.Year.ToString() + "X"; // Dynamic version e.g., "2024X"
 
                 using (FileStream fs = new FileStream(outputTzdataFile, FileMode.Create, FileAccess.Write))
                 {
-                    // 1. ヘッダー (24バイト)
-                    byte[] header = new byte[24];
-                    Encoding.ASCII.GetBytes("tzdata").CopyTo(header, 0); // ヘッダーマジック
-                    Encoding.ASCII.GetBytes(tzVersion.PadRight(8, '\0')).CopyTo(header, 6); // バージョン
-                    WriteInt32BigEndian(header, 12, indexOffset); // インデックスオフセット
-                    WriteInt32BigEndian(header, 16, dataOffset); // データオフセット
-                    WriteInt32BigEndian(header, 20, zonetabOffset); // ゾーンタブオフセット
+                    // 1. Header (24 bytes)
+                    byte[] header = new byte[headerSize];
+                    Encoding.ASCII.GetBytes("tzdata").CopyTo(header, 0); // Magic
+                    Encoding.ASCII.GetBytes(tzVersion.PadRight(8, '\0')).CopyTo(header, 6); // Version
+                    WriteInt32BigEndian(header, 12, indexTableOffset);      // Index table offset
+                    WriteInt32BigEndian(header, 16, dataSectionStartOffset); // Data section offset
+                    WriteInt32BigEndian(header, 20, zonetabOffset);          // Zone.tab section offset
                     fs.Write(header, 0, header.Length);
 
-                    // 2. インデックス
-                    int currentOffset=0;
-                    foreach (var entry in tzEntries)
+                    // 2. Index Table
+                    int entryNo = 1;
+                    foreach (var entry in tzFileEntries)
                     {
-                        byte[] indexEntry = new byte[52];
-                        byte[] nameBytes = Encoding.ASCII.GetBytes(entry.Name.PadRight(40, '\0')); // 20バイトの名前
+                        byte[] indexEntry = new byte[indexEntrySize];
+                        var uniqueDataInfo = uniqueFilesData[entry.UniqueDataKey];
+
+                        byte[] nameBytes = Encoding.ASCII.GetBytes(entry.TzName.PadRight(40, '\0'));
                         Array.Copy(nameBytes, 0, indexEntry, 0, Math.Min(nameBytes.Length, 40));
 
-                        WriteInt32BigEndian(indexEntry, 40, currentOffset); // データオフセット
-                        WriteInt32BigEndian(indexEntry, 44, entry.Data.Length); // データ長
+                        WriteInt32BigEndian(indexEntry, 40, uniqueDataInfo.FileOffset - dataSectionStartOffset); //  offset from start of file
+                        WriteInt32BigEndian(indexEntry, 44, uniqueDataInfo.Length);     // Data length
+                        WriteInt32BigEndian(indexEntry, 48, 0);                         // Reserved/Type
                         fs.Write(indexEntry, 0, indexEntry.Length);
-                        currentOffset += entry.Data.Length;
+
+                        // Log entry details
+                        logCsv.AppendLine($"{entryNo++},{entry.TzName},{entry.IsDuplicate},{entry.OriginalTzName ?? ""},{entry.FileSize},{entry.UniqueDataKey},{entry.Crc32},{entry.Sha512},{uniqueDataInfo.FileOffset:X8},{uniqueDataInfo.Length}");
                     }
 
-                    // 3. データ
-                    foreach (var entry in tzEntries)
+                    // 3. Data Section (write only unique data blocks in order of first appearance)
+                    foreach (string key in orderedUniqueDataKeys)
                     {
-                        fs.Write(entry.Data, 0, entry.Data.Length);
+                        var dataInfo = uniqueFilesData[key];
+                        if (fs.Position != dataInfo.FileOffset)
+                        {
+                            // This would indicate an error in offset calculation logic.
+                            string errorMsg = $"Error: Stream position {fs.Position} mismatch for {dataInfo.FirstSeenTzName} (expected {dataInfo.FileOffset}).";
+                            Console.Error.WriteLine(errorMsg);
+                            logCsv.AppendLine(errorMsg);
+                            // Potentially throw an exception or handle error
+                        }
+                        fs.Write(dataInfo.Data, 0, dataInfo.Length);
                     }
 
-                    // ログにメタデータを追加
-                    log.AppendLine($"Total sections: {sectionCount}, zonetab_size: {fs.Position - zonetabOffset}");
-                    log.AppendLine($"Output file: {outputTzdataFile}");
-                    Properties.Settings.Default.android_tzfie_info = log.ToString();
+                    // 4. Zone.tab section (optional content)
+                    // If zonetabOffset indicates the end of the file (i.e., no actual zone.tab data),
+                    // then no further writes are needed here.
+                    // If actual zone.tab content needs to be written, it would go here.
+                    // For this example, we assume zonetabOffset just marks where it would start.
+                    if (fs.Position != zonetabOffset)
+                    {
+                        string errorMsg = $"Warning: File stream position {fs.Position} does not match calculated zonetab_offset {zonetabOffset}. Zone.tab may be missing or offsets miscalculated.";
+                        Console.Error.WriteLine(errorMsg);
+                        logCsv.AppendLine(errorMsg);
+                    }
                 }
+
+                string csvlog = "EntryNo,tzname,IsDuplicate,OriginalTzNameIfDuplicate,FileSize,MD5Hash,CRC32Hash,SHA512Hash,FinalFileOffset,FinalFileLength\r\n";
+
+                // (ファイルへのインデックス書き込み処理の後など、必要な情報が確定したタイミング)
+                int entryNO = 1; // 通し番号の初期化
+                foreach (var entry in tzFileEntries)
+                {
+                    // entry は (string TzName, string UniqueDataKey, bool IsDuplicate, string OriginalTzName, long FileSize, string Crc32, string Sha512)
+                    // uniqueDataInfo は uniqueFilesData[entry.UniqueDataKey] から取得した (byte[] Data, int FileOffset, int Length, string FirstSeenTzName)
+
+                    var uniqueDataInfo = uniqueFilesData[entry.UniqueDataKey]; // 最終的なオフセットと長さを取得
+
+                    csvlog += ($"{entryNO++},{entry.TzName},{entry.IsDuplicate},{entry.OriginalTzName ?? ""},{entry.FileSize},{entry.UniqueDataKey},{entry.Crc32},{entry.Sha512},{uniqueDataInfo.FileOffset:X8},{uniqueDataInfo.Length}\r\n");
+                }
+
+                logCsv.AppendLine($"Summary:Header: Magic=tzdata, Version={tzVersion}, IndexOffset={indexTableOffset}, DataOffset={dataSectionStartOffset}, ZoneTabOffset={zonetabOffset}");
+                logCsv.AppendLine($"Summary:Total unique files: {uniqueFilesData.Count} ({totalUniqueDataLength} bytes)");
+                logCsv.AppendLine($"Summary:Total tz entries in index: {tzFileEntries.Count}");
+                logCsv.AppendLine($"Summary:Output file: {outputTzdataFile}");
+                Properties.Settings.Default.android_tzfie_info = logCsv.ToString();
+
+                string filePathmk = "mk_android_log.csv";
+                string content = csvlog;
+                File.WriteAllText(filePathmk, content, Encoding.UTF8); // UTF-8で書き込み
+
             }
             catch (Exception ex)
             {
-                Properties.Settings.Default.android_tzfie_info = $"Error: {ex.Message}\r\n";
+                logCsv.AppendLine($"Error: {ex.Message}");
+                logCsv.AppendLine($"StackTrace: {ex.StackTrace}");
+                Properties.Settings.Default.android_tzfie_info = logCsv.ToString();
             }
         }
+
+        // Helper for MD5
+        private static string CalculateMD5(byte[] data)
+        {
+            using (var md5 = MD5.Create())
+            {
+                byte[] hashBytes = md5.ComputeHash(data);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; i++)
+                {
+                    sb.Append(hashBytes[i].ToString("x2"));
+                }
+                return sb.ToString();
+            }
+        }
+
+        // Helper for SHA512
+        private static string CalculateSHA512(byte[] data)
+        {
+            using (var sha512 = SHA512.Create())
+            {
+                byte[] hashBytes = sha512.ComputeHash(data);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; i++)
+                {
+                    sb.Append(hashBytes[i].ToString("x2"));
+                }
+                return sb.ToString();
+            }
+        }
+
+        //https://claude.ai/chat/9da1bdcc-048b-416f-98e4-84d19faed737
+        private static string CalculateCRC32(byte[] data)
+        {
+            uint polynomial = 0xEDB88320;
+            uint crc = 0xFFFFFFFF;
+
+            foreach (byte b in data)
+            {
+                crc ^= b;
+                for (int i = 0; i < 8; i++)
+                {
+                    crc = (crc >> 1) ^ ((crc & 1) * polynomial);
+                }
+            }
+
+            crc = ~crc;
+
+            // Convert to byte array (big-endian)
+            byte[] result = new byte[4];
+            result[0] = (byte)((crc >> 24) & 0xFF);
+            result[1] = (byte)((crc >> 16) & 0xFF);
+            result[2] = (byte)((crc >> 8) & 0xFF);
+            result[3] = (byte)(crc & 0xFF);
+
+            return BitConverter.ToString(result).Replace("-", "").ToLowerInvariant();
+        }
+
 
         // ビッグエンディアンで4バイト整数を書き込むヘルパーメソッド
         private static void WriteInt32BigEndian(byte[] buffer, int offset, int value)
@@ -1945,7 +2095,7 @@ namespace neta
             string tmp = "";
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lasttzdatapath);
-            ofd.Title = "unix usr/share/tzinfoやpython pytz dateutilのtzdatabaseフォルダのバイナリふぁいるを選択してください";
+            ofd.Title = "unix usr/share/tzinfoやpython pytz dateutilのtzdatabaseフォルダのUTCバイナリふぁいるを選択してください　※slimDBは偏移範囲外posixゾーンとなるのでandroid 対応してない可能性があります";
 
             //ダイアログを表示する
             if (ofd.ShowDialog() == DialogResult.OK)
@@ -1957,7 +2107,25 @@ namespace neta
 
                 string directory = Path.GetDirectoryName(tzdata);
 
-                CreateAndroidTzdata(directory, "make_andoroid_tzdata");
+                CreateAndroidTzdata(directory, "mk_andoroid_tzdata");
+                textBox1.Text = Properties.Settings.Default.android_tzfie_info;
+            }
+        }
+
+        private void テキスト保存ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            string tmp = "";
+            SaveFileDialog ofd = new SaveFileDialog();
+            ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.lasttzdatapath);
+            ofd.Title = "ファイル名を入力してください";
+
+            //ダイアログを表示する
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                string filePathmk = ofd.FileName;
+                string content = textBox1.Text;
+                File.WriteAllText(filePathmk, content, Encoding.UTF8); // UTF-8で書き込み
             }
         }
     }
