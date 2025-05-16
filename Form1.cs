@@ -333,7 +333,7 @@ namespace neta
             progressBar1.ForeColor = Properties.Settings.Default.progbar_forecolor;
             progressBar1.BackColor = Properties.Settings.Default.progbar_backcolor;
 
-            
+
             if (Properties.Settings.Default.font_margn)
             {
                 menu_align(0, true);
@@ -352,8 +352,8 @@ namespace neta
 
             if (Properties.Settings.Default.change_baseurl)
             {
-                   var new_games = Properties.Settings.Default.alt_basekey.Split(",");
-                    UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
+                var new_games = Properties.Settings.Default.alt_basekey.Split(",");
+                UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
             }
 
             this.comboBox1.Text = Properties.Settings.Default.goog;
@@ -441,6 +441,13 @@ namespace neta
             fadeOpacity = 0f;
             currentImageOpacity = 1f;
         }
+
+        TimeZoneInfo posix_c = null;
+        TimeZoneInfo posix_s = null;
+        TimeZoneInfo posix_e = null;
+        int posix_c_year = 0;
+        int posix_s_year = 0;
+        int posix_e_year = 0;
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -673,6 +680,7 @@ namespace neta
 
                         if (lastTransitionIdx >= 0 && lastTransitionIdx_s >= 0 && lastTransitionIdx_d >= 0)
                         {
+
                             // マッチさせたい文字群を指定
                             string pattern = @"[dfFgGhtHKkmMsTyz:/]";
                             tzst = Regex.Replace(tzst, pattern, match => "\\" + match.Value);
@@ -701,9 +709,104 @@ namespace neta
                             formats = Regex.Replace(formats, patternn, match => "");
                             formate = Regex.Replace(formate, patternn, match => "");
 
-                            current_tmp = current_c + dt.AddHours(uo).ToString(formatc);
-                            start_tmp = start_c + st.AddHours(uoc).ToString(formats);
-                            end_tmp = end_c + en.AddHours(uoe).ToString(formate);
+                            //最大trasdiならposix適用
+                            int last_traditionIdx = tzTransitions.transList.Count - 1;
+                            if (lastTransitionIdx == last_traditionIdx)
+                            {
+                                int now_y = dt.Year;
+                                TimeZoneInfo tzi;
+                                string result;
+                                if (now_y == posix_c_year && posix_c != null)
+                                {
+                                    tzi = posix_c;
+                                }
+                                else
+                                {
+                                    (result, tzi) = ZIC.RuleTester(now_y, now_y);
+                                    posix_c = tzi;
+                                }
+                                posix_c_year = now_y;
+
+                                if (tzi == null)
+                                {
+                                    current_tmp = "POSIX->変換済みかすたむRULESがからです";
+                                }
+                                else
+                                {
+                                    DateTimeOffset ddt = DateTime.SpecifyKind(dt, dt.Kind);
+                                    string formatd = TZPASER.TimeZoneOffsetParser.getoffset(ddt, format, tzi);
+                                    current_tmp = current_c + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
+                                }
+                            }
+                            else
+                            {
+                                current_tmp = current_c + dt.AddHours(uo).ToString(formatc);
+                            }
+
+                            if (lastTransitionIdx_s == last_traditionIdx)
+                            {
+                                int now_y = st.Year;
+                                TimeZoneInfo tzi;
+                                string result;
+                                if (now_y == posix_s_year && posix_s != null)
+                                {
+                                    tzi = posix_s;
+                                }
+                                else
+                                {
+                                    (result, tzi) = ZIC.RuleTester(now_y, now_y);
+                                    posix_s = tzi;
+                                }
+                                posix_s_year = now_y;
+
+                                if (tzi == null)
+                                {
+                                    current_tmp = "POSIX->変換済みかすたむRULESがからです";
+                                }
+                                else
+                                {
+                                    DateTimeOffset ddt = DateTime.SpecifyKind(st, st.Kind);
+                                    string formatd = TZPASER.TimeZoneOffsetParser.getoffset(ddt, format, tzi);
+                                    start_tmp = start_c + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
+                                }
+                            }
+                            else
+                            {
+                                start_tmp = start_c + st.AddHours(uoc).ToString(formats);
+                            }
+
+                            if (lastTransitionIdx_d == last_traditionIdx)
+                            {
+                                int now_y = st.Year;
+                                TimeZoneInfo tzi;
+                                string result;
+                                if (now_y == posix_e_year && posix_e != null)
+                                {
+                                    tzi = posix_e;
+                                }
+                                else
+                                {
+                                    (result, tzi) = ZIC.RuleTester(now_y, now_y);
+                                    posix_s = tzi;
+                                }
+                                posix_e_year = now_y;
+
+                                if (tzi == null)
+                                {
+                                    end_tmp = "POSIX->変換済みかすたむRULESがからです";
+                                }
+                                else
+                                {
+                                    DateTimeOffset ddt = DateTime.SpecifyKind(en, en.Kind);
+                                    string formatee = TZPASER.TimeZoneOffsetParser.getoffset(ddt, format, tzi);
+                                    end_tmp = end_c + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatee);
+                                }
+                            }
+                            else
+                            {
+                                end_tmp = end_c + en.AddHours(uoe).ToString(formate);
+                            }
+
 
                             mode = "TZif binay BisectR:" + Properties.Settings.Default.usetzdatabin;
 
@@ -1658,9 +1761,9 @@ namespace neta
 
         private void netaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-                var form5 = new ZIC();
-                form5.ShowDialog(this);
-                form5.Dispose();
+            var form5 = new ZIC();
+            form5.ShowDialog(this);
+            form5.Dispose();
         }
 
         private void luascriptToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4123,100 +4226,100 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
 
 
     public partial class IntervalForm : Form
+    {
+        private ComboBox intervalComboBox;
+        private Button okButton;
+        private Button cancelButton;
+
+        public int SelectedInterval { get; private set; } // 選択された間隔
+
+        public IntervalForm(int currentInterval)
         {
-            private ComboBox intervalComboBox;
-            private Button okButton;
-            private Button cancelButton;
+            InitializeComponent();
+            SetupControls(currentInterval);
+        }
 
-            public int SelectedInterval { get; private set; } // 選択された間隔
+        private void SetupControls(int currentInterval)
+        {
+            this.Text = "タイマー間隔の設定";
+            this.Width = 300;
+            this.Height = 150;
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
 
-            public IntervalForm(int currentInterval)
+            // ラベル
+            Label label = new Label
             {
-                InitializeComponent();
-                SetupControls(currentInterval);
-            }
+                Text = "表示間隔を選択してください（ミリ秒）:",
+                Location = new Point(10, 20),
+                AutoSize = true
+            };
 
-            private void SetupControls(int currentInterval)
+            // コンボボックス
+            intervalComboBox = new ComboBox
             {
-                this.Text = "タイマー間隔の設定";
-                this.Width = 300;
-                this.Height = 150;
-                this.FormBorderStyle = FormBorderStyle.FixedDialog;
-                this.MaximizeBox = false;
-                this.MinimizeBox = false;
+                Location = new Point(10, 50),
+                Width = 260,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            intervalComboBox.Items.AddRange(new object[] { "1000 (1秒)", "3000 (3秒)", "5000 (5秒)", "10000 (10秒)" });
+            intervalComboBox.SelectedIndex = GetIndexFromInterval(currentInterval);
 
-                // ラベル
-                Label label = new Label
-                {
-                    Text = "表示間隔を選択してください（ミリ秒）:",
-                    Location = new Point(10, 20),
-                    AutoSize = true
-                };
-
-                // コンボボックス
-                intervalComboBox = new ComboBox
-                {
-                    Location = new Point(10, 50),
-                    Width = 260,
-                    DropDownStyle = ComboBoxStyle.DropDownList
-                };
-                intervalComboBox.Items.AddRange(new object[] { "1000 (1秒)", "3000 (3秒)", "5000 (5秒)", "10000 (10秒)" });
-                intervalComboBox.SelectedIndex = GetIndexFromInterval(currentInterval);
-
-                // OKボタン
-                okButton = new Button
-                {
-                    Text = "OK",
-                    Location = new Point(110, 80),
-                    DialogResult = DialogResult.OK
-                };
-                okButton.Click += OkButton_Click;
-
-                // キャンセルボタン
-                cancelButton = new Button
-                {
-                    Text = "キャンセル",
-                    Location = new Point(190, 80),
-                    DialogResult = DialogResult.Cancel
-                };
-
-                // コントロールを追加
-                this.Controls.Add(label);
-                this.Controls.Add(intervalComboBox);
-                this.Controls.Add(okButton);
-                this.Controls.Add(cancelButton);
-
-                this.AcceptButton = okButton;
-                this.CancelButton = cancelButton;
-            }
-
-            private int GetIndexFromInterval(int interval)
+            // OKボタン
+            okButton = new Button
             {
-                switch (interval)
-                {
-                    case 1000: return 0;
-                    case 3000: return 1;
-                    case 5000: return 2;
-                    case 10000: return 3;
-                    default: return 1; // デフォルトは3秒
-                }
-            }
+                Text = "OK",
+                Location = new Point(110, 80),
+                DialogResult = DialogResult.OK
+            };
+            okButton.Click += OkButton_Click;
 
-            private void OkButton_Click(object sender, EventArgs e)
+            // キャンセルボタン
+            cancelButton = new Button
             {
-                string selectedText = intervalComboBox.SelectedItem.ToString();
-                SelectedInterval = int.Parse(selectedText.Split(' ')[0]); // "1000 (1秒)" から "1000" を抽出
-                Properties.Settings.Default.slidershow_interval = SelectedInterval;
-            }
+                Text = "キャンセル",
+                Location = new Point(190, 80),
+                DialogResult = DialogResult.Cancel
+            };
 
-            private void InitializeComponent()
+            // コントロールを追加
+            this.Controls.Add(label);
+            this.Controls.Add(intervalComboBox);
+            this.Controls.Add(okButton);
+            this.Controls.Add(cancelButton);
+
+            this.AcceptButton = okButton;
+            this.CancelButton = cancelButton;
+        }
+
+        private int GetIndexFromInterval(int interval)
+        {
+            switch (interval)
             {
-                this.SuspendLayout();
-                this.ClientSize = new System.Drawing.Size(284, 111);
-                this.Name = "IntervalForm";
-                this.ResumeLayout(false);
+                case 1000: return 0;
+                case 3000: return 1;
+                case 5000: return 2;
+                case 10000: return 3;
+                default: return 1; // デフォルトは3秒
             }
         }
+
+        private void OkButton_Click(object sender, EventArgs e)
+        {
+            string selectedText = intervalComboBox.SelectedItem.ToString();
+            SelectedInterval = int.Parse(selectedText.Split(' ')[0]); // "1000 (1秒)" から "1000" を抽出
+            Properties.Settings.Default.slidershow_interval = SelectedInterval;
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            this.ClientSize = new System.Drawing.Size(284, 111);
+            this.Name = "IntervalForm";
+            this.ResumeLayout(false);
+        }
+    }
 
     // 透過可能なProgressBarクラス（NETA_TIMERクラスの外に移動）
     public class TransparentProgressBar : ProgressBar

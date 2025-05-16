@@ -605,6 +605,7 @@
             // y_start
             // 
             y_start.FormattingEnabled = true;
+            y_start.ImeMode = System.Windows.Forms.ImeMode.Disable;
             y_start.Items.AddRange(new object[] { "1900", "1950", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038" });
             y_start.Location = new System.Drawing.Point(543, 577);
             y_start.Name = "y_start";
@@ -612,10 +613,12 @@
             y_start.TabIndex = 4;
             y_start.Text = "2000";
             y_start.SelectedIndexChanged += comboBox7_SelectedIndexChanged;
+            y_start.TextChanged += comboBox7_SelectedIndexChanged;
             // 
             // y_end
             // 
             y_end.FormattingEnabled = true;
+            y_end.ImeMode = System.Windows.Forms.ImeMode.Disable;
             y_end.Items.AddRange(new object[] { "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038" });
             y_end.Location = new System.Drawing.Point(654, 577);
             y_end.Name = "y_end";
@@ -623,6 +626,7 @@
             y_end.TabIndex = 5;
             y_end.Text = "2037";
             y_end.SelectedIndexChanged += comboBox8_SelectedIndexChanged;
+            y_end.TextChanged += comboBox8_SelectedIndexChanged;
             // 
             // use_year_filter
             // 

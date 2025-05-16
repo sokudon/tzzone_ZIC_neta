@@ -1,5 +1,6 @@
 ﻿using Force.Crc32;
 using NodaTime;
+using NodaTime.TimeZones.Cldr;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -729,7 +730,19 @@ namespace neta
             textBox1.Text = tmp;
             if (posix.Checked)
             {
-                ruletester();
+                string date = Properties.Settings.Default.posix_testdate;
+                DateTimeOffset utcNowOffset;
+                if (date != "")
+                {
+                    utcNowOffset = DateTimeOffset.Parse(date);
+                }
+                else
+                {
+                    utcNowOffset = DateTimeOffset.UtcNow;
+                }
+                int thisyear = utcNowOffset.Year;
+
+                RuleTester(thisyear, thisyear);
             }
         }
 
@@ -762,7 +775,19 @@ namespace neta
 
             if (posix.Checked)
             {
-                ruletester();
+                string date = Properties.Settings.Default.posix_testdate;
+                DateTimeOffset utcNowOffset;
+                if (date != "")
+                {
+                    utcNowOffset = DateTimeOffset.Parse(date);
+                }
+                else
+                {
+                    utcNowOffset = DateTimeOffset.UtcNow;
+                }
+                int thisyear = utcNowOffset.Year;
+
+                RuleTester(thisyear, thisyear);
             }
 
         }
@@ -876,12 +901,24 @@ namespace neta
             Properties.Settings.Default.posix_json = tmp;
             if (posix.Checked)
             {
-                textBox1.Text += ruletester();
+                string date = Properties.Settings.Default.posix_testdate;
+                DateTimeOffset utcNowOffset;
+                if (date != "")
+                {
+                    utcNowOffset = DateTimeOffset.Parse(date);
+                }
+                else
+                {
+                    utcNowOffset = DateTimeOffset.UtcNow;
+                }
+                int thisyear = utcNowOffset.Year;
+
+                textBox1.Text += RuleTester(thisyear, thisyear);
             }
         }
 
         // 1. データモデル (クラス) の定義:
-        public class TimeZoneData
+        public class TimeZoneData_Posix
         {
             [JsonPropertyName("Parsing")]
             public string? Parsing { get; set; }
@@ -933,22 +970,23 @@ namespace neta
         }
 
 
-        private string ruletester()
+        //public static string ruletester(int year_start,int year_end)
+        public static (string, System.TimeZoneInfo?) RuleTester(int year_start, int year_end)
         {
             try
             {
                 string json = Properties.Settings.Default.posix_json;
                 if (string.IsNullOrEmpty(json))
                 {
-                    return "JSON data is missing.\r\n";
+                    return ("JSON data is missing.\r\n",null);
                 }
 
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                TimeZoneData? tzData = JsonSerializer.Deserialize<TimeZoneData>(json, options);
+                TimeZoneData_Posix? tzData = JsonSerializer.Deserialize<TimeZoneData_Posix>(json, options);
 
                 if (tzData == null)
                 {
-                    return "Failed to deserialize JSON.\r\n";
+                    return ("Failed to deserialize JSON.\r\n",null);
                 }
 
                 // --- Microsoft Docs style TimeZoneInfo creation ---
@@ -956,7 +994,7 @@ namespace neta
                 // 1. Parse TimeSpans
                 if (!TimeSpan.TryParse(tzData.StandardOffset, out TimeSpan standardOffset))
                 {
-                    return "Failed to parse StandardOffset.\r\n";
+                    return ("Failed to parse StandardOffset.\r\n",null);
                 }
                 if (!TimeSpan.TryParse(tzData.DaylightOffset, out TimeSpan daylightDelta))
                 {
@@ -983,7 +1021,7 @@ namespace neta
                 {
                     if (!TimeSpan.TryParse(tzData.StartRule.Time, out TimeSpan startTime))
                     {
-                        return "Failed to parse StartRule.Time.\r\n";
+                        return ("Failed to parse StartRule.Time.\r\n",null);
                     }
                     dd = startTime.Days;
                     hh = startTime.Hours;
@@ -1065,7 +1103,7 @@ namespace neta
                 {
                     if (!TimeSpan.TryParse(tzData.EndRule.Time, out TimeSpan endTime))
                     {
-                        return "Failed to parse EndRule.Time.\r\n";
+                        return ("Failed to parse EndRule.Time.\r\n",null);
                     }
 
                     dd = endTime.Days;
@@ -1143,7 +1181,6 @@ namespace neta
                 }
 
                 // 3. Create Adjustment Rule (for the specified year)
-                int thisyear = DateTime.Now.Year;
                 // --- Time Conversion and Output ---
                 string date = Properties.Settings.Default.posix_testdate;
                 DateTimeOffset utcNowOffset;
@@ -1155,6 +1192,7 @@ namespace neta
                 {
                     utcNowOffset = DateTimeOffset.UtcNow;
                 }
+                //int thisyear = utcNowOffset.Year;
 
                 System.TimeZoneInfo.AdjustmentRule adjustmentRule;
                 System.TimeZoneInfo customTimeZone;
@@ -1172,8 +1210,8 @@ namespace neta
                 else
                 {
                     adjustmentRule = System.TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(
-                        dateStart: new DateTime(thisyear, 1, 1),
-                        dateEnd: new DateTime(thisyear, 12, 31),
+                        dateStart: new DateTime(year_start, 1, 1),
+                        dateEnd: new DateTime(year_end, 12, 31),
                         daylightDelta: daylightDelta,
                         daylightTransitionStart: transitionRuleStart,
                         daylightTransitionEnd: transitionRuleEnd
@@ -1198,11 +1236,11 @@ namespace neta
                 sb.Append($"posix TimeZone  Datetime: {localTimeOffset:yyyy-MM-dd HH:mm:sszzz}\r\n");
                 sb.Append($"OS Localtime: {dt:yyyy-MM-dd HH:mm:sszzz}\r\n");
 
-                return sb.ToString();
+                return (sb.ToString(), customTimeZone);
             }
             catch (Exception ex)
             {
-                return $"Error: {ex}\r\n";
+                return ($"Error: {ex}\r\n", null);
             }
         }
 

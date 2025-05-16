@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Threading;
 using System.Reflection.PortableExecutable;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static neta.ZIC;
 
 namespace neta
 {
@@ -45,6 +46,7 @@ namespace neta
             LoadCultures();
 
 
+            tzbinary_timezone.Checked = Properties.Settings.Default.usetz;
             elapst_left.Text = Properties.Settings.Default.lefttimeformat;
             normal_dateformat.Text = Properties.Settings.Default.datetimeformat;
             parse_target.Text = Properties.Settings.Default.parse;
@@ -54,7 +56,6 @@ namespace neta
 
             ms_utcoffset.Checked = Properties.Settings.Default.useutc;
             ms_timezone.Checked = Properties.Settings.Default.usems;
-            tzbinary_timezone.Checked = Properties.Settings.Default.usetz;
             use_year_filter.Checked = Properties.Settings.Default.usefiler;
             custom_local.Checked = Properties.Settings.Default.local_chager;
             ms_utcoffset_items.Text = Properties.Settings.Default.useutczone;
@@ -80,7 +81,7 @@ namespace neta
 
             change_baseurl.Checked = Properties.Settings.Default.change_baseurl;
 
-            baseurl_txt.Text=Properties.Settings.Default.alt_baseurl;
+            baseurl_txt.Text = Properties.Settings.Default.alt_baseurl;
 
             localeBox.Text = Properties.Settings.Default.locale;
 
@@ -105,7 +106,10 @@ script_path() + "zoneinfo\\",
 "C:\\Users\\"+username+"\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pytz\\zoneinfo\\",
 "C:\\Program Files\\LibreOffice\\program\\python-core-3.10.16\\lib\\site-packages\\pytz\\zoneinfo\\",
 "C:\\Program Files\\LibreOffice\\program\\python-core-3.10.16\\lib\\site-packages\\dateutil\\zoneinfo\\dateutil-zoneinfo.tar\\",
-"C:\\cygwin64\\usr\\share\\zoneinfo\\"
+"C:\\cygwin64\\usr\\share\\zoneinfo\\",
+//slimDB注意
+"C:\\msys64\\usr\\share\\zoneinfo\\",
+"C:\\Users\\"+username+"\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pytz\\zoneinfo\\"
             };
 
             return windowsTimezonePaths;
@@ -115,11 +119,6 @@ script_path() + "zoneinfo\\",
             {
                 return AppDomain.CurrentDomain.BaseDirectory; // スクリプトのベースディレクトリを返す
             }
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
         }
 
 
@@ -151,7 +150,7 @@ script_path() + "zoneinfo\\",
             }
             else
             {
-                nodatime_panel.Visible =false;
+                nodatime_panel.Visible = false;
             }
         }
 
@@ -160,7 +159,7 @@ script_path() + "zoneinfo\\",
             string normal_tzif = Path.Combine(Properties.Settings.Default.lasttzdatapath_base_utc, Properties.Settings.Default.usetzdatabin);
             string android_tzif = Path.Combine(Properties.Settings.Default.lasttzdatapath_base_utc, Properties.Settings.Default.use_android_tzdata);
             if (File.Exists(normal_tzif)) { return normal_tzif; }
-            if(File.Exists(android_tzif)) { return android_tzif; }
+            if (File.Exists(android_tzif)) { return android_tzif; }
 
             return "";
         }
@@ -178,7 +177,7 @@ script_path() + "zoneinfo\\",
                 }
 
                 string tzdata = select_tzdata();
-              if (System.IO.File.Exists(tzdata))
+                if (System.IO.File.Exists(tzdata))
                 {
                     System.IO.FileStream fs = new FileStream(tzdata, FileMode.Open, FileAccess.Read);
                     byte[] bs = new byte[fs.Length];
@@ -343,7 +342,7 @@ script_path() + "zoneinfo\\",
 
                 // 選択したファイルのパスを取得
                 string filePath_dir = tzdir;
-                string fileUTC = Path.Combine(filePath_dir,"UTC");
+                string fileUTC = Path.Combine(filePath_dir, "UTC");
                 string filetzdata = Path.Combine(filePath_dir, "tzdata");
 
                 // 拡張子がないファイルのみを検証する場合
@@ -359,8 +358,15 @@ script_path() + "zoneinfo\\",
                     {
                         Properties.Settings.Default.use_android_tzdata = "UTC";
                     }
+
+                    tzbinary_timezone_CheckedChanged(sender, e);
+                    return;
                 }
+
             }
+            textBox3.Text = "tzdataのフォルダにUTCファイルか　android tzdataがみつかりません\r\n"
+            + "前回取得成功した\r\n" + Properties.Settings.Default.lasttzdatapath_base_utc + "\\" + Properties.Settings.Default.use_android_tzdata
+            + "\r\nが読み込まれます";
         }
 
         //mobaapi
@@ -381,7 +387,9 @@ script_path() + "zoneinfo\\",
             var op = parse_target.Text.Split(',');
             if (op.Length != 3)
             {
-                MessageBox.Show("/(パス名 イベ名),/(パス名 開始),/(パス名　終了) ,カンマ区切りの対象パスが３つ必要です");
+                parse_target.Text = Properties.Settings.Default.parse;
+                textBox3.Text=("/(パス名 イベ名),/(パス名 開始),/(パス名　終了) ,カンマ区切りの対象パスが３つ必要です");
+                return;
             }
             else
             {
@@ -456,7 +464,7 @@ script_path() + "zoneinfo\\",
             {
                 openFileDialog.InitialDirectory = Properties.Settings.Default.lasttzdatapath_base_utc;
 
-                openFileDialog.Title = "android tzdataかzoneinfoフォルダのUTCがあるところを選択してください";
+                openFileDialog.Title = "android tzdataかzoneinfoフォルダのUTCがあるところを選択してください。androidはファイル名が 'tzdata' のみです";
                 openFileDialog.Filter = "androidのtzdata,zoneinfoふぉるだUTC ファイル (*.*)|*.*";
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
@@ -466,14 +474,14 @@ script_path() + "zoneinfo\\",
                     // 選択したファイルのパスを取得
                     string filePath_dir = Path.GetDirectoryName(openFileDialog.FileName);
                     string filePath_ext = System.IO.Path.GetExtension(openFileDialog.FileName);
-                    string filename =Path.GetFileName(openFileDialog.FileName);
+                    string filename = Path.GetFileName(openFileDialog.FileName);
 
                     string fileUTC = Path.Combine(filePath_dir, "UTC");
                     string filetzdata = Path.Combine(filePath_dir, "tzdata");
 
                     // 拡張子がないファイルのみを検証する場合
-                    if (File.Exists(fileUTC) || (File.Exists(filetzdata))) 
-                    { 
+                    if (File.Exists(fileUTC) || (File.Exists(filetzdata)))
+                    {
                         Properties.Settings.Default.lasttzdatapath_base_utc = filePath_dir;
                         tzbinary_path.Text = filePath_dir;
 
@@ -503,6 +511,14 @@ script_path() + "zoneinfo\\",
             if (m.Success)
             {
                 Properties.Settings.Default.api = m.Value;
+            }
+            else if (File.Exists(custom_url_path.Text))
+            {
+                Properties.Settings.Default.alt_baseurl = custom_url_path.Text;
+            }
+            else
+            {
+                textBox3.Text = "URLが不正かJSONファイルが存在しません";
             }
 
         }
@@ -661,17 +677,47 @@ script_path() + "zoneinfo\\",
 
         private void comboBox8_SelectedIndexChanged(object sender, EventArgs e)
         {
+            try
+            {
+                int start = Convert.ToInt32((y_start.Text));
+                int end = Convert.ToInt32((y_end.Text));
+                if (start > end)
+                {
+                    textBox3.Text = "開始年は終了年より小さい値を指定してください";
+                    y_end.Text = Properties.Settings.Default.enfilter;
+                    return;
+                }
 
-            Properties.Settings.Default.enfilter = y_end.Text;
+                Properties.Settings.Default.enfilter = y_end.Text;
+                tzbinary_timezone_CheckedChanged(sender, e);
+            }
+            catch (Exception ex)
+            {
+                textBox3.Text = "年は数値を入力してください";
+                y_end.Text = Properties.Settings.Default.enfilter;
+            }
         }
 
         private void comboBox7_SelectedIndexChanged(object sender, EventArgs e)
         {
-
-            Properties.Settings.Default.stfilter = y_start.Text;
-            int st = Convert.ToInt32(y_start.Text);
-            int en = Convert.ToInt32(y_end.Text);
-
+            try
+            {
+                int start = Convert.ToInt32((y_start.Text));
+                int end = Convert.ToInt32((y_end.Text));
+                if (start > end)
+                {
+                    textBox3.Text = "開始年は終了年より小さい値を指定してください";
+                    y_start.Text = Properties.Settings.Default.stfilter;
+                    return;
+                }
+                Properties.Settings.Default.stfilter = y_start.Text;
+                tzbinary_timezone_CheckedChanged(sender, e);
+            }
+            catch (Exception ex)
+            {
+                y_start.Text = Properties.Settings.Default.stfilter;
+                textBox3.Text = "年は数値を入力してください";
+            }
         }
 
         private void textBox6_TextChanged(object sender, EventArgs e)
@@ -696,7 +742,7 @@ script_path() + "zoneinfo\\",
         private static string TZif_ParseRaw(byte[] data)
         {
             int index = 0;
-            string android=Properties.Settings.Default.use_android_tzdata;
+            string android = Properties.Settings.Default.use_android_tzdata;
             StringBuilder sb = new StringBuilder();
             string tzdata_path = select_tzdata();
             string tzst = (Properties.Settings.Default.usetzdatabin);
@@ -704,28 +750,29 @@ script_path() + "zoneinfo\\",
             if (android == "tzdata")
             {
                 androidTZifHead android_t = new androidTZifHead(data, index);
-                if(android_t.Magic != 0x747A6461){
+                if (android_t.Magic != 0x747A6461)
+                {
                     return "";
                 }
                 var encoding_ascii = Encoding.GetEncoding(0);
                 int[] target = new int[2];
-                
-                target = ZIC.android_tzreader(tzdata_path,true, tzst);
+
+                target = ZIC.android_tzreader(tzdata_path, true, tzst);
                 if (target[0] == -1)
                 {
-                        return "";
+                    return "";
                 }
                 var tzver = encoding_ascii.GetString(data).Substring(0, 12).TrimEnd('\0');
 
                 byte[] bss = new byte[target[1]];
-                    Array.ConstrainedCopy(data, target[0], bss, 0, target[1]);
-                    data = bss;
+                Array.ConstrainedCopy(data, target[0], bss, 0, target[1]);
+                data = bss;
                 //sb.Append(Properties.Settings.Default.android_tzfie_info);
                 sb.AppendLine($"Android tzdata binary reader success\r\n" +
                         $"tzver:{tzver},target: {android} pos:{target[0]},size{target[1]}");
                 sb.AppendLine();
                 index = 0;
-             }
+            }
 
             // read in the 44-byte TZ header containing the count/length fields
             //
@@ -1077,6 +1124,13 @@ script_path() + "zoneinfo\\",
             sb.Append(footer);
             sb.AppendLine();
             sb.AppendLine();
+
+            sb.AppendLine();
+            sb.AppendLine($"footer_posix timezoneの詳細表示 {footer}");
+            string footer_info = PosixTimeZoneParser.LoadPosix(footer);
+            sb.AppendLine(footer_info);
+            Properties.Settings.Default.posix_json = footer_info;
+
             sb.AppendLine(mkjson);
             sb.AppendLine();
             Properties.Settings.Default.footerstring = footer.Replace("\n", "");
@@ -1192,6 +1246,28 @@ script_path() + "zoneinfo\\",
                         string uoff = TZPASER.TimeZoneOffsetParser.ToCustomFormat(uo, true).ToString();
                         string abb = tzData.Abbrs[lastTransitionIdx];
                         string iso8601tz = testDateTime.ToUniversalTime().AddHours(uo).ToString("yyyy-MM-dd'T'HH:mm:ss" + uoff + " " + abb);
+
+                        int last_traditionIdx = tzData.TransList.Count - 1;
+                        if (lastTransitionIdx == last_traditionIdx)
+                        {
+                            int now_y = testDateTime.Year;
+                            var (result, tzi_t) = ZIC.RuleTester(now_y, now_y);
+                            if (tzi_t == null)
+                            {
+                                iso8601tz = "POSIX->変換済みかすたむRULESがからです";
+                            }
+                            else
+                            {
+                                string patternn = @"(%TZ|%z|%Z|%PO)";
+                                format = Regex.Replace(format, patternn, match => "");
+                                string patternnn = @"(?<!\\)[!""#$'&%]"; // 「\K \z」を無視し、「Kz」のみマッチ !"#$'&%はダメ文字
+                                format = Regex.Replace(format, patternnn, match => "");
+                                DateTimeOffset ddtt = DateTime.SpecifyKind(testDateTime, testDateTime.Kind);
+                                string formatd = TZPASER.TimeZoneOffsetParser.getoffset(ddtt, format, tzi_t);
+                                iso8601tz = TimeZoneInfo.ConvertTime(ddtt, tzi_t).ToString(formatd);
+                            }
+                        }
+
 
                         sb.AppendLine(finaltz);
                         sb.AppendLine();
@@ -1375,9 +1451,9 @@ script_path() + "zoneinfo\\",
             public const int Length = 24;
 
             public readonly uint Magic; // tzda 74 7A 64 61
-            public readonly uint headersize; 
+            public readonly uint headersize;
             public readonly uint zoneoffset;
-            public readonly uint filesize; 
+            public readonly uint filesize;
 
             public androidTZifHead(byte[] data, int index)
             {
@@ -1394,7 +1470,7 @@ script_path() + "zoneinfo\\",
                     //throw new ArgumentException(SR.Argument_TimeZoneInfoBadTZif, nameof(data));
                 }
 
-                headersize  = (uint)TZif_ToInt32(data, index + 12);
+                headersize = (uint)TZif_ToInt32(data, index + 12);
                 zoneoffset = (uint)TZif_ToInt32(data, index + 16);
                 filesize = (uint)TZif_ToInt32(data, index + 20);
             }
@@ -1597,6 +1673,14 @@ script_path() + "zoneinfo\\",
             {
                 Properties.Settings.Default.alt_baseurl = m.Value;
             }
+            else if (File.Exists(baseurl_txt.Text))
+            {
+                Properties.Settings.Default.alt_baseurl = baseurl_txt.Text;
+            }
+            else
+            {
+                textBox3.Text = "URLが不正かJSONファイルが存在しません";
+            }
         }
 
         private void baseurl_keyval_TextChanged(object sender, EventArgs e)
@@ -1605,6 +1689,11 @@ script_path() + "zoneinfo\\",
             if (keys.Length == 10)
             {
                 Properties.Settings.Default.alt_basekey = baseurl_keyval.Text;
+            }
+            else
+            {
+                 baseurl_keyval.Text= Properties.Settings.Default.alt_basekey;
+                textBox3.Text = "アルファベットの10個のキーをカンマ区切りで指定してください";
             }
         }
 
