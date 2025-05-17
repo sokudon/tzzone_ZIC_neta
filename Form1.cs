@@ -187,10 +187,73 @@ namespace neta
         string[] orig_games = { "学ます", "でれすて", "みりした", "シャニマス", "シャニソン", "ユメステ", "プロセカ", "プロセカグローバル", "プロセカ韓国", "プロセカ繁体" };
         int game_maxlen = 10;
 
+        //private void button2_Click(object sender, EventArgs e)
+        //{
+        //    WebClient wc = new WebClient();
+
+        //    wc.Encoding = Encoding.UTF8;
+        //    var selecter = comboBox1.SelectedIndex;
+        //    bool change_url = Properties.Settings.Default.change_baseurl;
+
+        //    if (comboBox1.Text == "かすたむJS")
+        //    {
+        //        button3_Click(sender, e);
+        //        return;
+        //    }
+        //    if (comboBox1.Text == "フリー入力")
+        //    {
+        //        return;
+        //    }
+
+        //    var url2 = url;
+        //    string[] new_games = game;
+
+        //    if (change_url)
+        //    {
+        //        new_games = Properties.Settings.Default.alt_basekey.Split(",");
+        //        UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
+        //        url2 = Properties.Settings.Default.alt_baseurl;
+        //    }
+        //    else
+        //    {
+        //        for (int i = 0; i < game_maxlen; i++)
+        //        {
+        //            comboBox1.Items[i] = orig_games[i];
+        //        }
+        //    }
+
+        //    if (selecter > game_maxlen)
+        //    {
+        //        return;
+        //    }
+
+        //    try
+        //    {
+        //        string text = "";
+
+        //        text = wc.DownloadString(url2);
+        //        if (text == null || text == "")
+        //        {
+        //            endbox.Text = "baseurlの接続に失敗しました";
+        //            return;
+        //        }
+        //        var obj = Codeplex.Data.DynamicJson.Parse(text);
+        //        string path = "/data/" + new_games[selecter] + "/name," +
+        //            "/data/" + new_games[selecter] + "/start," +
+        //            "/data/" + new_games[selecter] + "/end";
+
+        //        get_json_parse(url2, text, path, false);
+        //        Properties.Settings.Default.json = text;
+
+        //    }
+        //    catch (WebException exc)
+        //    {
+        //        endbox.Text = exc.Message;
+        //    }
+        //}
         private void button2_Click(object sender, EventArgs e)
         {
             WebClient wc = new WebClient();
-
             wc.Encoding = Encoding.UTF8;
             var selecter = comboBox1.SelectedIndex;
             bool change_url = Properties.Settings.Default.change_baseurl;
@@ -211,16 +274,31 @@ namespace neta
             if (change_url)
             {
                 new_games = Properties.Settings.Default.alt_basekey.Split(",");
+                // UpdateComboBox modifies comboBox1.Items, which might trigger SelectedIndexChanged
+                // We should probably update the combobox *before* attempting to load JSON based on selection
+                // and potentially save the imagePaths state if necessary.
+                // Let's call UpdateComboBox here as it was originally.
                 UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
                 url2 = Properties.Settings.Default.alt_baseurl;
+
+                // 新しいURLの項目に切り替えた後、現在のimagePathsの状態を保存
+                SaveIni(); // ★ 追加 ★
             }
             else
             {
+                // 元のURLに戻す場合、項目をリセット
                 for (int i = 0; i < game_maxlen; i++)
                 {
                     comboBox1.Items[i] = orig_games[i];
                 }
+                // 元のURLの項目に戻した後、現在のimagePathsの状態を保存
+                SaveIni(); // ★ 追加 ★
             }
+
+            // Re-select the previously selected index after updating items if possible,
+            // or handle the SelectedIndexChanged that might have been triggered.
+            // The original code doesn't explicitly handle re-selection here,
+            // relying on the event to fire.
 
             if (selecter > game_maxlen)
             {
@@ -237,6 +315,7 @@ namespace neta
                     endbox.Text = "baseurlの接続に失敗しました";
                     return;
                 }
+                // The rest of the JSON parsing and textbox updating logic remains the same
                 var obj = Codeplex.Data.DynamicJson.Parse(text);
                 string path = "/data/" + new_games[selecter] + "/name," +
                     "/data/" + new_games[selecter] + "/start," +
@@ -250,14 +329,20 @@ namespace neta
             {
                 endbox.Text = exc.Message;
             }
+            finally
+            {
+                wc.Dispose(); // Ensure WebClient is disposed
+            }
         }
 
 
-        private void Form1_Load(object sender, EventArgs e)
+        //https://gemini.google.com/app/30a3f1e2b2d7b79a async awaitに変更
+        private async void Form1_Load(object sender, EventArgs e) // ★ async を追加 ★
         {
-            //https://chatgpt.com/share/677e10d5-018c-800f-9356-ac6a02a537e2 begin updateみたいな描写制御        
+            //https://chatgpt.com/share/677e10d5-018c-800f-9356-ac6a02a537e2 begin updateみたいな描写制御
             this_begin_update();
 
+            // 文化情報の設定
             if (Properties.Settings.Default.locale == "InvariantCulture")
             {
                 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
@@ -267,8 +352,7 @@ namespace neta
                 Thread.CurrentThread.CurrentCulture = new CultureInfo(Properties.Settings.Default.locale);
             }
 
-
-
+            // 各種設定の復元 (テキストボックス、バー、フォント、色など)
             this.startbox.Text = Properties.Settings.Default.st;
             this.endbox.Text = Properties.Settings.Default.en;
             this.ibemei.Text = Properties.Settings.Default.ibe;
@@ -306,77 +390,102 @@ namespace neta
 
             if (カットToolStripMenuItem.Checked)
             {
-                カットToolStripMenuItem_Click(sender, e);
+                SetTransitionType(TransitionType.Cut); // 直接タイプを設定
             }
             if (フェードToolStripMenuItem.Checked)
             {
-                フェードToolStripMenuItem_Click(sender, e);
+                SetTransitionType(TransitionType.Fade); // 直接タイプを設定
             }
-            if (スライドToolStripMenuItem.Checked) { スライドToolStripMenuItem_Click(sender, e); }
-
-            // スライドショーの状態を復元
-            isSlideshowRunning = Properties.Settings.Default.using_slideshow;
-            if (isSlideshowRunning)
+            if (スライドToolStripMenuItem.Checked)
             {
-                isSlideshowRunning = false; // 一旦リセットしてToggleButton_Clickで正しく状態を設定
-                ToggleButton_Click(sender, e);
+                SetTransitionType(TransitionType.Slide); // 直接タイプを設定
             }
 
 
+            // ここでまず、INIファイルからすべての画像パスを読み込みます
+            LoadIni(); // ★ LoadIniの呼び出しを移動 ★
+
+            // システムタイムゾーンの設定
             Properties.Settings.Default.system_tz = TimeZoneInfo.Local.Id;
 
-
-
+            // プログレスバーの色の設定
             progressBar1.FilledColor = Properties.Settings.Default.progbar_filledcolor;
             progressBar1.UnfilledColor = Properties.Settings.Default.progbar_unfilledcolor;
-
             progressBar1.ForeColor = Properties.Settings.Default.progbar_forecolor;
             progressBar1.BackColor = Properties.Settings.Default.progbar_backcolor;
 
-
+            // メニュー配置の設定
             if (Properties.Settings.Default.font_margn)
             {
                 menu_align(0, true);
             }
             if (Properties.Settings.Default.barvisible == false)
             {
-                バーの表示ToolStripMenuItem_Click(sender, e);
+                progressBar1.Visible = false; // Directly set visibility
+                parcent.Visible = false;
+                バーの表示ToolStripMenuItem.Checked = false;
             }
 
-
+            // UIクロマキーの設定
             if (Properties.Settings.Default.use_upui_chroma)
             {
-                うえのいろToolStripMenuItem_Click(sender, e);
+                // うえのいろToolStripMenuItem_Click(sender, e); // クリックイベントではなく直接設定する方が安全
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.AllowTransparency = true;
+                ToolStripMenuItem[] menuItems = {
+          色の設定ToolStripMenuItem, バージョンToolStripMenuItem, netaToolStripMenuItem,
+          外部つーるへエクスポートToolStripMenuItem, 時刻設定ToolStripMenuItem
+        };
+                foreach (var item in menuItems)
+                {
+                    item.BackColor = this.BackColor;
+                    item.ForeColor = this.BackColor;
+                }
+                menuStrip1.BackColor = this.BackColor;
             }
 
-
+            // URLに基づいてコンボボックスの項目を設定
             if (Properties.Settings.Default.change_baseurl)
             {
                 var new_games = Properties.Settings.Default.alt_basekey.Split(",");
-                UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
-            }
-
-            this.comboBox1.Text = Properties.Settings.Default.goog;
-
-            if (comboBox1.SelectedItem != null)
-            {
-                string key = comboBox1.SelectedItem.ToString();
-                if (HasImagePath(key))
+                try
                 {
-                    read_picture(imagePaths[key].ToString());
-                    Properties.Settings.Default.lastimagefile = imagePaths[key];
+                    // UpdateComboBox が完了するまで待ちます
+                   await UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
+                }
+                catch (Exception ex)
+                {
+                    // 非同期処理中のエラーを適切に処理します
+                    MessageBox.Show($"コンボボックスの更新中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // エラー発生時のフォールバック処理が必要であればここに追加
                 }
             }
-            LoadIni();
+
+            // 保存されていた選択項目をコンボボックスに設定します。
+            // この設定により SelectedIndexChanged イベントがトリガーされ、
+            // ロード済みの imagePaths を使用して画像が読み込まれます。
+            this.comboBox1.Text = Properties.Settings.Default.goog;
 
 
+            // スライドショーの状態を復元（comboBox1.Text 設定後に移動）
+            // 画像のロードはcomboBox1_SelectedIndexChanged内で行われるため、
+            // ここではUIの状態とタイマーの状態を同期させるだけにします。
+            isSlideshowRunning = Properties.Settings.Default.using_slideshow;
+            スライドショー.Checked = Properties.Settings.Default.using_slideshow;
+            if (isSlideshowRunning)
+            {
+                // LoadImagesがcomboBox1_SelectedIndexChanged -> read_picture 経由で呼ばれていれば
+                // タイマーもそこで開始されるはずです。
+                // もし画像パスがない場合は、comboBox1_SelectedIndexChangedのelseブロックでタイマーが停止されます。
+                // ここでは特にタイマーを明示的に開始する必要はないかもしれません。
+                timer?.Start(); // 必要であればコメント解除して調整
+            }
 
 
             this_end_update();
 
             this.TransparencyKey = Properties.Settings.Default.colorkey;
 
-            // using Microsoft.Win32;
             // システム時間変更時のイベントハンドラを登録
             SystemEvents.TimeChanged += new EventHandler(SystemEvents_TimeChanged);
         }
@@ -1140,11 +1249,14 @@ namespace neta
                 string key = comboBox1.SelectedItem.ToString();
                 if (HasImagePath(key))
                 {
+                    // 画像パスがimagePathsに存在する場合、画像を読み込む
                     read_picture(imagePaths[key].ToString());
                     Properties.Settings.Default.lastimagefile = imagePaths[key];
                 }
                 else
                 {
+                    // 画像パスがimagePathsに見つからない場合
+                    // 既存の画像をクリアし、背景色をリセットする
                     if (panel1.BackgroundImage != null)
                     {
                         panel1.BackgroundImage.Dispose();
@@ -1153,27 +1265,26 @@ namespace neta
                     panel1.BackColor = this.BackColor;
                     panel1.Invalidate(); // 再描画をリクエスト
 
-                    // スライドショー用の画像リストをクリア
-                    imageFiles = null;
-                    currentImageIndex = 0;
-
-                    // スライドショーが実行中でない場合、タイマーを開始しない
-                    if (isSlideshowRunning)
+                    // imageFilesをクリアするのではなく、画像表示を停止する
+                    // imageFiles配列自体はnullにせず、必要に応じてLoadImagesで更新する
+                    // slideshowTimerなどのタイマーは停止が必要かもしれない
+                    if (timer != null && isSlideshowRunning)
                     {
-                        isSlideshowRunning = true;
-                        スライドショー.Checked = true;
-                        Properties.Settings.Default.using_slideshow = true;
-                        timer?.Start();
-                    }
-                    else
-                    {
+                        // スライドショーが実行中であれば停止
+                        timer.Stop();
                         isSlideshowRunning = false;
                         スライドショー.Checked = false;
                         Properties.Settings.Default.using_slideshow = false;
                     }
+
+                    // imageFiles配列をここでnullに「しない」ことが重要
+                    // imageFiles = null; // この行を削除またはコメントアウト
+
+                    currentImageIndex = 0; // インデックスはリセットして良い
                 }
             }
 
+            // 以下、既存のJSONデータ読み込み処理などは変更なし
             if (comboBox1.Text == "フリー入力")
             {
                 ibemei.Text = Properties.Settings.Default.freeevent;
@@ -1197,7 +1308,7 @@ namespace neta
                 if (change_url)
                 {
                     new_games = Properties.Settings.Default.alt_basekey.Split(",");
-                    //UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
+                    //UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl); // この行はUpdateComboBox内で処理済みか、別途呼び出すべきか確認
                     url2 = Properties.Settings.Default.alt_baseurl;
                 }
 
@@ -1224,6 +1335,7 @@ namespace neta
                     "/data/" + new_games[selecter] + "/end";
 
                 get_json_parse(url2, text, path, false);
+
             }
             catch (WebException exc)
             {
@@ -2680,7 +2792,7 @@ namespace neta
 
                 foreach (string line in lines)
                 {
-                    if (line.Trim().StartsWith("["))
+                    if (line.Trim().StartsWith("[")&& line.Trim().EndsWith("]"))
                     {
                         inImagePathsSection = line.Trim() == "[ImagePaths]";
                         continue;
