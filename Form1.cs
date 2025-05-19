@@ -187,70 +187,7 @@ namespace neta
         string[] orig_games = { "学ます", "でれすて", "みりした", "シャニマス", "シャニソン", "ユメステ", "プロセカ", "プロセカグローバル", "プロセカ韓国", "プロセカ繁体" };
         int game_maxlen = 10;
 
-        //private void button2_Click(object sender, EventArgs e)
-        //{
-        //    WebClient wc = new WebClient();
 
-        //    wc.Encoding = Encoding.UTF8;
-        //    var selecter = comboBox1.SelectedIndex;
-        //    bool change_url = Properties.Settings.Default.change_baseurl;
-
-        //    if (comboBox1.Text == "かすたむJS")
-        //    {
-        //        button3_Click(sender, e);
-        //        return;
-        //    }
-        //    if (comboBox1.Text == "フリー入力")
-        //    {
-        //        return;
-        //    }
-
-        //    var url2 = url;
-        //    string[] new_games = game;
-
-        //    if (change_url)
-        //    {
-        //        new_games = Properties.Settings.Default.alt_basekey.Split(",");
-        //        UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
-        //        url2 = Properties.Settings.Default.alt_baseurl;
-        //    }
-        //    else
-        //    {
-        //        for (int i = 0; i < game_maxlen; i++)
-        //        {
-        //            comboBox1.Items[i] = orig_games[i];
-        //        }
-        //    }
-
-        //    if (selecter > game_maxlen)
-        //    {
-        //        return;
-        //    }
-
-        //    try
-        //    {
-        //        string text = "";
-
-        //        text = wc.DownloadString(url2);
-        //        if (text == null || text == "")
-        //        {
-        //            endbox.Text = "baseurlの接続に失敗しました";
-        //            return;
-        //        }
-        //        var obj = Codeplex.Data.DynamicJson.Parse(text);
-        //        string path = "/data/" + new_games[selecter] + "/name," +
-        //            "/data/" + new_games[selecter] + "/start," +
-        //            "/data/" + new_games[selecter] + "/end";
-
-        //        get_json_parse(url2, text, path, false);
-        //        Properties.Settings.Default.json = text;
-
-        //    }
-        //    catch (WebException exc)
-        //    {
-        //        endbox.Text = exc.Message;
-        //    }
-        //}
         private void button2_Click(object sender, EventArgs e)
         {
             WebClient wc = new WebClient();
@@ -838,7 +775,7 @@ namespace neta
 
                                 if (tzi == null)
                                 {
-                                    current_tmp = "POSIX->変換済みかすたむRULESがからです";
+                                    current_tmp = "POSIX->MS_AJUSTMENT_RULESがからです";
                                 }
                                 else
                                 {
@@ -870,7 +807,7 @@ namespace neta
 
                                 if (tzi == null)
                                 {
-                                    current_tmp = "POSIX->変換済みかすたむRULESがからです";
+                                    current_tmp = "POSIX->MS_AJUSTMENT_RULESが空のため変換できません";
                                 }
                                 else
                                 {
@@ -902,7 +839,7 @@ namespace neta
 
                                 if (tzi == null)
                                 {
-                                    end_tmp = "POSIX->変換済みかすたむRULESがからです";
+                                    end_tmp = "POSIX->MS_AJUSTMENT_RULESが空のため変換できません";
                                 }
                                 else
                                 {

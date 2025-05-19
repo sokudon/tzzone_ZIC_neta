@@ -12,6 +12,11 @@ using NodaTime.Text;
 using NodaTime;
 using System.IO;
 using System.Security.Policy;
+using System.Web;
+using static neta.ZIC;
+using System.Text.Json;
+using System.Security.Cryptography;
+using System.Linq;
 
 //https://claude.ai/chat/5e3294c3-7dec-4e02-9be6-b82196e7bab1
 namespace TZPASER
@@ -23,8 +28,10 @@ namespace TZPASER
         public List<double> Offsets { get; set; }
         public List<string> Abbrs { get; set; }
     }
+    
 
-    public class nodaparser {
+    public class nodaparser
+    {
         public static ZonedDateTime ParseDateTimeInTimeZone(string isoDateString, string timeZoneId)
         {
             neta.Properties.Settings.Default.noda_strict_error = "";
@@ -82,7 +89,7 @@ namespace TZPASER
 
         }
 
-        
+
         public static bool CheckTimeZoneExists(string timeZoneId)
         {
             var timeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(timeZoneId);
@@ -165,11 +172,13 @@ namespace TZPASER
             // Convert DateTime to a Unix timestamp
             long timestamp = DateTimeToUnixTimestamp(dt);
 
-            int idx = BisectRight_w(transList, timestamp,offsets);
+            int idx = BisectRight_w(transList, timestamp, offsets);
 
 
             return idx - 1; // Return the index of the previous transition
         }
+
+
 
         public static int BisectRight_w(List<long> list, long value, List<double> offsets)
         {
@@ -179,7 +188,7 @@ namespace TZPASER
             {
                 int mid = (low + high) / 2;
 
-                if (list[mid] + Convert.ToInt64(offsets[mid]*3600) > value)
+                if (list[mid] + Convert.ToInt64(offsets[mid] * 3600) > value)
                 {
                     high = mid;
                 }
@@ -190,6 +199,135 @@ namespace TZPASER
             }
 
             return low;
+        }
+
+        //zo-ne parse用
+        public double FindLastTransition_w_posix(DateTime dt, bool inUtc = false)
+        {
+
+            // Convert DateTime to a Unix timestamp
+            long timestamp = DateTimeToUnixTimestamp(dt);
+
+
+            List<long> posix_trans = new List<long>();
+            List<double> posix_offsets = new List<double>();
+
+
+
+            // 1. JSONデータの読み込み
+            //    Properties.Settings.Default.posix_json の代わりに直接文字列を指定
+            string jsonString = neta.Properties.Settings.Default.posix_json;
+
+
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                Console.WriteLine("Error: Properties.Settings.Default.posix_json is null or empty.");
+                return -1;
+            }
+
+            try
+            {
+                // 2. JSONのデシリアライズ
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                TimeZoneData_Posix tzData = JsonSerializer.Deserialize<TimeZoneData_Posix>(jsonString, options);
+
+
+                var tempTransitions = new List<Tuple<long, double>>();
+
+                if (tzData != null)
+                {
+                    DateTimeOffset startDto = new DateTimeOffset();
+                    DateTimeOffset endDto;
+
+                    // StartRuleからのデータ抽出
+                    if (tzData.StartRule != null && !string.IsNullOrEmpty(tzData.StartRule.CurrentYearDate))
+                    {
+                        // 3. CurrentYearDateのパース
+                        if (DateTimeOffset.TryParse(tzData.StartRule.CurrentYearDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out startDto))
+                        {
+                            // 4. タイムスタンプとオフセットの抽出とリストへの格納
+                            tempTransitions.Add(Tuple.Create(startDto.ToUnixTimeSeconds(), startDto.Offset.TotalHours));
+
+
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Warning: Could not parse StartRule.CurrentYearDate: {tzData.StartRule.CurrentYearDate}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Warning: StartRule or StartRule.CurrentYearDate is missing or empty.");
+                    }
+
+                    // EndRuleからのデータ抽出
+                    if (tzData.EndRule != null && !string.IsNullOrEmpty(tzData.EndRule.CurrentYearDate))
+                    {
+                        // 3. CurrentYearDateのパース
+                        if (DateTimeOffset.TryParse(tzData.EndRule.CurrentYearDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out endDto))
+                        {
+                            // 4. タイムスタンプとオフセットの抽出とリストへの格納
+                            tempTransitions.Add(Tuple.Create(endDto.ToUnixTimeSeconds(), endDto.Offset.TotalHours));
+
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Warning: Could not parse EndRule.CurrentYearDate: {tzData.EndRule.CurrentYearDate}");
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Warning: EndRule or EndRule.CurrentYearDate is missing or empty.");
+                        return -1;
+                    }
+
+
+                    double tmp = TimeSpan.Parse(tzData.StandardOffset).TotalHours;
+                    if (startDto.ToUnixTimeSeconds() > endDto.ToUnixTimeSeconds())
+                    {
+                        tmp = TimeSpan.Parse(tzData.DaylightOffset).TotalHours;
+                    }
+
+                    tempTransitions.Add(Tuple.Create(DateTimeToUnixTimestamp(DateTime.MinValue), tmp));
+
+
+
+                }
+                else
+                {
+                    Console.WriteLine("Error: Failed to deserialize posix_json.");
+                    return -1;
+                }
+
+
+
+                // 3. タイムスタンプで降順にソート
+                var sortedTransitions = tempTransitions.OrderBy(t => t.Item1).ToList();
+
+                // 4. ソートされた結果を最終的なリストに格納
+                foreach (var transTuple in sortedTransitions)
+                {
+                    posix_trans.Add(transTuple.Item1);
+                    posix_offsets.Add(transTuple.Item2);
+                }
+            }
+            catch (JsonException jsonEx)
+            {
+                Console.WriteLine($"Error deserializing JSON: {jsonEx.Message}");
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                return -1;
+            }
+
+            if (posix_trans.Count != 3) { return -1; }
+            int idx = BisectRight_w(posix_trans, timestamp, posix_offsets);
+
+
+            return posix_offsets[idx - 1]; // Return the index of the previous transition
         }
 
         private long DateTimeToUnixTimestamp(DateTime dt)
@@ -349,8 +487,8 @@ namespace TZPASER
             string SS = tspan.TotalSeconds.ToString("#");
             string MS = tspan.TotalMilliseconds.ToString("#");
 
-            string[] rp = { HH, DD, MM,SS ,MS, ds, hs, dd, hh, mm, ss, ms, h, m, s};
-            string[] rpb = {"HH", "DD","MM","SS","MS", "ds", "hs", "dd", "hh", "mm", "ss", "ms" ,"h", "m", "s" };
+            string[] rp = { HH, DD, MM, SS, MS, ds, hs, dd, hh, mm, ss, ms, h, m, s };
+            string[] rpb = { "HH", "DD", "MM", "SS", "MS", "ds", "hs", "dd", "hh", "mm", "ss", "ms", "h", "m", "s" };
 
             string left = leftformat;
             for (var i = 0; i < rp.Length; i++)
@@ -390,6 +528,7 @@ namespace TZPASER
     //        }
     //    }
 
+    
 
         public class FastDateTimeParsing
     {
@@ -403,6 +542,9 @@ namespace TZPASER
     new Regex(@"^\d{4}[\-/]\d{1,2}[\-/]\d{1,2} \d{1,2}$"), // YYYY-MM-DD HH
     new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}((:?:\d{2})?(:?\.\d+)?)?(Z|[\+\-]\d{2}:\d{2})?$") // ISO 8601
 };
+        // 静的フィールドに変更
+        public static TimeZoneInfo posix_parser = null;
+        public static int posix_year_paser = 0;
 
         private static string[] formats = new[]
                    {
@@ -446,7 +588,7 @@ namespace TZPASER
 
                     //string format = "yyyy-MM-ddTHH:mm:sszzz";
                     Regex iso = new Regex(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$"); // ISO 8601
-                    if (iso.IsMatch(input)  || (use_posix== true)|| (use_zoneparse == false) ||　(utc == false && ms == false && tz == false && nd==false)
+                    if (iso.IsMatch(input) || (use_posix == true) || (use_zoneparse == false) || (utc == false && ms == false && tz == false && nd == false)
                         )
                     {
                         return DateTime.TryParseExact(
@@ -457,14 +599,14 @@ namespace TZPASER
                                out result);
                     }
 
-                    return zone_parser(input,out result, utc,ms,tz,nd);
+                    return zone_parser(input, out result, utc, ms, tz, nd);
                 }
-            } 
+            }
 
             return false;
         }
 
-        public static bool zone_parser(string input, out DateTime result,bool utc, bool ms, bool tz,bool nd)
+        public static bool zone_parser(string input, out DateTime result, bool utc, bool ms, bool tz, bool nd)
         {
             string format = "yyyy-MM-ddTHH:mm:sszzz";
             DateTime.TryParseExact(
@@ -484,27 +626,30 @@ namespace TZPASER
 
                 try
                 {
+                    DateTimeStyles styles = DateTimeStyles.None;
+
                     // 日付文字列のパース
                     if (!DateTime.TryParseExact(
                         input,
                         formats,
                         CultureInfo.InvariantCulture,
-                        DateTimeStyles.AssumeLocal,
+                        styles,
                         out result))
                     {
                         return false;
                     }
 
+
                     // タイムゾーン情報の取得
                     TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(neta.Properties.Settings.Default.mstime);
 
                     // ローカル時間から現地に変換
-                    DateTime pstDateTime = TimeZoneInfo.ConvertTimeFromUtc(result.ToUniversalTime(), timeZone);
+                    DateTime PT_DateTime = TimeZoneInfo.ConvertTimeFromUtc(result.ToUniversalTime(), timeZone);
                     // UTCオフセットの計算
                     TimeSpan offset = timeZone.GetUtcOffset(result);
 
                     // DateTimeOffsetの作成
-                    DateTimeOffset dateTimeOffset = new DateTimeOffset(pstDateTime, offset);
+                    DateTimeOffset dateTimeOffset = new DateTimeOffset(PT_DateTime, offset);
 
                     // オフセット時間を取得
                     uo = dateTimeOffset.Offset.TotalHours;
@@ -524,13 +669,13 @@ namespace TZPASER
                     string dateString = result.ToString("yyyy-MM-ddTHH:mm:ss");
 
                     ZonedDateTime parsedDateTime = TZPASER.nodaparser.ParseDateTimeInTimeZone(dateString, tznd);
-                    TimeSpan zz= parsedDateTime.Offset.ToTimeSpan();
+                    TimeSpan zz = parsedDateTime.Offset.ToTimeSpan();
                     uo = zz.TotalHours;
 
 
                     if (parsedDateTime.ToString().Contains("1970-01-01T00:00:00"))
                     {
-                                                return false;
+                        return false;
                     }
                 }
                 else
@@ -562,12 +707,48 @@ namespace TZPASER
                         if (lastTransitionIdx >= 0)
                         {
 
-                            uo = tzData.Offsets[lastTransitionIdx];
+                            if (lastTransitionIdx == tzTransitions.transList.Count - 1)
+                            {
+                                int now_y = dt.Year;
+                                TimeZoneInfo tzz;
+                                string result_posix;
+                                if (now_y == posix_year_paser && posix_parser != null)
+                                {
+                                    tzz = posix_parser;
+                                }
+                                else
+                                {
+                                    (result_posix, tzz) = ZIC.RuleTester(now_y, now_y);
+                                    posix_parser = tzz;
+                                }
+                                posix_year_paser = now_y;
+
+                                if (uo != -1)
+                                {
+                                    //こっちでもたぶん動く？
+                                    //DateTimeOffset ddt = DateTime.SpecifyKind(dt, dt.Kind);
+                                    //string formatd = TZPASER.TimeZoneOffsetParser.getoffset(ddt, format, tzi);
+                                    //current_tmp = current_c + TimeZoneInfo.ConvertTime(ddt, tzi).ToString(formatd);
+
+                                    uo = tzTransitions.FindLastTransition_w_posix(dt);
+                                }
+                                else
+                                {
+                                    uo = tzData.Offsets[lastTransitionIdx];
+                                }
+                            }
+                            else
+                            {
+                                uo = tzData.Offsets[lastTransitionIdx];
+                            }
                         }
                         else if (tzData.Offsets.Count >= 1 && tzData.Abbrs[0] != "")　//UTCバイナリの例外
                         {
                             uo = tzData.Offsets[0];
                         }
+
+
+
                     }
                     catch (Exception ex)
                     {
@@ -595,6 +776,9 @@ namespace TZPASER
                 DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal,//ローカル変換後 UTCに変換
             out result);
         }
+
+
+
 
 
         static long ToUnixTimeSeconds(DateTime dt)
