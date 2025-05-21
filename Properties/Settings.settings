@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2025/05/19</Value>
+      <Value Profile="(Default)">2025/05/21</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -334,6 +334,12 @@
     </Setting>
     <Setting Name="posix_tester" Type="System.String" Scope="User">
       <Value Profile="(Default)">PST8PDT,M3.2.0,M11.1.0</Value>
+    </Setting>
+    <Setting Name="encoder_in" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="encoder_out" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

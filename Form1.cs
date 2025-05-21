@@ -388,7 +388,7 @@ namespace neta
                 try
                 {
                     // UpdateComboBox が完了するまで待ちます
-                   await UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
+                    await UpdateComboBox(new_games, Properties.Settings.Default.alt_baseurl);
                 }
                 catch (Exception ex)
                 {
@@ -775,7 +775,7 @@ namespace neta
 
                                 if (tzi == null)
                                 {
-                                    current_tmp = "POSIX->MS_AJUSTMENT_RULESがからです";
+                                    current_tmp = "POSIX->MS_AJUSTMENT_RULESが空のため変換できません";
                                 }
                                 else
                                 {
@@ -2729,7 +2729,7 @@ namespace neta
 
                 foreach (string line in lines)
                 {
-                    if (line.Trim().StartsWith("[")&& line.Trim().EndsWith("]"))
+                    if (line.Trim().StartsWith("[") && line.Trim().EndsWith("]"))
                     {
                         inImagePathsSection = line.Trim() == "[ImagePaths]";
                         continue;
@@ -4270,6 +4270,13 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             button1.Visible = !button1.Visible;
             旧アウトルック用のボタンを隠すToolStripMenuItem.Checked = button1.Visible;
             Properties.Settings.Default.view_old_outlook_calender = button1.Visible;
+        }
+
+        private void iNOUTフォーム変換ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form8 = new Form8();
+            form8.ShowDialog();
+            form8.Dispose();
         }
     }
 

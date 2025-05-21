@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/05/19")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/05/21")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -1353,6 +1353,30 @@ namespace neta.Properties {
             }
             set {
                 this["posix_tester"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int encoder_in {
+            get {
+                return ((int)(this["encoder_in"]));
+            }
+            set {
+                this["encoder_in"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int encoder_out {
+            get {
+                return ((int)(this["encoder_out"]));
+            }
+            set {
+                this["encoder_out"] = value;
             }
         }
     }
