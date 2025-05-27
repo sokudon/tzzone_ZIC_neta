@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2025/05/21")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2025/05/27")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -1377,6 +1377,54 @@ namespace neta.Properties {
             }
             set {
                 this["encoder_out"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int mscodepage {
+            get {
+                return ((int)(this["mscodepage"]));
+            }
+            set {
+                this["mscodepage"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string cptype {
+            get {
+                return ((string)(this["cptype"]));
+            }
+            set {
+                this["cptype"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int usercp {
+            get {
+                return ((int)(this["usercp"]));
+            }
+            set {
+                this["usercp"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string cpstr {
+            get {
+                return ((string)(this["cpstr"]));
+            }
+            set {
+                this["cpstr"] = value;
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.Text;
 using System;
 using System.Windows.Forms;
+using System.IO;
 
 //https://grok.com/chat/2761bb43-4dac-4fcb-b526-629e06c76c1c
 namespace neta
@@ -234,12 +235,60 @@ namespace neta
         }
 
 
-
         private void Form8_Load(object sender, System.EventArgs e)
         {
+            restcodepage();
+
+            string[] cmds = Environment.GetCommandLineArgs();
+            string fsname = "";
+            int i = 0;
+            foreach (string cmd in cmds)
+            {
+                if (i == 1)
+                {
+                    fsname = cmd;
+                }
+                i++;
+            }
+
+
+            if (!Directory.Exists(Properties.Settings.Default.lastfile))
+            {
+                Properties.Settings.Default.lastfile = Application.StartupPath + "\\";
+            }
+
+            if (File.Exists(fsname))
+            {
+                if (customcpmatch(Properties.Settings.Default.mscodepage))
+                {
+                    using (FileStream fs = new FileStream(fsname, FileMode.Open, FileAccess.Read))
+                    {
+                        byte[] bs = new byte[fs.Length];
+                        fs.Read(bs, 0, bs.Length);
+
+                        int sel = 0;
+                        sel = sel_num(sel, 0);
+
+                        textBox1.Text = Encoding.GetEncoding(65001).GetString(customtable_parse(bs, sel));
+                    }
+                }
+                else
+                {
+                    using (FileStream fs = new FileStream(fsname, FileMode.Open, FileAccess.Read))
+                    {
+                        byte[] bs = new byte[fs.Length];
+                        fs.Read(bs, 0, bs.Length);
+
+                        textBox1.Text = Encoding.GetEncoding(Properties.Settings.Default.mscodepage).GetString(bs);
+                    }
+                }
+            }
             comboBox1.Text = Encoding.GetEncoding(neta.Properties.Settings.Default.encoder_in).BodyName;
             comboBox2.Text = Encoding.GetEncoding(neta.Properties.Settings.Default.encoder_out).BodyName;
+
         }
+
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -265,6 +314,630 @@ namespace neta
             {
                 Clipboard.SetText(textBox2.Text);
             }
+        }
+
+
+
+        private void mscodeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.mscodepage = Properties.Settings.Default.encoder_in;
+            SELCP.Checked = true;
+            SJIS.Checked = false;
+        }
+
+        private void shiftJIS2004ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.mscodepage = 2132004;
+            SJIS.Checked = true;
+            SELCP.Checked = false;
+        }
+
+        private int restcodepage()
+        {
+            SJIS.Checked = false;
+
+            switch (Properties.Settings.Default.mscodepage)
+            {
+                case 2132004:
+                    SJIS.Checked = true;
+                    break;
+                default:
+                    SELCP.Checked = true;
+                    break;
+            }
+
+            if (Properties.Settings.Default.mscodepage == Properties.Settings.Default.usercp)
+            {
+                SELCP.ToolTipText = Properties.Settings.Default.cpstr;
+            }
+
+            return 0;
+        }
+
+        private void OPENFILE_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.InitialDirectory = Properties.Settings.Default.lastfile;
+                ofd.Filter = "TXTファイル(*.txt)|*.txt|すべてのファイル(*.*)|*.*";
+                ofd.Title = "開くファイルを選択してください";
+                ofd.RestoreDirectory = true;
+                ofd.CheckFileExists = true;
+                ofd.CheckPathExists = true;
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    Properties.Settings.Default.lastfile = Path.GetDirectoryName(ofd.FileName);
+
+                    if (customcpmatch(Properties.Settings.Default.mscodepage))
+                    {
+                        using (FileStream fs = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read))
+                        {
+                            byte[] bs = new byte[fs.Length];
+                            fs.Read(bs, 0, bs.Length);
+
+                            int sel = 0;
+                            sel = sel_num(sel, 0);
+
+                            textBox1.Text = Encoding.GetEncoding(65001).GetString(customtable_parse(bs, sel));
+                        }
+                    }
+                    else
+                    {
+                        using (FileStream fs = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read))
+                        {
+                            byte[] bs = new byte[fs.Length];
+                            fs.Read(bs, 0, bs.Length);
+
+                            textBox1.Text = Encoding.GetEncoding(Properties.Settings.Default.mscodepage).GetString(bs);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        private void SAVEAS_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                sfd.InitialDirectory = Properties.Settings.Default.lastfile;
+                sfd.FileName = "新しいファイル.txt";
+                sfd.Filter = "TXTファイル(*.txt)|*.txt|すべてのファイル(*.*)|*.*";
+                sfd.Title = "保存先のファイルを選択してください";
+                sfd.OverwritePrompt = true;
+                sfd.CheckPathExists = true;
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    Properties.Settings.Default.lastfile = Path.GetDirectoryName(sfd.FileName);
+                    savefile(sfd.FileName);
+                }
+            }
+        }
+
+        private int savefile(string fsname)
+        {
+            using (FileStream fs = new FileStream(fsname, FileMode.Create, FileAccess.Write))
+            {
+                byte[] bs;
+
+                if (customcpmatch(Properties.Settings.Default.mscodepage))
+                {
+                    int sel = 0;
+                    sel = sel_num(sel, 1);
+                    string tablePath = Path.Combine(Application.StartupPath, unitable[sel]);
+                    if (File.Exists(tablePath))
+                    {
+                        bs = Encoding.GetEncoding(1200).GetBytes(textBox1.Text);
+                        byte[] bss = new byte[bs.Length * 2];
+                        byte[] tbl;
+                        using (FileStream tfs = new FileStream(tablePath, FileMode.Open, FileAccess.Read))
+                        {
+                            tbl = new byte[tfs.Length];
+                            tfs.Read(tbl, 0, tbl.Length);
+                        }
+
+                        byte[] tofusjis = { 0x81, 0xA0 };
+                        byte[] tofueuc = { 0xA2, 0xA2 };
+                        byte[] tofujis = { 0x22, 0x22 };
+                        byte[] tofugb = { 0xA1, 0xF5 }; // GBK 0xA1F5, BIG5 0xA1BC
+                        byte[] tofuhk = { 0xA1, 0xBC };
+                        byte[] maru = { 0xE3, 0x82, 0x9A };
+                        byte[] ac = { 0xCC, 0x80 };
+                        byte[] gousei = { 0xCB, 0xA9, 0xCB, 0xA5 };
+
+                        int[] hmaru = { 0xF582, 0x9783, 0xF683 };
+                        int ha = 0x6386;
+                        int hac = 0x6786;
+                        int koe = 0x8586;
+
+                        int[] hmaru_euc = { 0xF7A4, 0xF7A5, 0xF8A6 };
+
+                        int[] hmaru_jis = { 0x7724, 0x7725, 0x7826 };
+
+                        byte[] code;
+
+                        byte[] jis201 = { 0, 0, 0 };
+                        int c1 = 0, c2 = 0, c3 = 0, ct = 0;
+                        int i = 0, k = 0, l = 0, m = 0;
+                        ushort hex = 0, hex2 = 0;
+                        int pos = 0;
+                        int cp = Properties.Settings.Default.mscodepage;
+
+
+                        // SJIS2004
+                        if (cp == 2132004)
+                        {
+                            while (i < bs.Length)
+                            {
+                                hex = BitConverter.ToUInt16(bs, i);
+                                if (hex >= 0xD800 && hex <= 0xDBFF)
+                                {
+                                    i += 2;
+                                    hex2 = BitConverter.ToUInt16(bs, i);
+                                    if (hex2 >= 0xDC00 && hex2 <= 0xDFFF)
+                                    {
+                                        pos = (hex & 0x3FF) * 1024 + (hex2 & 0x3FF);
+                                        pos += 0x10000;
+                                    }
+                                    else
+                                    {
+                                        pos = tbl.Length;
+                                    }
+                                }
+                                else
+                                {
+                                    pos = Convert.ToInt32(hex);
+                                }
+                                if (pos * 4 < tbl.Length)
+                                {
+                                    Array.Copy(tbl, pos * 4, bss, k, 4);
+                                    c1 = bss[k];
+                                    c2 = bss[k + 1];
+                                    c3 = bss[k + 2];
+                                    if (i + 4 <= bs.Length)
+                                    {
+                                        hex2 = BitConverter.ToUInt16(bs, i + 2);
+                                    }
+                                    else
+                                    {
+                                        hex2 = 0;
+                                    }
+
+                                    if (hex2 == 0x309A && gouseimaru(pos) >= 0)
+                                    {
+                                        m = gouseimaru(pos);
+                                        l = 0;
+                                        if (m > 12)
+                                        {
+                                            l = 2;
+                                            m = 0;
+                                        }
+                                        else if (m > 4)
+                                        {
+                                            l = 1;
+                                            m -= 5;
+                                        }
+                                        code = BitConverter.GetBytes(hmaru[l] + 0x100 * m);
+                                        Array.Copy(code, 0, bss, k, 4);
+                                        k += 2;
+                                        i += 2;
+                                    }
+                                    else if (hex2 == 0x300 && pos == 0xE6)
+                                    {
+                                        code = BitConverter.GetBytes(ha);
+                                        Array.Copy(code, 0, bss, k, 4);
+                                        k += 2;
+                                        i += 2;
+                                    }
+                                    else if (hex2 == 0x300 && gouseiac(pos) >= 0)
+                                    {
+                                        code = BitConverter.GetBytes(hac + (2 * gouseiac(pos) * 0x100));
+                                        Array.Copy(code, 0, bss, k, 4);
+                                        k += 2;
+                                        i += 2;
+                                    }
+                                    else if (hex2 == 0x301 && gouseiac(pos) >= 0)
+                                    {
+                                        code = BitConverter.GetBytes(hac + ((2 * gouseiac(pos) + 1) * 0x100));
+                                        Array.Copy(code, 0, bss, k, 4);
+                                        k += 2;
+                                        i += 2;
+                                    }
+                                    else if (hex2 == 0x2E9 && pos == 0x2E5)
+                                    {
+                                        code = BitConverter.GetBytes(koe + 0x100);
+                                        Array.Copy(code, 0, bss, k, 4);
+                                        k += 2;
+                                        i += 2;
+                                    }
+                                    else if (hex2 == 0x2E5 && pos == 0x2E9)
+                                    {
+                                        code = BitConverter.GetBytes(koe);
+                                        Array.Copy(code, 0, bss, k, 4);
+                                        k += 2;
+                                        i += 2;
+                                    }
+                                    else
+                                    {
+                                        if (pos < 128)
+                                        {
+                                            if (pos < 32 && pos != 0xA && pos != 0xD && pos != 0x9)
+                                            {
+                                                pos = 32;
+                                            }
+                                            bss[k] = (byte)pos;
+                                            k += 1;
+                                        }
+                                        else if (c1 == 0 && c2 == 0)
+                                        {
+                                            Array.Copy(tofusjis, 0, bss, k, 2);
+                                            k += 2;
+                                        }
+                                        else if (c2 == 0 && c1 >= 0xA1 && c1 <= 0xDF)
+                                        {
+                                            k += 1;
+                                        }
+                                        else if ((((c1 ^ 0x20) + 0x5F) & 0xFF) < 0x3C && c2 >= 0x40)
+                                        {
+                                            k += 2;
+                                        }
+                                        else
+                                        {
+                                            Array.Copy(tofusjis, 0, bss, k, 2);
+                                            k += 2;
+                                        }
+                                    }
+                                }
+                                i += 2;
+                            }
+                        }
+                        fs.Write(bss, 0, k);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"{unitable[sel]} がありません");
+                    }
+                }
+                else
+                {
+                    bs = Encoding.GetEncoding(Properties.Settings.Default.mscodepage).GetBytes(textBox1.Text);
+                    fs.Write(bs, 0, bs.Length);
+                }
+            }
+            return 0;
+        }
+
+        private int[] customcodepage = { 2132004 };
+
+        private bool customcpmatch(int enc)
+        {
+            foreach (int code in customcodepage)
+            {
+                if (enc == code)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private int gouseimaru(int pos)
+        {
+            int[] maru = { 0x304B, 0x304D, 0x304F, 0x3051, 0x3053, 0x30AB, 0x30AD, 0x30AF, 0x30B1, 0x30B3, 0x30BB, 0x30C4, 0x30C8, 0x31F7 };
+            for (int i = 0; i < maru.Length; i++)
+            {
+                if (pos == maru[i])
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private int gouseiac(int pos)
+        {
+            int[] maru = { 0x254, 0x28C, 0x259, 0x25A };
+            for (int i = 0; i < maru.Length; i++)
+            {
+                if (pos == maru[i])
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private string[] vstable = { "table\\sjisvsutf8" };
+        private string[] unitable = { "table\\sjis2004_utf32" };
+        private int sel_num(int sel, int mode)
+        {
+            sel = 0;
+
+            return sel;
+        }
+
+        private byte[] customtable_parse(byte[] bs, int sel)
+        {
+            if (File.Exists(Path.Combine(Application.StartupPath, vstable[sel])))
+            {
+                byte[] bss = new byte[bs.Length * 2];
+                using (FileStream tfs = new FileStream(Path.Combine(Application.StartupPath, vstable[sel]), FileMode.Open, FileAccess.Read))
+                {
+                    byte[] tbl = new byte[tfs.Length];
+                    tfs.Read(tbl, 0, tbl.Length);
+
+                    byte[] tofu = { 0xE2, 0x96, 0xA1 };
+                    byte[] maru = { 0xE3, 0x82, 0x9A };
+                    byte[] ac = { 0xCC, 0x80 };
+                    byte[] ac2 = { 0xCC, 0x81 };
+                    byte[] gousei = { 0xCB, 0xA9, 0xCB, 0xA5 };
+                    byte[] jis201 = { 0, 0, 0 };
+                    int c1 = 0, c2 = 0, c3 = 0, c4 = 0, ct = 0;
+                    int i = 0, k = 0, pos = 0;
+                    int len = bs.Length;
+                    int cp = Properties.Settings.Default.mscodepage;
+
+
+                    if (cp == 2132004) // SJIS
+                    {
+                        while (i < bs.Length)
+                        {
+                            c1 = bs[i];
+                            if (c1 < 128)
+                            {
+                                // 制御コード排除
+                                if ((c1 < 32 && c1 != 0x9 && c1 != 0xD && c1 != 0xA) || c1 == 0x7F)
+                                {
+                                    c1 = 32;
+                                }
+                                bss[k] = (byte)c1;
+                                // 改行CRLF化
+                                if (c1 == 0xA)
+                                {
+                                    c2 = k > 0 ? bss[k - 1] : 0;
+                                    if (c2 != 0xD)
+                                    {
+                                        bss[k] = 0xD;
+                                        bss[k + 1] = (byte)c1;
+                                        k++;
+                                    }
+                                }
+                                k++;
+                                i++;
+                            }
+                            else if (((c1 + 0x5F) & 0xFF) < 0x3F)
+                            {
+                                c1 = c1 + 0xFF60 - 0xA0;
+                                jis201[0] = (byte)((c1 >> 12) | 0xE0);
+                                jis201[1] = (byte)(((c1 >> 6) & 0x3F) | 0x80);
+                                jis201[2] = (byte)((c1 & 0x3F) | 0x80);
+                                Array.Copy(jis201, 0, bss, k, 3);
+                                k += 3;
+                                i++;
+                            }
+                            else if ((((c1 ^ 0x20) + 0x5F) & 0xFF) < 0x3C && i < len - 1)
+                            {
+                                c2 = bs[i + 1];
+                                if (c2 >= 0x40 && c2 <= 0xFC && c2 != 0x7F)
+                                {
+                                    pos = ((c1 ^ 0x20) - 0xA1) * 192 + c2 - 0x40;
+                                    if (pos * 4 < tbl.Length)
+                                    {
+                                        Array.Copy(tbl, pos * 4, bss, k, 4);
+                                        ct = bss[k];
+                                        if (ct == 0)
+                                        {
+                                            Array.Copy(tofu, 0, bss, k, 3);
+                                            k += 3;
+                                        }
+                                        else
+                                        {
+                                            if (ct < 0x80)
+                                            {
+                                                k++;
+                                            }
+                                            else if (ct < 0xC2)
+                                            {
+                                            }
+                                            else if (ct < 0xE0)
+                                            {
+                                                k += 2;
+                                                if (c1 == 0x86 && (c2 & 1) == 1 && c2 >= 0x67 && c2 <= 0x6D)
+                                                {
+                                                    Array.Copy(ac, 0, bss, k, 2);
+                                                    k += 2;
+                                                }
+                                                else if (c1 == 0x86 && (c2 & 1) == 0 && c2 >= 0x68 && c2 <= 0x6E)
+                                                {
+                                                    Array.Copy(ac2, 0, bss, k, 2);
+                                                    k += 2;
+                                                }
+                                                else if (c1 == 0x86 && (c2 == 0x85 || c2 == 0x86))
+                                                {
+                                                    Array.Copy(gousei, (c2 & 1) * 2, bss, k, 2);
+                                                    k += 2;
+                                                }
+                                                else if (c1 == 0x86 && c2 == 0x63)
+                                                {
+                                                    Array.Copy(ac, 0, bss, k, 2);
+                                                    k += 2;
+                                                }
+                                            }
+                                            else if (ct < 0xF0)
+                                            {
+                                                k += 3;
+                                                if (c1 == 0x82 && c2 >= 0xF5 && c2 <= 0xF9)
+                                                {
+                                                    Array.Copy(maru, 0, bss, k, 3);
+                                                    k += 3;
+                                                }
+                                                else if (c1 == 0x83 && c2 >= 0x97 && c2 <= 0x9E)
+                                                {
+                                                    Array.Copy(maru, 0, bss, k, 3);
+                                                    k += 3;
+                                                }
+                                                else if (c1 == 0x83 && c2 == 0xF6)
+                                                {
+                                                    Array.Copy(maru, 0, bss, k, 3);
+                                                    k += 3;
+                                                }
+                                            }
+                                            else if (ct < 0xF8)
+                                            {
+                                                k += 4;
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Array.Copy(tofu, 0, bss, k, 3);
+                                    k += 3;
+                                }
+                                i += 2;
+                            }
+                            else
+                            {
+                                i++;
+                            }
+                        }
+                    }
+
+                    Array.Resize(ref bss, k);
+                    return bss;
+                }
+            }
+            return bs;
+        }
+        private void TextBox1_TextChanged(object sender, EventArgs e)
+        {
+            // VB.NETのHandlesをC#で再現（KeyPress, KeyUp, KeyDown, TextChanged, Clickイベントに対応）
+            // デザイナーでイベントを登録済みと仮定
+            int iCaret = textBox1.SelectionStart;
+            string s = "";
+            if (iCaret < textBox1.Text.Length - 1)
+            {
+                byte[] bb = Encoding.GetEncoding(1200).GetBytes(textBox1.Text.Substring(iCaret, 2));
+                uint sarrogate = BitConverter.ToUInt32(bb, 0) & 0xFFFF;
+                uint sarrogate2 = BitConverter.ToUInt32(bb, 0) >> 16;
+                if (sarrogate < 0xD800 || sarrogate > 0xDFFF)
+                {
+                    Array.Clear(bb, 2, 2);
+                    unihex.Text = "UTF-32:U+" + sarrogate.ToString("X");
+                    unihex.Text += " UTF-16:U+" + sarrogate.ToString("X");
+                    unihex.Text += " UTF-8:" + getutf8(bb);
+                }
+                else if (sarrogate2 >= 0xDC00 && sarrogate2 < 0xE000)
+                {
+                    uint utf32 = 0x10000 + ((sarrogate & 0x3FF) << 10) | (sarrogate2 & 0x3FF);
+                    unihex.Text = "UTF-32:U+" + utf32.ToString("X");
+                    unihex.Text += " UTF-16:U+" + sarrogate.ToString("X");
+                    unihex.Text += "+" + sarrogate2.ToString("X");
+                    bb = BitConverter.GetBytes(utf32);
+                    unihex.Text += " UTF-8:" + getutf8(bb);
+                }
+                else
+                {
+                    unihex.Text = "U+" + sarrogate.ToString("X");
+                    unihex.Text += "+" + sarrogate2.ToString("X");
+                    unihex.Text += "は不正なサロゲートペアです";
+                }
+            }
+            else if (iCaret == textBox1.Text.Length - 1)
+            {
+                byte[] bb = Encoding.GetEncoding(1200).GetBytes(textBox1.Text.Substring(iCaret, 1));
+                uint sarrogate = BitConverter.ToUInt16(bb, 0);
+                Array.Resize(ref bb, 4);
+                unihex.Text = "UTF-32:U+" + sarrogate.ToString("X");
+                unihex.Text += " UTF-16:U+" + sarrogate.ToString("X");
+                unihex.Text += " UTF-8:" + getutf8(bb);
+            }
+            else
+            {
+                unihex.Text = "[EOF]";
+            }
+        }
+
+        // UTF32からUTF-8に変換
+        private string getutf8(byte[] bb)
+        {
+            int wc = 0;
+            int i = 0;
+            int n = 0;
+            string s = "";
+            while (i < bb.Length)
+            {
+                wc = BitConverter.ToInt32(bb, i);
+                n += utf32toutf8(bb, wc, n);
+                i += 4;
+            }
+            Array.Resize(ref bb, n);
+            for (i = 0; i < n; i++)
+            {
+                s += bb[i].ToString("X");
+            }
+            return s;
+        }
+
+        private int utf32toutf8(byte[] r, int wc, int n)
+        {
+            int count = 0;
+            int countbk = 0;
+            if (wc < 0x80)
+            {
+                count = 1;
+            }
+            else if (wc < 0x800)
+            {
+                count = 2;
+            }
+            else if (wc < 0x10000)
+            {
+                count = 3;
+            }
+            else if (wc < 0x200000)
+            {
+                count = 4;
+            }
+            else
+            {
+                return 0; // 不正な文字（元のVB.NETではRET_ILUNIに相当）
+            }
+
+            countbk = count;
+
+            while (count > 0)
+            {
+                switch (count)
+                {
+                    case 4:
+                        r[n + 3] = (byte)(0x80 | (wc & 0x3F));
+                        wc = (wc >> 6) | 0x10000;
+                        break;
+                    case 3:
+                        r[n + 2] = (byte)(0x80 | (wc & 0x3F));
+                        wc = (wc >> 6) | 0x800;
+                        break;
+                    case 2:
+                        r[n + 1] = (byte)(0x80 | (wc & 0x3F));
+                        wc = (wc >> 6) | 0xC0;
+                        break;
+                    case 1:
+                        r[n] = (byte)wc;
+                        break;
+                }
+                count--;
+            }
+
+            return countbk;
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
