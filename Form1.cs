@@ -3051,10 +3051,22 @@ namespace neta
             try
             {
                 // 画像を直接パネルの背景として設定
+                bool image_is_sq = false;
+                if(panel1.BackgroundImage.Height >= panel1.BackgroundImage.Width)
+                {
+                    image_is_sq = true;
+                }
+
                 panel1.BackgroundImage = System.Drawing.Image.FromFile(Properties.Settings.Default.lastimagefile);
-                if (ぱねる１似合わせるToolStripMenuItem.Checked)
+                if (ぱねる１似合わせるToolStripMenuItem.Checked && image_is_sq ==false)
                 {
                     panel1.BackgroundImageLayout = ImageLayout.Stretch; // 必要に応じて調整
+                }
+                else if(image_is_sq)
+                {
+
+                    panel1.BackgroundImageLayout = ImageLayout.Zoom;
+
                 }
                 else
                 {
@@ -3725,7 +3737,11 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
 
                 // サポートするすべての画像形式を取得
                 string[] extensions = new[] { "*.jpg", "*.jpeg", "*.png", "*.bmp", "*.gif", "*.tiff", "*.ico" };
-                imageFiles = extensions.SelectMany(ext => Directory.GetFiles(folderPath, ext)).ToArray();
+                //imageFiles = extensions.SelectMany(ext => Directory.GetFiles(folderPath, ext)).ToArray();
+                // サブフォルダも含めて検索
+                imageFiles = extensions
+                    .SelectMany(ext => Directory.GetFiles(folderPath, ext, SearchOption.AllDirectories))
+                    .ToArray();
 
                 if (imageFiles.Length == 0)
                 {
@@ -3885,6 +3901,9 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
 
             // 新しい画像を読み込む
             panel1.BackgroundImage = Image.FromFile(imageFiles[currentImageIndex]);
+            bool image_is_sq = panel1.BackgroundImage.Height >= panel1.BackgroundImage.Width;
+            panel1.BackgroundImageLayout = image_is_sq ? ImageLayout.Zoom :
+                (ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile);
         }
 
         //private float fadeOpacity = 0f; // 次の画像の透明度（0.0 → 1.0）
@@ -3903,7 +3922,12 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
                 panel2.BackgroundImage = null;
             }
             panel2.BackgroundImage = Image.FromFile(imageFiles[currentImageIndex]);
-            panel2.BackgroundImageLayout = ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile;
+
+            // 画像が正方形または縦長の場合、Zoomを設定
+            bool image_is_sq = panel2.BackgroundImage.Height >= panel2.BackgroundImage.Width;
+            panel2.BackgroundImageLayout = image_is_sq ? ImageLayout.Zoom :
+                (ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile);
+
             panel2.Visible = true;
             panel2.BringToFront();
 
@@ -3933,7 +3957,12 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
                     panel1.BackgroundImage.Dispose();
                 }
                 panel1.BackgroundImage = panel2.BackgroundImage;
-                panel1.BackgroundImageLayout = panel2.BackgroundImageLayout;
+
+                // panel2の設定をpanel1に引き継ぐ
+                bool image_is_sq = panel2.BackgroundImage.Height >= panel2.BackgroundImage.Width;
+                panel1.BackgroundImageLayout = image_is_sq ? ImageLayout.Zoom :
+                    (ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile);
+
                 panel2.BackgroundImage = null;
                 panel2.Visible = false;
                 panel1.Invalidate();
@@ -3944,6 +3973,7 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
             panel2.Invalidate(); // 再描画
         }
 
+        //https://grok.com/chat/c6a3300e-c3b5-4b00-997c-1f75b408f7d6
         private void ShowImageSlide()
         {
             isAnimating = true;
@@ -3956,7 +3986,12 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
                 panel2.BackgroundImage = null;
             }
             panel2.BackgroundImage = Image.FromFile(imageFiles[currentImageIndex]);
-            panel2.BackgroundImageLayout = ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile;
+
+            // 画像が正方形または縦長の場合、Zoomを設定
+            bool image_is_sq = panel2.BackgroundImage.Height >= panel2.BackgroundImage.Width;
+            panel2.BackgroundImageLayout = image_is_sq ? ImageLayout.Zoom :
+                (ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile);
+
             panel2.Visible = true;
             panel2.BringToFront();
 
@@ -3983,7 +4018,12 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
                     panel1.BackgroundImage.Dispose();
                 }
                 panel1.BackgroundImage = panel2.BackgroundImage;
-                panel1.BackgroundImageLayout = panel2.BackgroundImageLayout;
+
+                // panel2の設定をpanel1に引き継ぐ
+                bool image_is_sq = panel2.BackgroundImage.Height >= panel2.BackgroundImage.Width;
+                panel1.BackgroundImageLayout = image_is_sq ? ImageLayout.Zoom :
+                    (ぱねる１似合わせるToolStripMenuItem.Checked ? ImageLayout.Stretch : ImageLayout.Tile);
+
                 panel2.BackgroundImage = null;
                 panel2.Visible = false;
                 panel1.Invalidate();
