@@ -28,8 +28,11 @@ namespace neta
 {
     public partial class NETA_TIMER : Form
     {
-        private Dictionary<int, (Keys Key, ModifierKeys Modifiers)> hotkeys =
-            new Dictionary<int, (Keys, ModifierKeys)>();
+        //private Dictionary<int, (Keys Key, ModifierKeys Modifiers)> hotkeys =
+         //   new Dictionary<int, (Keys, ModifierKeys)>();
+        // 修正後
+        private Dictionary<int, (Keys Key, Keys Modifiers)> hotkeys =
+            new Dictionary<int, (Keys, Keys)>();
         private System.Windows.Forms.Timer timer;
         private string[] imageFiles;
         private int currentImageIndex = 0;

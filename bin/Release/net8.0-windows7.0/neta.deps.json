@@ -9,24 +9,17 @@
       "neta/1.0.0": {
         "dependencies": {
           "Crc32.NET": "1.2.0",
-          "DynamicJson": "1.2.0",
-          "Microsoft.CSharp": "4.7.0",
-          "Microsoft.CodeAnalysis.NetAnalyzers": "9.0.0",
-          "Newtonsoft.Json": "13.0.3",
-          "NodaTime": "3.2.2",
-          "System.Drawing.Common": "9.0.3",
-          "TimeZoneConverter.Posix": "5.0.0",
-          "obs-websocket-dotnet": "5.0.0.3",
-          "System.Reactive.Reference": "4.3.0.0"
+          "Newtonsoft.Json": "13.0.4",
+          "NodaTime": "3.3.2",
+          "System.Drawing.Common": "10.0.8",
+          "TimeZoneConverter.Posix": "5.1.0",
+          "obs-websocket-dotnet": "5.0.1"
         },
         "runtime": {
           "neta.dll": {}
         }
       },
       "Crc32.NET/1.2.0": {
-        "dependencies": {
-          "NETStandard.Library": "2.0.0"
-        },
         "runtime": {
           "lib/netstandard2.0/Crc32.NET.dll": {
             "assemblyVersion": "1.0.0.0",
@@ -34,113 +27,144 @@
           }
         }
       },
-      "DynamicJson/1.2.0": {},
-      "Microsoft.CodeAnalysis.NetAnalyzers/9.0.0": {},
-      "Microsoft.CSharp/4.7.0": {},
-      "Microsoft.NETCore.Platforms/1.1.0": {},
-      "Microsoft.Win32.SystemEvents/9.0.3": {
+      "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions/9.0.4": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.4",
+          "System.Diagnostics.DiagnosticSource": "9.0.4"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.IO.RecyclableMemoryStream/3.0.0": {
+        "runtime": {
+          "lib/net6.0/Microsoft.IO.RecyclableMemoryStream.dll": {
+            "assemblyVersion": "3.0.0.0",
+            "fileVersion": "3.0.0.0"
+          }
+        }
+      },
+      "Microsoft.Win32.SystemEvents/10.0.8": {
         "runtime": {
           "lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.325.11113"
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.826.23019"
           }
         },
         "runtimeTargets": {
           "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
             "rid": "win",
             "assetType": "runtime",
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.325.11113"
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.826.23019"
           }
         }
       },
-      "NETStandard.Library/2.0.0": {
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "1.1.0"
-        }
-      },
-      "Newtonsoft.Json/13.0.3": {
+      "Newtonsoft.Json/13.0.4": {
         "runtime": {
           "lib/net6.0/Newtonsoft.Json.dll": {
             "assemblyVersion": "13.0.0.0",
-            "fileVersion": "13.0.3.27908"
+            "fileVersion": "13.0.4.30916"
           }
         }
       },
-      "NodaTime/3.2.2": {
+      "NodaTime/3.3.2": {
         "runtime": {
           "lib/net8.0/NodaTime.dll": {
-            "assemblyVersion": "3.2.2.0",
-            "fileVersion": "3.2.2.0"
+            "assemblyVersion": "3.3.2.0",
+            "fileVersion": "3.3.2.0"
           }
         }
       },
-      "obs-websocket-dotnet/5.0.0.3": {
+      "obs-websocket-dotnet/5.0.1": {
         "dependencies": {
-          "Newtonsoft.Json": "13.0.3",
-          "Websocket.Client": "4.4.43"
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
+          "Newtonsoft.Json": "13.0.4",
+          "Websocket.Client": "5.1.2"
         },
         "runtime": {
-          "lib/netstandard2.0/obs-websocket-dotnet.dll": {
-            "assemblyVersion": "5.0.0.3",
-            "fileVersion": "5.0.0.3"
+          "lib/netstandard2.1/obs-websocket-dotnet.dll": {
+            "assemblyVersion": "5.0.1.0",
+            "fileVersion": "5.0.1.0"
           }
         }
       },
-      "System.Drawing.Common/9.0.3": {
+      "System.Diagnostics.DiagnosticSource/9.0.4": {
+        "runtime": {
+          "lib/net8.0/System.Diagnostics.DiagnosticSource.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "System.Drawing.Common/10.0.8": {
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "9.0.3"
+          "Microsoft.Win32.SystemEvents": "10.0.8"
         },
         "runtime": {
           "lib/net8.0/System.Drawing.Common.dll": {
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.325.11202"
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.826.23019"
           },
           "lib/net8.0/System.Private.Windows.Core.dll": {
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.325.11202"
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.826.23019"
+          },
+          "lib/net8.0/System.Private.Windows.GdiPlus.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.826.23019"
           }
         }
       },
-      "System.Reactive/4.3.2": {},
-      "System.Threading.Channels/4.7.0": {},
-      "TimeZoneConverter/7.0.0": {
+      "System.Reactive/6.0.0": {
+        "runtime": {
+          "lib/net6.0/System.Reactive.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.0.1"
+          }
+        }
+      },
+      "TimeZoneConverter/7.1.0": {
         "runtime": {
           "lib/net8.0/TimeZoneConverter.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.0.0"
+            "assemblyVersion": "7.1.0.0",
+            "fileVersion": "7.1.0.0"
           }
         }
       },
-      "TimeZoneConverter.Posix/5.0.0": {
+      "TimeZoneConverter.Posix/5.1.0": {
         "dependencies": {
-          "NodaTime": "3.2.2",
-          "TimeZoneConverter": "7.0.0"
+          "NodaTime": "3.3.2",
+          "TimeZoneConverter": "7.1.0"
         },
         "runtime": {
           "lib/net8.0/TimeZoneConverter.Posix.dll": {
-            "assemblyVersion": "5.0.0.0",
-            "fileVersion": "5.0.0.0"
+            "assemblyVersion": "5.1.0.0",
+            "fileVersion": "5.1.0.0"
           }
         }
       },
-      "Websocket.Client/4.4.43": {
+      "Websocket.Client/5.1.2": {
         "dependencies": {
-          "System.Reactive": "4.3.2",
-          "System.Threading.Channels": "4.7.0"
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
+          "Microsoft.IO.RecyclableMemoryStream": "3.0.0",
+          "System.Reactive": "6.0.0"
         },
         "runtime": {
-          "lib/net6.0/Websocket.Client.dll": {
-            "assemblyVersion": "4.4.0.0",
-            "fileVersion": "4.4.0.0"
-          }
-        }
-      },
-      "System.Reactive.Reference/4.3.0.0": {
-        "runtime": {
-          "System.Reactive.dll": {
-            "assemblyVersion": "4.3.0.0",
-            "fileVersion": "4.3.2.55399"
+          "lib/net8.0/Websocket.Client.dll": {
+            "assemblyVersion": "5.1.2.0",
+            "fileVersion": "5.1.2.0"
           }
         }
       }
@@ -159,115 +183,96 @@
       "path": "crc32.net/1.2.0",
       "hashPath": "crc32.net.1.2.0.nupkg.sha512"
     },
-    "DynamicJson/1.2.0": {
+    "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ZJNGswa6RqEq+5VdYY5aciiOoG0nLhlpW3XvFJ3/3kdCc+6b3lCwHPay+t/n5zgisX4iqccPq8taxwXahuUc1w==",
-      "path": "dynamicjson/1.2.0",
-      "hashPath": "dynamicjson.1.2.0.nupkg.sha512"
+      "sha512": "sha512-UI0TQPVkS78bFdjkTodmkH0Fe8lXv9LnhGFKgKrsgUJ5a5FVdFRcgjIkBVLbGgdRhxWirxH/8IXUtEyYJx6GQg==",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/9.0.4",
+      "hashPath": "microsoft.extensions.dependencyinjection.abstractions.9.0.4.nupkg.sha512"
     },
-    "Microsoft.CodeAnalysis.NetAnalyzers/9.0.0": {
+    "Microsoft.Extensions.Logging.Abstractions/9.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-JajbvkrBgtdRghavIjcJuNHMOja4lqBmEezbhZyqWPYh2cpLhT5mPpfC7NQVDO4IehWQum9t/nwF4v+qQGtYWg==",
-      "path": "microsoft.codeanalysis.netanalyzers/9.0.0",
-      "hashPath": "microsoft.codeanalysis.netanalyzers.9.0.0.nupkg.sha512"
+      "sha512": "sha512-0MXlimU4Dud6t+iNi5NEz3dO2w1HXdhoOLaYFuLPCjAsvlPQGwOT6V2KZRMLEhCAm/stSZt1AUv0XmDdkjvtbw==",
+      "path": "microsoft.extensions.logging.abstractions/9.0.4",
+      "hashPath": "microsoft.extensions.logging.abstractions.9.0.4.nupkg.sha512"
     },
-    "Microsoft.CSharp/4.7.0": {
+    "Microsoft.IO.RecyclableMemoryStream/3.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-pTj+D3uJWyN3My70i2Hqo+OXixq3Os2D1nJ2x92FFo6sk8fYS1m1WLNTs0Dc1uPaViH0YvEEwvzddQ7y4rhXmA==",
-      "path": "microsoft.csharp/4.7.0",
-      "hashPath": "microsoft.csharp.4.7.0.nupkg.sha512"
+      "sha512": "sha512-irv0HuqoH8Ig5i2fO+8dmDNdFdsrO+DoQcedwIlb810qpZHBNQHZLW7C/AHBQDgLLpw2T96vmMAy/aE4Yj55Sg==",
+      "path": "microsoft.io.recyclablememorystream/3.0.0",
+      "hashPath": "microsoft.io.recyclablememorystream.3.0.0.nupkg.sha512"
     },
-    "Microsoft.NETCore.Platforms/1.1.0": {
+    "Microsoft.Win32.SystemEvents/10.0.8": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
-      "path": "microsoft.netcore.platforms/1.1.0",
-      "hashPath": "microsoft.netcore.platforms.1.1.0.nupkg.sha512"
+      "sha512": "sha512-J9+VT0lkrA7wW38CGxO2sZd+iH9C0qzioMi/2ztpT32WOVr+04uNqFIrxisTRf+mvtXLtdqcio1AoS0vfAVLLQ==",
+      "path": "microsoft.win32.systemevents/10.0.8",
+      "hashPath": "microsoft.win32.systemevents.10.0.8.nupkg.sha512"
     },
-    "Microsoft.Win32.SystemEvents/9.0.3": {
+    "Newtonsoft.Json/13.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Z0hIB2oeNqPOO0MYD0wkLpEe0LangoF3BSdMLLF5wft/rndYoXhLQvWni1OxymlWj+1adswAps2ZlrPmD9ZhBg==",
-      "path": "microsoft.win32.systemevents/9.0.3",
-      "hashPath": "microsoft.win32.systemevents.9.0.3.nupkg.sha512"
+      "sha512": "sha512-pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A==",
+      "path": "newtonsoft.json/13.0.4",
+      "hashPath": "newtonsoft.json.13.0.4.nupkg.sha512"
     },
-    "NETStandard.Library/2.0.0": {
+    "NodaTime/3.3.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-7jnbRU+L08FXKMxqUflxEXtVymWvNOrS8yHgu9s6EM8Anr6T/wIX4nZ08j/u3Asz+tCufp3YVwFSEvFTPYmBPA==",
-      "path": "netstandard.library/2.0.0",
-      "hashPath": "netstandard.library.2.0.0.nupkg.sha512"
+      "sha512": "sha512-8hI5b1ENTKQCaPyU6YHpYiMwj5aJKZ4Mnv0bLbhk65Dd44gQsXenUohMzyiIphANa8LdW6vcOvpY/l1urvx4dw==",
+      "path": "nodatime/3.3.2",
+      "hashPath": "nodatime.3.3.2.nupkg.sha512"
     },
-    "Newtonsoft.Json/13.0.3": {
+    "obs-websocket-dotnet/5.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
-      "path": "newtonsoft.json/13.0.3",
-      "hashPath": "newtonsoft.json.13.0.3.nupkg.sha512"
+      "sha512": "sha512-iV8P7q3hdzAjYdlga5pc/rE+Jk7PfgfD4saSx2JCyMYnJkQb97MpVLKTc+RYHoMX2m+3nCKQHaGhsdvrYXGjxA==",
+      "path": "obs-websocket-dotnet/5.0.1",
+      "hashPath": "obs-websocket-dotnet.5.0.1.nupkg.sha512"
     },
-    "NodaTime/3.2.2": {
+    "System.Diagnostics.DiagnosticSource/9.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-dmju5W0UYC3QP/UJM0juKAZkH0HSDMp0gH91A0+mT9M0kgyM2Jm67hUZPl/WRQLq8Lijjqmdk8kyAViWFWM7dA==",
-      "path": "nodatime/3.2.2",
-      "hashPath": "nodatime.3.2.2.nupkg.sha512"
+      "sha512": "sha512-Be0emq8bRmcK4eeJIFUt9+vYPf7kzuQrFs8Ef1CdGvXpq/uSve22PTSkRF09bF/J7wmYJ2DHf2v7GaT3vMXnwQ==",
+      "path": "system.diagnostics.diagnosticsource/9.0.4",
+      "hashPath": "system.diagnostics.diagnosticsource.9.0.4.nupkg.sha512"
     },
-    "obs-websocket-dotnet/5.0.0.3": {
+    "System.Drawing.Common/10.0.8": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-XQ8i/e/3hHfQxxU3r2YQ6Ha3SI7uqOspb06ExSQH41SRESznywJNXB1ijRqOI+uZIpPf0slS9Sj50a+GBjTN5w==",
-      "path": "obs-websocket-dotnet/5.0.0.3",
-      "hashPath": "obs-websocket-dotnet.5.0.0.3.nupkg.sha512"
+      "sha512": "sha512-LCISd6JAF80vsy9L6wuetZeOMR3FH+SwKovw5Zl0Nov9pB9ZOiCSqvOfMzooypPItQLv0mGfEePjJ1nCCQztNw==",
+      "path": "system.drawing.common/10.0.8",
+      "hashPath": "system.drawing.common.10.0.8.nupkg.sha512"
     },
-    "System.Drawing.Common/9.0.3": {
+    "System.Reactive/6.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-yDxzWfZGvOtk8zk5apWXP/tmro1Nghn7/4bWS5np5CtwIfiVCC74qCc1qvIsnywvXKzVqIbKXRk09wts+xGfeg==",
-      "path": "system.drawing.common/9.0.3",
-      "hashPath": "system.drawing.common.9.0.3.nupkg.sha512"
+      "sha512": "sha512-31kfaW4ZupZzPsI5PVe77VhnvFF55qgma7KZr/E0iFTs6fmdhhG8j0mgEx620iLTey1EynOkEfnyTjtNEpJzGw==",
+      "path": "system.reactive/6.0.0",
+      "hashPath": "system.reactive.6.0.0.nupkg.sha512"
     },
-    "System.Reactive/4.3.2": {
+    "TimeZoneConverter/7.1.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-WhGkScPWxw2pp7UwRW8M1OvYZ3WUDPC2wJ0aiuaB4KRD3bt4wLkgHgYnOUu87WRhsurvv5LN0E63iWOEza2o8g==",
-      "path": "system.reactive/4.3.2",
-      "hashPath": "system.reactive.4.3.2.nupkg.sha512"
+      "sha512": "sha512-vVkn+7Z5w105egC45Y44FDgnv9jr4SSqDY7EGDd2hg42PQG5aCglsfoQF8vpDVLGEYNnnmnRJB7PW0wbgZ+lvQ==",
+      "path": "timezoneconverter/7.1.0",
+      "hashPath": "timezoneconverter.7.1.0.nupkg.sha512"
     },
-    "System.Threading.Channels/4.7.0": {
+    "TimeZoneConverter.Posix/5.1.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-gdOOXBhtt2UpTxYJm1DRmoqNfYg5ypvhzhVt0vxKhzxXFjS81r8yIOSFsJYLRa1Jc14GBAqCnjxJstO3zBN7gg==",
-      "path": "system.threading.channels/4.7.0",
-      "hashPath": "system.threading.channels.4.7.0.nupkg.sha512"
+      "sha512": "sha512-GrsUCiPCQn07kSVDq0RxdHBbY2jzku12REEehgGxHAkrerBzhHP/WZJlT4Fzt4kbWUoZCrS8jCYk89mxgdZm7w==",
+      "path": "timezoneconverter.posix/5.1.0",
+      "hashPath": "timezoneconverter.posix.5.1.0.nupkg.sha512"
     },
-    "TimeZoneConverter/7.0.0": {
+    "Websocket.Client/5.1.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-sFbY65N/5GdsHx7nkdHFHUG+5Ar4W0w6Aks7Y2X+Q4NOTw6XyX2Il7jm+4tPkc//4mA3nG0RdxI8gKgoJitdLw==",
-      "path": "timezoneconverter/7.0.0",
-      "hashPath": "timezoneconverter.7.0.0.nupkg.sha512"
-    },
-    "TimeZoneConverter.Posix/5.0.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-pq33oCC/cPeTv5+dmyzJxWhW4uQmb822edwUsXXo2Uy0UFYMZuk+a6MJgmzH5g9xlE2VK8NMxl7BtlgpdkKGEg==",
-      "path": "timezoneconverter.posix/5.0.0",
-      "hashPath": "timezoneconverter.posix.5.0.0.nupkg.sha512"
-    },
-    "Websocket.Client/4.4.43": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-h0sS4zsnXrVkYyMYDaRc0k/oV54uXXBlN/HOHAK5d/RWleLTmWS6bxtt0l3D5Q2rgtfLinkHLdf4sOqdrxZ0NA==",
-      "path": "websocket.client/4.4.43",
-      "hashPath": "websocket.client.4.4.43.nupkg.sha512"
-    },
-    "System.Reactive.Reference/4.3.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
+      "sha512": "sha512-ZE5VoUCIYbfACGmXxgfD96i4W0wyBk0JEwIViyPpvxdk/pNfzh2SX9BgEj8fTqNaxlFl0bUTWq1UUvR/c18BTQ==",
+      "path": "websocket.client/5.1.2",
+      "hashPath": "websocket.client.5.1.2.nupkg.sha512"
     }
   }
 }
