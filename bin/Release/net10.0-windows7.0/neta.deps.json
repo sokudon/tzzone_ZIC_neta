@@ -1,0 +1,212 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "neta/1.0.0": {
+        "dependencies": {
+          "Crc32.NET": "1.2.0",
+          "Newtonsoft.Json": "13.0.4",
+          "NodaTime": "3.3.2",
+          "TimeZoneConverter.Posix": "5.1.0",
+          "obs-websocket-dotnet": "5.0.1"
+        },
+        "runtime": {
+          "neta.dll": {}
+        }
+      },
+      "Crc32.NET/1.2.0": {
+        "runtime": {
+          "lib/netstandard2.0/Crc32.NET.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.2.0.5"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions/9.0.4": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.4"
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.IO.RecyclableMemoryStream/3.0.0": {
+        "runtime": {
+          "lib/net6.0/Microsoft.IO.RecyclableMemoryStream.dll": {
+            "assemblyVersion": "3.0.0.0",
+            "fileVersion": "3.0.0.0"
+          }
+        }
+      },
+      "Newtonsoft.Json/13.0.4": {
+        "runtime": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "13.0.0.0",
+            "fileVersion": "13.0.4.30916"
+          }
+        }
+      },
+      "NodaTime/3.3.2": {
+        "runtime": {
+          "lib/net8.0/NodaTime.dll": {
+            "assemblyVersion": "3.3.2.0",
+            "fileVersion": "3.3.2.0"
+          }
+        }
+      },
+      "obs-websocket-dotnet/5.0.1": {
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
+          "Newtonsoft.Json": "13.0.4",
+          "Websocket.Client": "5.1.2"
+        },
+        "runtime": {
+          "lib/netstandard2.1/obs-websocket-dotnet.dll": {
+            "assemblyVersion": "5.0.1.0",
+            "fileVersion": "5.0.1.0"
+          }
+        }
+      },
+      "System.Reactive/6.0.0": {
+        "runtime": {
+          "lib/net6.0/System.Reactive.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.0.1"
+          }
+        }
+      },
+      "TimeZoneConverter/7.1.0": {
+        "runtime": {
+          "lib/net9.0/TimeZoneConverter.dll": {
+            "assemblyVersion": "7.1.0.0",
+            "fileVersion": "7.1.0.0"
+          }
+        }
+      },
+      "TimeZoneConverter.Posix/5.1.0": {
+        "dependencies": {
+          "NodaTime": "3.3.2",
+          "TimeZoneConverter": "7.1.0"
+        },
+        "runtime": {
+          "lib/net9.0/TimeZoneConverter.Posix.dll": {
+            "assemblyVersion": "5.1.0.0",
+            "fileVersion": "5.1.0.0"
+          }
+        }
+      },
+      "Websocket.Client/5.1.2": {
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
+          "Microsoft.IO.RecyclableMemoryStream": "3.0.0",
+          "System.Reactive": "6.0.0"
+        },
+        "runtime": {
+          "lib/net8.0/Websocket.Client.dll": {
+            "assemblyVersion": "5.1.2.0",
+            "fileVersion": "5.1.2.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "neta/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Crc32.NET/1.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-wNW/huzolu8MNKUnwCVKxjfAlCFpeI8AZVfF46iAWJ1+P6bTU1AZct7VAkDDEjgeeTJCVTkGZaD6jSd/fOiUkA==",
+      "path": "crc32.net/1.2.0",
+      "hashPath": "crc32.net.1.2.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-UI0TQPVkS78bFdjkTodmkH0Fe8lXv9LnhGFKgKrsgUJ5a5FVdFRcgjIkBVLbGgdRhxWirxH/8IXUtEyYJx6GQg==",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/9.0.4",
+      "hashPath": "microsoft.extensions.dependencyinjection.abstractions.9.0.4.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Logging.Abstractions/9.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-0MXlimU4Dud6t+iNi5NEz3dO2w1HXdhoOLaYFuLPCjAsvlPQGwOT6V2KZRMLEhCAm/stSZt1AUv0XmDdkjvtbw==",
+      "path": "microsoft.extensions.logging.abstractions/9.0.4",
+      "hashPath": "microsoft.extensions.logging.abstractions.9.0.4.nupkg.sha512"
+    },
+    "Microsoft.IO.RecyclableMemoryStream/3.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-irv0HuqoH8Ig5i2fO+8dmDNdFdsrO+DoQcedwIlb810qpZHBNQHZLW7C/AHBQDgLLpw2T96vmMAy/aE4Yj55Sg==",
+      "path": "microsoft.io.recyclablememorystream/3.0.0",
+      "hashPath": "microsoft.io.recyclablememorystream.3.0.0.nupkg.sha512"
+    },
+    "Newtonsoft.Json/13.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A==",
+      "path": "newtonsoft.json/13.0.4",
+      "hashPath": "newtonsoft.json.13.0.4.nupkg.sha512"
+    },
+    "NodaTime/3.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-8hI5b1ENTKQCaPyU6YHpYiMwj5aJKZ4Mnv0bLbhk65Dd44gQsXenUohMzyiIphANa8LdW6vcOvpY/l1urvx4dw==",
+      "path": "nodatime/3.3.2",
+      "hashPath": "nodatime.3.3.2.nupkg.sha512"
+    },
+    "obs-websocket-dotnet/5.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-iV8P7q3hdzAjYdlga5pc/rE+Jk7PfgfD4saSx2JCyMYnJkQb97MpVLKTc+RYHoMX2m+3nCKQHaGhsdvrYXGjxA==",
+      "path": "obs-websocket-dotnet/5.0.1",
+      "hashPath": "obs-websocket-dotnet.5.0.1.nupkg.sha512"
+    },
+    "System.Reactive/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-31kfaW4ZupZzPsI5PVe77VhnvFF55qgma7KZr/E0iFTs6fmdhhG8j0mgEx620iLTey1EynOkEfnyTjtNEpJzGw==",
+      "path": "system.reactive/6.0.0",
+      "hashPath": "system.reactive.6.0.0.nupkg.sha512"
+    },
+    "TimeZoneConverter/7.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vVkn+7Z5w105egC45Y44FDgnv9jr4SSqDY7EGDd2hg42PQG5aCglsfoQF8vpDVLGEYNnnmnRJB7PW0wbgZ+lvQ==",
+      "path": "timezoneconverter/7.1.0",
+      "hashPath": "timezoneconverter.7.1.0.nupkg.sha512"
+    },
+    "TimeZoneConverter.Posix/5.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GrsUCiPCQn07kSVDq0RxdHBbY2jzku12REEehgGxHAkrerBzhHP/WZJlT4Fzt4kbWUoZCrS8jCYk89mxgdZm7w==",
+      "path": "timezoneconverter.posix/5.1.0",
+      "hashPath": "timezoneconverter.posix.5.1.0.nupkg.sha512"
+    },
+    "Websocket.Client/5.1.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ZE5VoUCIYbfACGmXxgfD96i4W0wyBk0JEwIViyPpvxdk/pNfzh2SX9BgEj8fTqNaxlFl0bUTWq1UUvR/c18BTQ==",
+      "path": "websocket.client/5.1.2",
+      "hashPath": "websocket.client.5.1.2.nupkg.sha512"
+    }
+  }
+}
