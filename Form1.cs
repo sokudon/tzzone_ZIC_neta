@@ -23,6 +23,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using TZPASER;
 using static System.TimeZoneInfo;
+using System.ComponentModel;
 
 namespace neta
 {
@@ -1939,6 +1940,7 @@ namespace neta
 
         public class CustomProgressBar : ProgressBar
         {
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
             public Color BarColor { get; set; } = Color.Blue;
 
             public CustomProgressBar()
@@ -4424,9 +4426,11 @@ new EncodingInfo { DisplayName = "cp0 OS default	", CodePage = 0 }        };
     public class TransparentProgressBar : ProgressBar
     {
         // カスタムプロパティ：達成部分の色（ARGB）
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Color FilledColor { get; set; } = Color.FromArgb(100, 0, 255, 0); // 半透明の緑
 
         // カスタムプロパティ：未達成部分の色（ARGB）
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Color UnfilledColor { get; set; } = Color.FromArgb(50, 255, 0, 0); // 半透明の赤
 
         public TransparentProgressBar()
