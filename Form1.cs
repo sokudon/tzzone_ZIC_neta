@@ -186,10 +186,10 @@ namespace neta
         }
 
 
-        string url = "https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_MhLrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec";
-        string[] game = { "gakumasu", "deresute", "mirsita", "shanimasu", "syanison", "yumesute", "proseka", "proseka_kr", "proseka_los", "proseka_hk" };
-        string[] orig_games = { "学ます", "でれすて", "みりした", "シャニマス", "シャニソン", "ユメステ", "プロセカ", "プロセカグローバル", "プロセカ韓国", "プロセカ繁体" };
-        int game_maxlen = 10;
+        string url = "https://script.google.com/macros/s/AKfycbyZ3J774oF-Hdl420BDQ6YuVTDa_t7KwvDSv_uU0G_IhHamQMBzUtZuNNqP59LYxbh3Kg/exec";
+        string[] game = { "gakumasu", "deresute", "mirsita", "shanimasu", "syanison","bandoriHN","hololive", "proseka", "proseka_kr", "proseka_los", "proseka_hk", "proseka_cn" };
+        string[] orig_games = { "学ます", "でれすて", "みりした", "シャニマス", "シャニソン", "バンドリHN","ホロドリ", "プロセカ", "プロセカグローバル", "プロセカ韓国", "プロセカ繁体", "プロセカ中国" };
+        int game_maxlen = 12;
 
 
         private void button2_Click(object sender, EventArgs e)
@@ -864,7 +864,7 @@ namespace neta
                         else
                         {
                             //みつからなかったらUTCのバイナリとみなす
-                            if (tzData.Offsets.Count >= 1 && tzData.Abbrs[0] != "")
+                            if (tzData.Abbrs !=null && tzData.Offsets.Count >= 1 && tzData.Abbrs[0] != "")
                             {
                                 // マッチさせたい文字群を指定
                                 string pattern = @"[dfFgGhtHKkmMsTyz:/]";

@@ -45,7 +45,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="build" Type="System.String" Scope="User">
-      <Value Profile="(Default)">2026/11/11</Value>
+      <Value Profile="(Default)">2026/11/15</Value>
     </Setting>
     <Setting Name="json" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -162,10 +162,10 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="alt_baseurl" Type="System.String" Scope="User">
-      <Value Profile="(Default)">https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_MhLrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec</Value>
+      <Value Profile="(Default)">https://script.google.com/macros/s/AKfycbxLHrC0VPX77MTujP7IHSdyM5PvCTiFpNYkanl7119xylFykBsVYsoOGwU0btNW5VpWWQ/exec</Value>
     </Setting>
     <Setting Name="alt_basekey" Type="System.String" Scope="User">
-      <Value Profile="(Default)">mirikr,deresute,mirsita,shanimasu,saisuta,miricn,proseka,mobamasu,sidem</Value>
+      <Value Profile="(Default)">gakumasu,deresute,mirsita,shanimasu,syanison,bandoriHN,hololive,proseka,proseka_kr,proseka_los,proseka_hk,proseka_cn</Value>
     </Setting>
     <Setting Name="use_upui_chroma" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

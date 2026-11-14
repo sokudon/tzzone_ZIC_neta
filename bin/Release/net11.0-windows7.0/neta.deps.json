@@ -1,11 +1,11 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v10.0",
+    "name": ".NETCoreApp,Version=v11.0",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
-    ".NETCoreApp,Version=v10.0": {
+    ".NETCoreApp,Version=v11.0": {
       "neta/1.0.0": {
         "dependencies": {
           "Crc32.NET": "1.2.0",
@@ -22,26 +22,8 @@
         "runtime": {
           "lib/netstandard2.0/Crc32.NET.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.2.0.5"
-          }
-        }
-      },
-      "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
-        "runtime": {
-          "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.425.16305"
-          }
-        }
-      },
-      "Microsoft.Extensions.Logging.Abstractions/9.0.4": {
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.4"
-        },
-        "runtime": {
-          "lib/net9.0/Microsoft.Extensions.Logging.Abstractions.dll": {
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.425.16305"
+            "fileVersion": "1.2.0.5",
+            "localPath": "Crc32.NET.dll"
           }
         }
       },
@@ -49,7 +31,8 @@
         "runtime": {
           "lib/net6.0/Microsoft.IO.RecyclableMemoryStream.dll": {
             "assemblyVersion": "3.0.0.0",
-            "fileVersion": "3.0.0.0"
+            "fileVersion": "3.0.0.0",
+            "localPath": "Microsoft.IO.RecyclableMemoryStream.dll"
           }
         }
       },
@@ -57,7 +40,8 @@
         "runtime": {
           "lib/net6.0/Newtonsoft.Json.dll": {
             "assemblyVersion": "13.0.0.0",
-            "fileVersion": "13.0.4.30916"
+            "fileVersion": "13.0.4.30916",
+            "localPath": "Newtonsoft.Json.dll"
           }
         }
       },
@@ -65,20 +49,21 @@
         "runtime": {
           "lib/net8.0/NodaTime.dll": {
             "assemblyVersion": "3.3.2.0",
-            "fileVersion": "3.3.2.0"
+            "fileVersion": "3.3.2.0",
+            "localPath": "NodaTime.dll"
           }
         }
       },
       "obs-websocket-dotnet/5.0.1": {
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
           "Newtonsoft.Json": "13.0.4",
           "Websocket.Client": "5.1.2"
         },
         "runtime": {
           "lib/netstandard2.1/obs-websocket-dotnet.dll": {
             "assemblyVersion": "5.0.1.0",
-            "fileVersion": "5.0.1.0"
+            "fileVersion": "5.0.1.0",
+            "localPath": "obs-websocket-dotnet.dll"
           }
         }
       },
@@ -86,7 +71,8 @@
         "runtime": {
           "lib/net6.0/System.Reactive.dll": {
             "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.0.1"
+            "fileVersion": "6.0.0.1",
+            "localPath": "System.Reactive.dll"
           }
         }
       },
@@ -94,7 +80,8 @@
         "runtime": {
           "lib/net9.0/TimeZoneConverter.dll": {
             "assemblyVersion": "7.1.0.0",
-            "fileVersion": "7.1.0.0"
+            "fileVersion": "7.1.0.0",
+            "localPath": "TimeZoneConverter.dll"
           }
         }
       },
@@ -106,20 +93,21 @@
         "runtime": {
           "lib/net9.0/TimeZoneConverter.Posix.dll": {
             "assemblyVersion": "5.1.0.0",
-            "fileVersion": "5.1.0.0"
+            "fileVersion": "5.1.0.0",
+            "localPath": "TimeZoneConverter.Posix.dll"
           }
         }
       },
       "Websocket.Client/5.1.2": {
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
           "Microsoft.IO.RecyclableMemoryStream": "3.0.0",
           "System.Reactive": "6.0.0"
         },
         "runtime": {
           "lib/net8.0/Websocket.Client.dll": {
             "assemblyVersion": "5.1.2.0",
-            "fileVersion": "5.1.2.0"
+            "fileVersion": "5.1.2.0",
+            "localPath": "Websocket.Client.dll"
           }
         }
       }
@@ -137,20 +125,6 @@
       "sha512": "sha512-wNW/huzolu8MNKUnwCVKxjfAlCFpeI8AZVfF46iAWJ1+P6bTU1AZct7VAkDDEjgeeTJCVTkGZaD6jSd/fOiUkA==",
       "path": "crc32.net/1.2.0",
       "hashPath": "crc32.net.1.2.0.nupkg.sha512"
-    },
-    "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-UI0TQPVkS78bFdjkTodmkH0Fe8lXv9LnhGFKgKrsgUJ5a5FVdFRcgjIkBVLbGgdRhxWirxH/8IXUtEyYJx6GQg==",
-      "path": "microsoft.extensions.dependencyinjection.abstractions/9.0.4",
-      "hashPath": "microsoft.extensions.dependencyinjection.abstractions.9.0.4.nupkg.sha512"
-    },
-    "Microsoft.Extensions.Logging.Abstractions/9.0.4": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-0MXlimU4Dud6t+iNi5NEz3dO2w1HXdhoOLaYFuLPCjAsvlPQGwOT6V2KZRMLEhCAm/stSZt1AUv0XmDdkjvtbw==",
-      "path": "microsoft.extensions.logging.abstractions/9.0.4",
-      "hashPath": "microsoft.extensions.logging.abstractions.9.0.4.nupkg.sha512"
     },
     "Microsoft.IO.RecyclableMemoryStream/3.0.0": {
       "type": "package",

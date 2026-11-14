@@ -1295,7 +1295,7 @@ script_path() + "zoneinfo\\",
                         sb.AppendLine($"Abbreviation: " + abb);
                     }
                     //みつからなかったらUTCのバイナリとみなす
-                    else if (tzData.Offsets.Count >= 1 && tzData.Abbrs[0] != "")
+                    else if (tzData.Abbrs != null && tzData.Offsets.Count >= 1 && tzData.Abbrs[0] != "")
                     {
                         // マッチさせたい文字群を指定
                         string patterntz = @"[dfFgGhtHKkmMsTyz:/]";
@@ -1686,14 +1686,14 @@ script_path() + "zoneinfo\\",
         private void baseurl_keyval_TextChanged(object sender, EventArgs e)
         {
             string[] keys = baseurl_keyval.Text.Split(",");
-            if (keys.Length == 10)
+            if (keys.Length == 12)
             {
                 Properties.Settings.Default.alt_basekey = baseurl_keyval.Text;
             }
             else
             {
                  baseurl_keyval.Text= Properties.Settings.Default.alt_basekey;
-                textBox3.Text = "アルファベットの10個のキーをカンマ区切りで指定してください";
+                textBox3.Text = "アルファベットの12個のキーをカンマ区切りで指定してください";
             }
         }
 

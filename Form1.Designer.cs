@@ -288,14 +288,12 @@
             // progressBar1
             // 
             progressBar1.BackColor = System.Drawing.Color.Transparent;
-            progressBar1.FilledColor = System.Drawing.Color.FromArgb(225, 192, 255, 192);
             progressBar1.ForeColor = System.Drawing.Color.Transparent;
             progressBar1.Location = new System.Drawing.Point(7, 277);
             progressBar1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             progressBar1.Name = "progressBar1";
             progressBar1.Size = new System.Drawing.Size(520, 22);
             progressBar1.TabIndex = 10;
-            progressBar1.UnfilledColor = System.Drawing.Color.Transparent;
             progressBar1.Value = 90;
             // 
             // eventname
@@ -435,7 +433,7 @@
             comboBox1.BackColor = System.Drawing.Color.White;
             comboBox1.ForeColor = System.Drawing.Color.Black;
             comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "学ます", "でれすて", "みりした", "シャニマス", "シャニソン", "バンドリHN", "プロセカ", "プロセカグローバル", "プロセカ韓国", "プロセカ繁体", "かすたむJS", "フリー入力" });
+            comboBox1.Items.AddRange(new object[] { "学ます", "でれすて", "みりした", "シャニマス", "シャニソン", "バンドリHN", "ホロドリ", "プロセカ", "プロセカグローバル", "プロセカ韓国", "プロセカ繁体", "プロセカ中国", "かすたむJS", "フリー入力" });
             comboBox1.Location = new System.Drawing.Point(324, 23);
             comboBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             comboBox1.Name = "comboBox1";
@@ -885,14 +883,14 @@
             // 終了ToolStripMenuItem
             // 
             終了ToolStripMenuItem.Name = "終了ToolStripMenuItem";
-            終了ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            終了ToolStripMenuItem.Size = new System.Drawing.Size(176, 26);
             終了ToolStripMenuItem.Text = "アプリ終了";
             終了ToolStripMenuItem.Click += 終了ToolStripMenuItem_Click;
             // 
             // ヴァージョン情報ToolStripMenuItem
             // 
             ヴァージョン情報ToolStripMenuItem.Name = "ヴァージョン情報ToolStripMenuItem";
-            ヴァージョン情報ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            ヴァージョン情報ToolStripMenuItem.Size = new System.Drawing.Size(176, 26);
             ヴァージョン情報ToolStripMenuItem.Text = "バージョン情報";
             ヴァージョン情報ToolStripMenuItem.Click += バージョンToolStripMenuItem_Click;
             // 

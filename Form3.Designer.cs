@@ -495,7 +495,7 @@
             baseurl_keyval.Name = "baseurl_keyval";
             baseurl_keyval.Size = new System.Drawing.Size(86, 27);
             baseurl_keyval.TabIndex = 25;
-            baseurl_keyval.Text = "gakumasu,deresute,mirsita,shanimasu,syanison,yumesute,proseka,proseka_kr,proseka_los,proseka_hk";
+            baseurl_keyval.Text = "gakumasu,deresute,mirsita,shanimasu,syanison,bandoriHN,hololive,proseka,proseka_kr,proseka_los,proseka_hk,proseka_cn";
             baseurl_keyval.TextChanged += baseurl_keyval_TextChanged;
             // 
             // baseurl_txt
@@ -504,7 +504,7 @@
             baseurl_txt.Name = "baseurl_txt";
             baseurl_txt.Size = new System.Drawing.Size(83, 27);
             baseurl_txt.TabIndex = 24;
-            baseurl_txt.Text = "https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_MhLrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec";
+            baseurl_txt.Text = "https://script.google.com/macros/s/AKfycbxLHrC0VPX77MTujP7IHSdyM5PvCTiFpNYkanl7119xylFykBsVYsoOGwU0btNW5VpWWQ/exec";
             baseurl_txt.TextChanged += textBox1_TextChanged;
             // 
             // label13
@@ -557,7 +557,7 @@
             custom_url_path.Name = "custom_url_path";
             custom_url_path.Size = new System.Drawing.Size(192, 28);
             custom_url_path.TabIndex = 21;
-            custom_url_path.Text = " https://script.google.com/macros/s/AKfycbw27NVH4JZWekqFZIXiNsZ08e3S2MxL6sFW01rZpBFLIVEIK1VAPkiMffpCE46r6ZRL/exec";
+            custom_url_path.Text = "https://script.google.com/macros/s/AKfycbxLHrC0VPX77MTujP7IHSdyM5PvCTiFpNYkanl7119xylFykBsVYsoOGwU0btNW5VpWWQ/exec";
             custom_url_path.SelectedIndexChanged += comboBox5_SelectedIndexChanged;
             custom_url_path.TextChanged += comboBox5_TextChanged;
             // 

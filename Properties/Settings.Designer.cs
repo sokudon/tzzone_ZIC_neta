@@ -193,7 +193,7 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2026/11/11")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2026/11/15")]
         public string build {
             get {
                 return ((string)(this["build"]));
@@ -661,8 +661,8 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://script.google.com/macros/s/AKfycbxH2PF9yxHCZCp-e-n4LrGHRSi-Ag-E32trEdw_Mh" +
-            "LrMf-cnkb8qwy27KwD7Deut1Mj2Q/exec")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://script.google.com/macros/s/AKfycbxLHrC0VPX77MTujP7IHSdyM5PvCTiFpNYkanl711" +
+            "9xylFykBsVYsoOGwU0btNW5VpWWQ/exec")]
         public string alt_baseurl {
             get {
                 return ((string)(this["alt_baseurl"]));
@@ -674,7 +674,8 @@ namespace neta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("mirikr,deresute,mirsita,shanimasu,saisuta,miricn,proseka,mobamasu,sidem")]
+        [global::System.Configuration.DefaultSettingValueAttribute("gakumasu,deresute,mirsita,shanimasu,syanison,bandoriHN,hololive,proseka,proseka_k" +
+            "r,proseka_los,proseka_hk,proseka_cn")]
         public string alt_basekey {
             get {
                 return ((string)(this["alt_basekey"]));
