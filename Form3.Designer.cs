@@ -212,7 +212,7 @@
             label5.Name = "label5";
             label5.Size = new System.Drawing.Size(89, 20);
             label5.TabIndex = 23;
-            label5.Text = "tzdateのパス:";
+            label5.Text = "tzdataのパス:";
             label5.Click += label5_Click;
             // 
             // tzbinary_dir_select

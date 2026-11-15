@@ -350,13 +350,13 @@ script_path() + "zoneinfo\\",
                 {
                     Properties.Settings.Default.lasttzdatapath_base_utc = filePath_dir;
                     tzbinary_path.Text = filePath_dir;
-                    if (File.Exists(filetzdata))
-                    {
-                        Properties.Settings.Default.use_android_tzdata = "tzdata";
-                    }
-                    else
+                    if (File.Exists(fileUTC))
                     {
                         Properties.Settings.Default.use_android_tzdata = "UTC";
+                    }
+                    else if (File.Exists(filetzdata))
+                    {
+                        Properties.Settings.Default.use_android_tzdata = "tzdata";
                     }
 
                     tzbinary_timezone_CheckedChanged(sender, e);
@@ -364,7 +364,8 @@ script_path() + "zoneinfo\\",
                 }
 
             }
-            textBox3.Text = "tzdataのフォルダにUTCファイルか　android tzdataがみつかりません\r\n"
+            textBox3.Text = "エラー:読み込んだフォルダに'UTC'ファイルか　android_tzdata 'tzdata'ファイルがみつかりません\r\n"
+            + "//ふぁいるぱす例\r\nunix系tzdata: C\\:\\usr\\share\\zoneinfo\\UTC\r\nandroid_tzdata: C\\:android\\usr\\share\\zoneinfo\\tzdata\r\n"
             + "前回取得成功した\r\n" + Properties.Settings.Default.lasttzdatapath_base_utc + "\\" + Properties.Settings.Default.use_android_tzdata
             + "\r\nが読み込まれます";
         }
@@ -464,7 +465,7 @@ script_path() + "zoneinfo\\",
             {
                 openFileDialog.InitialDirectory = Properties.Settings.Default.lasttzdatapath_base_utc;
 
-                openFileDialog.Title = "android tzdataかzoneinfoフォルダのUTCがあるところを選択してください。androidはファイル名が 'tzdata' のみです";
+                openFileDialog.Title = "android tzdataかzoneinfoフォルダに'UTC'ファイルがあるところを選択してください。androidはファイル名が 'tzdata' のみです";
                 openFileDialog.Filter = "androidのtzdata,zoneinfoふぉるだUTC ファイル (*.*)|*.*";
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;

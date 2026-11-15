@@ -196,7 +196,7 @@ namespace neta
 
                     if (header.Contains("TZif") == false)
                     {
-                        sb.AppendLine("Zone infomation compiler で作成されたtzdataバイナリTZifファイルではありません");
+                        sb.AppendLine("エラー:ふぁいるヘッダにTZifが含まれていません。Zone infomation compiler で作成されたtzdataバイナリTZifファイルではありません");
                     }
                     else
                     {
@@ -216,7 +216,7 @@ namespace neta
 
                         if (bs[4] == 0)
                         {
-                            sb.AppendLine("Zone infomation compiler で作成されたtzdataバイナリTZif version NULL(1) はMUST BE IGNOREです");
+                            sb.AppendLine("エラー:Zone infomation compiler で作成されたtzdataバイナリTZif version NULL(1) はMUST BE IGNOREです");
                         }
                         else
                         {
@@ -415,7 +415,7 @@ namespace neta
 
                             if (header2.Contains("TZif") == false)
                             {
-                                sb.AppendLine("2番目のZone infomation compiler で作成されたtzdataバイナリTZifはありません");
+                                sb.AppendLine("エラー:2番目のZone infomation compiler で作成されたtzdataバイナリTZifはありません");
                                 sb.AppendLine();
                             }
                             else
@@ -425,7 +425,7 @@ namespace neta
 
                                 if (bs[pos + 4] == 0)
                                 {
-                                    sb.AppendLine("2番目のZone infomation compiler で作成されたtzdataバイナリTZif version NULL(1) はMUST BE IGNOREです");
+                                    sb.AppendLine("エラー:2番目のZone infomation compiler で作成されたtzdataバイナリTZif version NULL(1) はMUST BE IGNOREです");
                                     sb.AppendLine();
                                 }
                                 else
